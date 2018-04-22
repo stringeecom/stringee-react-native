@@ -1,0 +1,35 @@
+
+{
+  "name": "stringee-react-native",
+  "version": "1.0.0",
+  "description": "The Stringee platform makes it easy to embed high-quality interactive video, voice, SMS into web and mobile apps.",
+  "main": "index.js",
+  "homepage": "www.stringee.com",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "stringee",
+    "react-native",
+    "webrtc",
+    "ios",
+    "android",
+    "video",
+    "react"
+  ],
+  "author": "HoangDuoc <duoc@stringee.com>",
+  "license": "MIT",
+
+  "dependencies": {
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "babel-preset-react-native": "4.0.0",
+    "react": "16.2.0",
+    "react-native": "^0.51.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stringeecom/stringee-react-native.git"
+  }
+}
