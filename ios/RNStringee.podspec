@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
                    DESC
   s.homepage     = "www.stringee.com"
   s.license      = "MIT"
-  s.author       = { "HoangDuoc" => "duoc@stringee.com" }
+  s.author       = { "Stringee" => "info@stringee.com" }
   s.platform     = :ios, "8.0"
   s.source       = { :git => "https://github.com/stringeecom/stringee-react-native.git", :tag => s.version.to_s }
   s.source_files  = "*.{h,m}"

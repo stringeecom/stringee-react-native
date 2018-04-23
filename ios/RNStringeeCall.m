@@ -69,13 +69,13 @@ RCT_EXPORT_METHOD(makeCall:(NSString *)parameters callback:(RCTResponseSenderBlo
     } else {
         NSString *from = data[@"from"];
         NSString *to = data[@"to"];
-        BOOL isVideoCall = data[@"isVideoCall"];
+        NSNumber *isVideoCall = data[@"isVideoCall"];
         NSString *customData = data[@"customData"];
         NSString *videoResolution = data[@"videoResolution"];
 
         StringeeCall *outgoingCall = [[StringeeCall alloc] initWithStringeeClient:[RNStringeeInstanceManager instance].rnClient.client from:from to:to];
         outgoingCall.delegate = self;
-        outgoingCall.isVideoCall = isVideoCall;
+        outgoingCall.isVideoCall = [isVideoCall boolValue];
 
         if (customData.length) {
             outgoingCall.customData = customData;
@@ -364,36 +364,7 @@ RCT_EXPORT_METHOD(enableVideo:(NSString *)callId enableVideo:(BOOL)enableVideo c
 - (void)didChangeSignalingState:(StringeeCall *)stringeeCall signalingState:(SignalingState)signalingState reason:(NSString *)reason sipCode:(int)sipCode sipReason:(NSString *)sipReason {
     
     if ([jsEvents containsObject:didChangeSignalingState]) {
-
         [self sendEventWithName:didChangeSignalingState body:@{ @"callId" : stringeeCall.callId, @"code" : @(signalingState), @"reason" : reason, @"sipCode" : @(sipCode), @"sipReason" : sipReason }];
-
-        // switch (signalingState) {
-        //     case SignalingStateCalling:
-        //         [self sendEventWithName:didChangeSignalingState body:@{ @"callId" : stringeeCall.callId, @"code" : @(0), @"reason" : reason, @"sipCode" : @(sipCode), @"sipReason" : sipReason }];
-                
-        //         break;
-                    
-        //     case SignalingStateRinging:
-        //         [self sendEventWithName:didChangeSignalingState body:@{ @"callId" : stringeeCall.callId, @"code" : @(1), @"reason" : reason, @"sipCode" : @(sipCode), @"sipReason" : sipReason }];
-
-        //         break;
-                    
-        //     case SignalingStateAnswered:
-        //         [self sendEventWithName:didChangeSignalingState body:@{ @"callId" : stringeeCall.callId, @"code" : @(2), @"reason" : reason, @"sipCode" : @(sipCode), @"sipReason" : sipReason }];
-
-        //         break;
-                    
-        //     case SignalingStateBusy:
-        //         [self sendEventWithName:didChangeSignalingState body:@{ @"callId" : stringeeCall.callId, @"code" : @(3), @"reason" : reason, @"sipCode" : @(sipCode), @"sipReason" : sipReason }];
-        //         [[RNStringeeInstanceManager instance].calls removeObjectForKey:stringeeCall.callId];
-
-        //         break;
-                    
-        //     case SignalingStateEnded:
-        //         [self sendEventWithName:didChangeSignalingState body:@{ @"callId" : stringeeCall.callId, @"code" : @(4), @"reason" : reason, @"sipCode" : @(sipCode), @"sipReason" : sipReason }];
-        //         [[RNStringeeInstanceManager instance].calls removeObjectForKey:stringeeCall.callId];
-        //         break;
-        // }
     }
 }
 
