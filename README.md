@@ -21,13 +21,13 @@
 
 #### Android
 
-1. Open up `android/app/src/main/java/[...]/MainActivity.java`
-  - Add `import com.reactlibrary.RNStringeePackage;` to the imports at the top of the file
+1. Open up `android/app/src/main/java/[...]/MainApplication.java`
+  - Add `import com.stringeereactnative.RNStringeeReactPackage;` to the imports at the top of the file
   - Add `new RNStringeePackage()` to the list returned by the `getPackages()` method
 2. Append the following lines to `android/settings.gradle`:
   	```
   	include ':stringee-react-native'
-  	project(':stringee-react-native').projectDir = new File(rootProject.projectDir, 	'../node_modules/stringee-react-native/android')
+	project(':stringee-react-native').projectDir = new File(rootProject.projectDir, '../node_modules/stringee-react-native/android')
   	```
 3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
   	```
