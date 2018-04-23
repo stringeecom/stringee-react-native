@@ -1,13 +1,15 @@
 import PropTypes from "prop-types";
-import { View, requireNativeComponent } from "react-native";
+import { requireNativeComponent, ViewPropTypes, Platform } from "react-native";
 
-const viewPropTypes = View.propTypes;
 var iface = {
   name: "StringeeVideoView",
-  PropTypes: {
-    callId: PropTypes.string,
-    local: PropTypes.boolean,
-    ...viewPropTypes
+  propTypes: {
+    callId: PropTypes.string.isRequired,
+    local: PropTypes.bool.isRequired,
+    ...ViewPropTypes
   }
 };
-module.exports = requireNativeComponent("RNStringeeVideoViewManager", iface);
+module.exports =
+  Platform.OS === "android"
+    ? requireNativeComponent("RNStringeeVideoViewManager", iface)
+    : null;

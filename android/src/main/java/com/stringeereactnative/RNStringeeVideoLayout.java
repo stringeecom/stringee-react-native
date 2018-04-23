@@ -10,6 +10,7 @@ public class RNStringeeVideoLayout extends FrameLayout {
     private StringeeCall stringeeCall;
     private String callId;
     private boolean isLocal;
+    private FrameLayout mViewContainer;
 
     public void setCallId(String callId) {
         this.callId = callId;
@@ -21,16 +22,22 @@ public class RNStringeeVideoLayout extends FrameLayout {
 
     public RNStringeeVideoLayout(ThemedReactContext context) {
         super(context);
+        mViewContainer = new FrameLayout(getContext());
+        addView(mViewContainer, 0);
+        requestLayout();
     }
 
     public void updateView() {
         stringeeCall = StringeeManager.getInstance().getCallsMap().get(callId);
         if (stringeeCall != null) {
+            if (mViewContainer.getChildCount() > 0) {
+                mViewContainer.removeAllViews();
+            }
             if (isLocal) {
-                addView(stringeeCall.getLocalView());
+                mViewContainer.addView(stringeeCall.getLocalView());
                 stringeeCall.renderLocalView(true);
             } else {
-                addView(stringeeCall.getRemoteView());
+                mViewContainer.addView(stringeeCall.getRemoteView());
                 stringeeCall.renderRemoteView(false);
             }
         }

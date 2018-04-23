@@ -1,10 +1,15 @@
 package com.stringeereactnative;
 
+import android.util.Log;
+
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 
 public class RNStringeeVideoViewManager extends ViewGroupManager<RNStringeeVideoLayout> {
+
+    private boolean callIdSet;
+    private boolean localSet;
 
     @Override
     public String getName() {
@@ -19,8 +24,9 @@ public class RNStringeeVideoViewManager extends ViewGroupManager<RNStringeeVideo
 
     @ReactProp(name = "callId")
     public void setCallId(RNStringeeVideoLayout layout, String callId) {
+        callIdSet = true;
         layout.setCallId(callId);
-        if (callId != null && callId.length() > 0) {
+        if (callId != null && callId.length() > 0 && localSet) {
             layout.updateView();
         }
     }
@@ -28,5 +34,8 @@ public class RNStringeeVideoViewManager extends ViewGroupManager<RNStringeeVideo
     @ReactProp(name = "local", defaultBoolean = false)
     public void setLocal(RNStringeeVideoLayout layout, boolean isLocal) {
         layout.setLocal(isLocal);
+        if (callIdSet) {
+            layout.updateView();
+        }
     }
 }

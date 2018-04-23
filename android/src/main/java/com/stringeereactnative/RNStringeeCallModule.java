@@ -91,10 +91,9 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             callback.invoke(false, -3, "The call is not found.");
             return;
         }
-        if (call != null) {
-            call.setCallListener(this);
-            call.initAnswer(getReactApplicationContext(), StringeeManager.getInstance().getClient());
-        }
+        call.setCallListener(this);
+        call.initAnswer(getReactApplicationContext(), StringeeManager.getInstance().getClient());
+        callback.invoke(true, 0, "Success");
     }
 
     @ReactMethod
@@ -115,6 +114,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             return;
         }
         call.answer();
+        callback.invoke(true, 0, "Success");
     }
 
     @ReactMethod
@@ -135,6 +135,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             return;
         }
         call.reject();
+        callback.invoke(true, 0, "Success");
     }
 
     @ReactMethod
@@ -155,6 +156,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             return;
         }
         call.hangup();
+        callback.invoke(true, 0, "Success");
     }
 
     @ReactMethod
@@ -175,6 +177,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             return;
         }
         call.enableVideo(enabled);
+        callback.invoke(true, 0, "Success");
     }
 
     @ReactMethod
@@ -190,8 +193,8 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             return;
         }
 
-        callback.invoke(true, 0, "Success");
         call.mute(isMute);
+        callback.invoke(true, 0, "Success");
     }
 
     @ReactMethod
@@ -214,6 +217,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
         try {
             JSONObject jsonObject = new JSONObject(info);
             call.sendCallInfo(jsonObject);
+            callback.invoke(true, 0, "Success");
         } catch (JSONException e) {
             callback.invoke(false, -4, "The call info format is invalid.");
         }
@@ -237,6 +241,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             return;
         }
         call.sendDTMF(key);
+        callback.invoke(true, 0, "Success");
     }
 
     @ReactMethod
@@ -251,8 +256,8 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             callback.invoke(false, -3, "The call is not found.");
             return;
         }
-        callback.invoke(true, 0, "Success");
         call.switchCamera(null);
+        callback.invoke(true, 0, "Success");
     }
 
     @ReactMethod
@@ -302,8 +307,8 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             callback.invoke(false, -3, "The call is not found.");
             return;
         }
-        callback.invoke(true, 0, "Success");
         call.setSpeakerphoneOn(on);
+        callback.invoke(true, 0, "Success");
     }
 
     @Override
