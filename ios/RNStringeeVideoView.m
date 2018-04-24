@@ -2,11 +2,17 @@
 #import "RNStringeeVideoView.h"
 #import "RNStringeeInstanceManager.h"
 
-@implementation RNStringeeVideoView
+@implementation RNStringeeVideoView {
+    BOOL hasDisplayed;
+}
 
-- (void)didMoveToWindow {
-    [super didMoveToSuperview];
-    [[RNStringeeInstanceManager instance].rnCall addRenderToView:self callId:_callId isLocal:_local];
+- (void)layoutSubviews {
+    [super layoutSubviews];
+
+    if (!hasDisplayed) {
+        [[RNStringeeInstanceManager instance].rnCall addRenderToView:self callId:_callId isLocal:_local];
+        hasDisplayed = YES;
+    }
 }
 
 - (void)videoView:(StringeeRemoteVideoView *)videoView didChangeVideoSize:(CGSize)size {
