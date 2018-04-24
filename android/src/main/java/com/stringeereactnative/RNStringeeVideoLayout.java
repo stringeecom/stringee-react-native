@@ -10,6 +10,7 @@ public class RNStringeeVideoLayout extends FrameLayout {
     private StringeeCall stringeeCall;
     private String callId;
     private boolean isLocal;
+    private String streamId;
     private FrameLayout mViewContainer;
 
     public void setCallId(String callId) {
@@ -18,6 +19,10 @@ public class RNStringeeVideoLayout extends FrameLayout {
 
     public void setLocal(boolean local) {
         isLocal = local;
+    }
+
+    public void setStreamId(String streamId) {
+        this.streamId = streamId;
     }
 
     public RNStringeeVideoLayout(ThemedReactContext context) {

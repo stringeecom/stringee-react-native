@@ -38,4 +38,9 @@ public class RNStringeeVideoViewManager extends ViewGroupManager<RNStringeeVideo
             layout.updateView();
         }
     }
+
+    @ReactProp(name = "streamId")
+    public void setStreamId(RNStringeeVideoLayout layout, String streamId) {
+        layout.setStreamId(streamId);
+    }
 }
