@@ -10,7 +10,4 @@ var iface = {
     ...ViewPropTypes
   }
 };
-module.exports =
-  Platform.OS === "android"
-    ? requireNativeComponent("RNStringeeVideoViewManager", iface)
-    : null;
+module.exports = Platform.OS === "android" ? requireNativeComponent("RNStringeeVideoViewManager", iface) : requireNativeComponent("RNStringeeVideoView", iface);

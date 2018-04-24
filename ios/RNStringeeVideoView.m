@@ -1,17 +1,16 @@
 
-#import "RNStringeeRemoteVideoView.h"
+#import "RNStringeeVideoView.h"
 #import "RNStringeeInstanceManager.h"
-#import <React/RCTLog.h>
 
-@implementation RNStringeeRemoteVideoView
+@implementation RNStringeeVideoView
 
 - (void)didMoveToWindow {
     [super didMoveToSuperview];
-    [[RNStringeeInstanceManager instance].rnCall addRemoteView:self callId:_callId];
+    [[RNStringeeInstanceManager instance].rnCall addRenderToView:self callId:_callId isLocal:_local];
 }
 
 - (void)videoView:(StringeeRemoteVideoView *)videoView didChangeVideoSize:(CGSize)size {
-
+    
     // Thay đổi frame của StringeeRemoteVideoView khi kích thước video thay đổi
     CGFloat superWidth = self.bounds.size.width;
     CGFloat superHeight = self.bounds.size.height;

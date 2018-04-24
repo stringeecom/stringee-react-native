@@ -18,8 +18,6 @@
 
 @interface RNStringeeCall : RCTEventEmitter <RCTBridgeModule, StringeeCallDelegate>
 
-- (void)addLocalView:(UIView *)view callId:(NSString *)callId;
-
-- (void)addRemoteView:(UIView *)view callId:(NSString *)callId;
+- (void)addRenderToView:(UIView *)view callId:(NSString *)callId isLocal:(BOOL)isLocal;
 
 @end

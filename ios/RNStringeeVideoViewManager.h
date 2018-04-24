@@ -1,4 +1,3 @@
-
 #if __has_include(<React/RCTViewManager.h>)
 #import <React/RCTViewManager.h>
 #elif __has_include("RCTViewManager.h")
@@ -7,8 +6,8 @@
 #import "React/RCTViewManager.h"
 #endif
 
-#import "RNStringeeRemoteVideoView.h"
+#import "RNStringeeVideoView.h"
 
-@interface RNStringeeRemoteVideoViewManager : RCTViewManager
+@interface RNStringeeVideoViewManager : RCTViewManager
 
 @end
