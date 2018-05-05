@@ -78,7 +78,7 @@ export default class extends Component {
     if (iOS) {
       RNStringeeClient.registerPushForDeviceToken(deviceToken, isProduction, isVoip, callback);
     } else {
-      RNStringeeClient.registerpushToken(deviceToken, callback);
+      RNStringeeClient.registerPushToken(deviceToken, callback);
     }
   }
 
