@@ -33,5 +33,6 @@ repositories {
 dependencies {
     implementation 'com.facebook.react:react-native:+'
 	implementation 'com.stringee.sdk.android:stringee-android-sdk:1.2.6'
+    compile 'com.google.firebase:firebase-messaging:15.0.0'
 }
   

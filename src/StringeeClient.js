@@ -74,11 +74,21 @@ export default class extends Component {
     RNStringeeClient.disconnect();
   }
 
-  registerPush(deviceToken: string, isProduction: boolean, isVoip: boolean, callback: RNStringeeEventCallback) {
+  registerPush(
+    deviceToken: string,
+    isProduction: boolean,
+    isVoip: boolean,
+    callback: RNStringeeEventCallback
+  ) {
     if (iOS) {
-      RNStringeeClient.registerPushForDeviceToken(deviceToken, isProduction, isVoip, callback);
+      RNStringeeClient.registerPushForDeviceToken(
+        deviceToken,
+        isProduction,
+        isVoip,
+        callback
+      );
     } else {
-      RNStringeeClient.registerPushToken(deviceToken, callback);
+      RNStringeeClient.registerPushToken(callback);
     }
   }
 

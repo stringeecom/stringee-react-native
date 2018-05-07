@@ -1,7 +1,6 @@
 package com.stringeereactnative;
 
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
@@ -9,9 +8,9 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.stringee.StringeeClient;
 import com.stringee.call.StringeeCall;
 import com.stringee.exception.StringeeError;
@@ -56,12 +55,13 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
     }
 
     @ReactMethod
-    public void registerPushToken(String token, final Callback callback) {
+    public void registerPushToken(final Callback callback) {
         if (mClient == null || !mClient.isConnected()) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected");
             return;
         }
 
+        final String token = FirebaseInstanceId.getInstance().getToken();
         mClient.registerPushToken(token, new StringeeClient.RegisterPushTokenListener() {
             @Override
             public void onPushTokenRegistered(boolean b, String s) {
@@ -71,7 +71,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
                 } else {
                     code = 1;
                 }
-                callback.invoke(b, code, s);
+                callback.invoke(b, code, s, token);
             }
 
             @Override
@@ -82,7 +82,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
     }
 
     @ReactMethod
-    public void unregisterPushToken(String token, final Callback callback) {
+    public void unregisterPushToken(final String token, final Callback callback) {
         mClient.unregisterPushToken(token, new StringeeClient.RegisterPushTokenListener() {
             @Override
             public void onPushTokenRegistered(boolean b, String s) {
@@ -97,7 +97,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
                 } else {
                     code = 1;
                 }
-                callback.invoke(b, code, s);
+                callback.invoke(b, code, s, token);
             }
         });
     }
