@@ -68,19 +68,28 @@ RCT_EXPORT_METHOD(disconnect) {
 }
 
 RCT_EXPORT_METHOD(registerPushForDeviceToken:(NSString *)deviceToken isProduction:(BOOL)isProduction isVoip:(BOOL)isVoip callback:(RCTResponseSenderBlock)callback) {
-    if (_client) {
-        [_client registerPushForDeviceToken:deviceToken isProduction:isProduction isVoip:isVoip completionHandler:^(BOOL status, int code, NSString *message) {
-            callback(@[@(status), @(code), message, _client.userId]);
-        }];
+    if (!_client || !_client.hasConnected) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized or connected."]);
+        return;
     }
+
+    [_client registerPushForDeviceToken:deviceToken isProduction:isProduction isVoip:isVoip completionHandler:^(BOOL status, int code, NSString *message) {
+        callback(@[@(status), @(code), message]);
+    }];
+
 }
 
 RCT_EXPORT_METHOD(unregisterPushToken:(NSString *)deviceToken callback:(RCTResponseSenderBlock)callback) {
-    if (_client) {
-        [_client unregisterPushForDeviceToken:deviceToken completionHandler:^(BOOL status, int code, NSString *message) {
-            callback(@[@(status), @(code), message, _client.userId]);
-        }];
-    }
+
+    if (!_client || !_client.hasConnected) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized or connected."]);
+        return;
+    } 
+
+    [_client unregisterPushForDeviceToken:deviceToken completionHandler:^(BOOL status, int code, NSString *message) {
+        callback(@[@(status), @(code), message]);
+    }];
+    
 }
 
 // Connect
@@ -90,13 +99,13 @@ RCT_EXPORT_METHOD(unregisterPushToken:(NSString *)deviceToken callback:(RCTRespo
 
 - (void)didConnect:(StringeeClient *)stringeeClient isReconnecting:(BOOL)isReconnecting {
     if ([jsEvents containsObject:didConnect]) {
-        [self sendEventWithName:didConnect body:@{ @"userId" : stringeeClient.userId, @"isReconnecting" : @(isReconnecting) }];
+        [self sendEventWithName:didConnect body:@{ @"userId" : stringeeClient.userId, @"projectId" : stringeeClient.projectId, @"isReconnecting" : @(isReconnecting) }];
     }
 }
 
 - (void)didDisConnect:(StringeeClient *)stringeeClient isReconnecting:(BOOL)isReconnecting {
     if ([jsEvents containsObject:didDisConnect]) {
-        [self sendEventWithName:didDisConnect body:@{ @"userId" : stringeeClient.userId, @"isReconnecting" : @(isReconnecting) }];
+        [self sendEventWithName:didDisConnect body:@{ @"userId" : stringeeClient.userId, @"projectId" : stringeeClient.projectId, @"isReconnecting" : @(isReconnecting) }];
     }
 }
 
