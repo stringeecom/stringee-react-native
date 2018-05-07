@@ -88,7 +88,7 @@ export default class extends Component {
         callback
       );
     } else {
-      RNStringeeClient.registerPushToken(callback);
+      RNStringeeClient.registerPushToken(deviceToken, callback);
     }
   }
 

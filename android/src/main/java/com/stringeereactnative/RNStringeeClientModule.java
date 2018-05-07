@@ -10,7 +10,6 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.stringee.StringeeClient;
 import com.stringee.call.StringeeCall;
 import com.stringee.exception.StringeeError;
@@ -55,13 +54,12 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
     }
 
     @ReactMethod
-    public void registerPushToken(final Callback callback) {
+    public void registerPushToken(String token, final Callback callback) {
         if (mClient == null || !mClient.isConnected()) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected");
             return;
         }
 
-        final String token = FirebaseInstanceId.getInstance().getToken();
         mClient.registerPushToken(token, new StringeeClient.RegisterPushTokenListener() {
             @Override
             public void onPushTokenRegistered(boolean b, String s) {
@@ -71,7 +69,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
                 } else {
                     code = 1;
                 }
-                callback.invoke(b, code, s, token);
+                callback.invoke(b, code, s);
             }
 
             @Override
@@ -97,7 +95,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
                 } else {
                     code = 1;
                 }
-                callback.invoke(b, code, s, token);
+                callback.invoke(b, code, s);
             }
         });
     }
