@@ -28,6 +28,14 @@
   		pod 'RNStringee', path: "#{node_modules_path}/stringee-react-native/ios"
     end
 
+    post_install do |installer|
+      installer.pods_project.targets.each do |target|
+        if target.name == "React"
+          target.remove_from_project
+        end
+      end
+    end
+
 ```
 
 4. Now run, `pod install`
@@ -52,10 +60,6 @@
 ```
 
 #### Android
-
-##### Automatic installation
-
-`$ react-native link stringee-react-native`
 
 ##### Manual installation
 
