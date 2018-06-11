@@ -65,7 +65,7 @@ RCT_EXPORT_METHOD(makeCall:(NSString *)parameters callback:(RCTResponseSenderBlo
                                       options:NSJSONReadingMutableContainers 
                                         error:&jsonError];
     if (jsonError) {
-        callback(@[@(NO), @(-4), @"The parameters format is invalid.", @""]);
+        callback(@[@(NO), @(-4), @"The parameters format is invalid.", @"", @""]);
     } else {
         NSString *from = data[@"from"];
         NSString *to = data[@"to"];
@@ -90,12 +90,12 @@ RCT_EXPORT_METHOD(makeCall:(NSString *)parameters callback:(RCTResponseSenderBlo
         __weak StringeeCall *weakCall = outgoingCall;
         __weak NSMutableDictionary *weakCalls = [RNStringeeInstanceManager instance].calls;
 
-        [outgoingCall makeCallWithCompletionHandler:^(BOOL status, int code, NSString *message) {
+        [outgoingCall makeCallWithCompletionHandler:^(BOOL status, int code, NSString *message, NSString *data) {
             StringeeCall *strongCall = weakCall;
             NSMutableDictionary *strongCalls = weakCalls;
 
             [strongCalls setObject:strongCall forKey:strongCall.callId]; 
-            callback(@[@(status), @(code), message, strongCall.callId]);
+            callback(@[@(status), @(code), message, strongCall.callId, data]);
         }];
     }
 }

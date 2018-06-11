@@ -17,7 +17,7 @@
 3. Add the following to your pod file:
 
 ```
-	platform :ios, '8.0'
+    platform :ios, '8.0'
 
     target '<YourProjectName>' do
   		node_modules_path = '../node_modules'

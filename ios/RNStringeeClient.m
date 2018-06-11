@@ -137,7 +137,7 @@ RCT_EXPORT_METHOD(unregisterPushToken:(NSString *)deviceToken callback:(RCTRespo
             index = 0;
         }
 
-        [self sendEventWithName:incomingCall body:@{ @"userId" : stringeeClient.userId, @"callId" : stringeeCall.callId, @"from" : stringeeCall.from, @"to" : stringeeCall.to, @"fromAlias" : stringeeCall.fromAlias, @"toAlias" : stringeeCall.toAlias, @"callType" : @(index), @"isVideoCall" : @(stringeeCall.isVideoCall) }];
+        [self sendEventWithName:incomingCall body:@{ @"userId" : stringeeClient.userId, @"callId" : stringeeCall.callId, @"from" : stringeeCall.from, @"to" : stringeeCall.to, @"fromAlias" : stringeeCall.fromAlias, @"toAlias" : stringeeCall.toAlias, @"callType" : @(index), @"isVideoCall" : @(stringeeCall.isVideoCall), @"customDataFromYourServer" : stringeeCall.customDataFromYourServer}];
     }
     
 }

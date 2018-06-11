@@ -85,7 +85,11 @@ export default class extends Component {
     RNStringeeCall.sendDTMF(callId, dtmf, callback);
   }
 
-  sendCallInfo(callId: string, callInfo: string, callback: RNStringeeEventCallback) {
+  sendCallInfo(
+    callId: string,
+    callInfo: string,
+    callback: RNStringeeEventCallback
+  ) {
     RNStringeeCall.sendCallInfo(callId, callInfo, callback);
   }
 
@@ -97,7 +101,11 @@ export default class extends Component {
     RNStringeeCall.switchCamera(callId, callback);
   }
 
-  enableVideo(callId: string, enabled: boolean, callback: RNStringeeEventCallback) {
+  enableVideo(
+    callId: string,
+    enabled: boolean,
+    callback: RNStringeeEventCallback
+  ) {
     RNStringeeCall.enableVideo(callId, enabled, callback);
   }
 
@@ -105,7 +113,11 @@ export default class extends Component {
     RNStringeeCall.mute(callId, mute, callback);
   }
 
-  setSpeakerphoneOn(callId: string, on: boolean, callback: RNStringeeEventCallback) {
+  setSpeakerphoneOn(
+    callId: string,
+    on: boolean,
+    callback: RNStringeeEventCallback
+  ) {
     RNStringeeCall.setSpeakerphoneOn(callId, on, callback);
   }
 }
