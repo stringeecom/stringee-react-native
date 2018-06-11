@@ -8,7 +8,6 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.stringee.call.StringeeCall;
@@ -316,7 +315,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
         if (contains(jsEvents, "onSignalingStateChange")) {
             if (signalingState == StringeeCall.SignalingState.CALLING) {
                 StringeeManager.getInstance().getCallsMap().put(stringeeCall.getCallId(), stringeeCall);
-                mCallback.invoke(true, 0, "Success", stringeeCall.getCallId());
+                mCallback.invoke(true, 0, "Success", stringeeCall.getCallId(), stringeeCall.getCustomDataFromYourServer());
             }
 
             WritableMap params = Arguments.createMap();
@@ -331,7 +330,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
 
     @Override
     public void onError(StringeeCall stringeeCall, int code, String desc) {
-        mCallback.invoke(false, code, desc, stringeeCall.getCallId());
+        mCallback.invoke(false, code, desc, stringeeCall.getCallId(), stringeeCall.getCustomDataFromYourServer());
     }
 
     @Override

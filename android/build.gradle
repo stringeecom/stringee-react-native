@@ -32,6 +32,6 @@ repositories {
 
 dependencies {
     implementation 'com.facebook.react:react-native:+'
-	implementation 'com.stringee.sdk.android:stringee-android-sdk:1.2.6'
+	implementation 'com.stringee.sdk.android:stringee-android-sdk:1.2.9'
 }
   

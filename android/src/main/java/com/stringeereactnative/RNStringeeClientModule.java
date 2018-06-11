@@ -135,12 +135,13 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
             params.putString("to", stringeeCall.getTo());
             params.putString("fromAlias", stringeeCall.getFromAlias());
             params.putString("toAlias", stringeeCall.getToAlias());
-            params.putBoolean("isVideoCall", stringeeCall.isVideoCall());
             int callType = 1;
             if (stringeeCall.isPhoneToAppCall()) {
                 callType = 3;
             }
             params.putInt("callType", callType);
+            params.putBoolean("isVideoCall", stringeeCall.isVideoCall());
+            params.putString("customDataFromYourServer", stringeeCall.getCustomDataFromYourServer());
             sendEvent(getReactApplicationContext(), "onIncomingCall", params);
         }
     }
