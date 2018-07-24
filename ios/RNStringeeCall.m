@@ -93,8 +93,9 @@ RCT_EXPORT_METHOD(makeCall:(NSString *)parameters callback:(RCTResponseSenderBlo
         [outgoingCall makeCallWithCompletionHandler:^(BOOL status, int code, NSString *message, NSString *data) {
             StringeeCall *strongCall = weakCall;
             NSMutableDictionary *strongCalls = weakCalls;
-
-            [strongCalls setObject:strongCall forKey:strongCall.callId]; 
+            if (status) {
+                [strongCalls setObject:strongCall forKey:strongCall.callId]; 
+            } 
             callback(@[@(status), @(code), message, strongCall.callId, data]);
         }];
     }
