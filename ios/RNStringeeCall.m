@@ -65,7 +65,7 @@ RCT_EXPORT_METHOD(makeCall:(NSString *)parameters callback:(RCTResponseSenderBlo
                                       options:NSJSONReadingMutableContainers 
                                         error:&jsonError];
     if (jsonError) {
-        callback(@[@(NO), @(-4), @"The parameters format is invalid.", @"", @""]);
+        callback(@[@(NO), @(-4), @"The parameters format is invalid.", [NSNull null], [NSNull null]]);
     } else {
         NSString *from = data[@"from"];
         NSString *to = data[@"to"];
@@ -96,7 +96,9 @@ RCT_EXPORT_METHOD(makeCall:(NSString *)parameters callback:(RCTResponseSenderBlo
             if (status) {
                 [strongCalls setObject:strongCall forKey:strongCall.callId]; 
             } 
-            callback(@[@(status), @(code), message, strongCall.callId, data]);
+            id returnCallId = strongCall.callId ? strongCall.callId : [NSNull null];
+            id returnData = data ? data : [NSNull null];
+            callback(@[@(status), @(code), message, returnCallId, returnData]);
         }];
     }
 }
