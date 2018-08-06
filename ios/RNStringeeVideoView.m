@@ -1,6 +1,7 @@
 
 #import "RNStringeeVideoView.h"
 #import "RNStringeeInstanceManager.h"
+#import <React/RCTLog.h>
 
 @implementation RNStringeeVideoView {
     BOOL hasDisplayed;
@@ -10,8 +11,20 @@
     [super layoutSubviews];
 
     if (!hasDisplayed) {
-        [[RNStringeeInstanceManager instance].rnCall addRenderToView:self callId:_callId isLocal:_local];
-        hasDisplayed = YES;
+        if (_callId.length) {
+            [[RNStringeeInstanceManager instance].rnCall addRenderToView:self callId:_callId isLocal:_local];
+            hasDisplayed = YES;
+        } else {
+            if (_local) {
+                [[RNStringeeInstanceManager instance].rnRoom addRenderToView:self streamId:_streamId isLocal:_local];
+                hasDisplayed = YES;
+            } else {
+                if (_streamId.length) {
+                    [[RNStringeeInstanceManager instance].rnRoom addRenderToView:self streamId:_streamId isLocal:_local];
+                    hasDisplayed = YES;
+                }
+            }
+        }
     }
 }
 

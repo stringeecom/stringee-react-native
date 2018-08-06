@@ -1,4 +1,3 @@
-
 buildscript {
     repositories {
         jcenter()
@@ -26,12 +25,8 @@ android {
     }
 }
 
-repositories {
-    mavenCentral()
-}
 
 dependencies {
     implementation 'com.facebook.react:react-native:+'
-	implementation 'com.stringee.sdk.android:stringee-android-sdk:1.2.16'
+    implementation 'com.stringee.sdk.android:stringee-android-sdk:1.3.1'
 }
-  

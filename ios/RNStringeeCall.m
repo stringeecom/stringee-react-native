@@ -45,6 +45,8 @@ RCT_EXPORT_MODULE();
     return YES;
 }
 
+// TODO: - Publish Functions
+
 RCT_EXPORT_METHOD(setNativeEvent:(NSString *)event) {
     [jsEvents addObject:event];
 }
@@ -325,7 +327,6 @@ RCT_EXPORT_METHOD(setSpeakerphoneOn:(NSString *)callId speaker:(BOOL)speaker cal
 
     [[StringeeAudioManager instance] setLoudspeaker:speaker];
     callback(@[@(YES), @(0), @"Success"]);
-
 }
 
 RCT_EXPORT_METHOD(switchCamera:(NSString *)callId callback:(RCTResponseSenderBlock)callback) {

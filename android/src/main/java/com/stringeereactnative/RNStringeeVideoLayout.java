@@ -4,14 +4,19 @@ import android.widget.FrameLayout;
 
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.stringee.call.StringeeCall;
+import com.stringee.conference.StringeeStream;
 
 public class RNStringeeVideoLayout extends FrameLayout {
 
     private StringeeCall stringeeCall;
+    private StringeeStream stringeeStream;
     private String callId;
     private boolean isLocal;
+    private boolean setLocal;
     private String streamId;
     private FrameLayout mViewContainer;
+    private boolean isOverlay;
+    private boolean setOverlay;
 
     public void setCallId(String callId) {
         this.callId = callId;
@@ -19,10 +24,16 @@ public class RNStringeeVideoLayout extends FrameLayout {
 
     public void setLocal(boolean local) {
         isLocal = local;
+        setLocal = true;
     }
 
     public void setStreamId(String streamId) {
         this.streamId = streamId;
+    }
+
+    public void setOverlay(boolean isOverlay) {
+        this.isOverlay = isOverlay;
+        setOverlay = true;
     }
 
     public RNStringeeVideoLayout(ThemedReactContext context) {
@@ -33,17 +44,28 @@ public class RNStringeeVideoLayout extends FrameLayout {
     }
 
     public void updateView() {
-        stringeeCall = StringeeManager.getInstance().getCallsMap().get(callId);
-        if (stringeeCall != null) {
-            if (mViewContainer.getChildCount() > 0) {
-                mViewContainer.removeAllViews();
+        if (callId != null) {
+            stringeeCall = StringeeManager.getInstance().getCallsMap().get(callId);
+            if (stringeeCall != null && setLocal) {
+                if (mViewContainer.getChildCount() > 0) {
+                    mViewContainer.removeAllViews();
+                }
+                if (isLocal) {
+                    mViewContainer.addView(stringeeCall.getLocalView());
+                    stringeeCall.renderLocalView(false);
+                } else {
+                    mViewContainer.addView(stringeeCall.getRemoteView());
+                    stringeeCall.renderRemoteView(false);
+                }
             }
-            if (isLocal) {
-                mViewContainer.addView(stringeeCall.getLocalView());
-                stringeeCall.renderLocalView(true);
-            } else {
-                mViewContainer.addView(stringeeCall.getRemoteView());
-                stringeeCall.renderRemoteView(false);
+        } else if (streamId != null) {
+            stringeeStream = StringeeManager.getInstance().getStreamsMap().get(streamId);
+            if (stringeeStream != null && setOverlay) {
+                if (mViewContainer.getChildCount() > 0) {
+                    mViewContainer.removeAllViews();
+                }
+                mViewContainer.addView(stringeeStream.getView());
+                stringeeStream.renderView(isOverlay);
             }
         }
 

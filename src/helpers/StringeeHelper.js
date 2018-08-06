@@ -36,10 +36,27 @@ const callEvents = {
   }
 };
 
+const roomEvents = {
+  ios: {
+    onRoomConnect: "didRoomConnect",
+    onRoomDisConnect: "didRoomDisConnect",
+    onRoomError: "didRoomError",
+    onStreamAdd: "didStreamAdd",
+    onStreamRemove: "didStreamRemove"
+  },
+  android: {
+    onRoomConnect: "onRoomConnected",
+    onRoomDisConnect: "onRoomDisconnected",
+    onRoomError: "onRoomError",
+    onStreamAdd: "onStreamAdded",
+    onStreamRemove: "onStreamRemoved"
+  }
+};
+
 export type RNStringeeEventCallback = (
   status: boolean,
   code: int,
   message: string
 ) => void;
 
-export { clientEvents, callEvents };
+export { clientEvents, callEvents, roomEvents };

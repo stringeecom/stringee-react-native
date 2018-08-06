@@ -1,6 +1,6 @@
 {
   "name": "stringee-react-native",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "The Stringee communication platform makes it easy to embed high-quality interactive video, voice, SMS into webs and mobile apps.",
   "main": "index.js",
   "homepage": "www.stringee.com",
@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "babel-preset-react-native": "4.0.0",
-    "react": "16.2.0",
+    "react": "^16.2.0",
     "react-native": "^0.51.0"
   },
   "repository": {
