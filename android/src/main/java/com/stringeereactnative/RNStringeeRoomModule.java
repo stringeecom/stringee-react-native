@@ -47,7 +47,7 @@ public class RNStringeeRoomModule extends ReactContextBaseJavaModule implements 
         mCallback = callback;
 
         if (StringeeManager.getInstance().getClient() == null) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected.", "");
+            callback.invoke(false, -1, "StringeeClient is not initialized or connected.", 0);
             return;
         }
 
@@ -82,12 +82,12 @@ public class RNStringeeRoomModule extends ReactContextBaseJavaModule implements 
     public void joinRoom(int roomId, Callback callback) {
         mCallback = callback;
         if (StringeeManager.getInstance().getClient() == null) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected.");
+            callback.invoke(false, -1, "StringeeClient is not initialized or connected.", roomId);
             return;
         }
 
         if (roomId <= 0) {
-            callback.invoke(false, -2, "The room id is invalid.");
+            callback.invoke(false, -2, "The room id is invalid.", roomId);
             return;
         }
 
@@ -99,12 +99,12 @@ public class RNStringeeRoomModule extends ReactContextBaseJavaModule implements 
     @ReactMethod
     public void publishLocalStream(int roomId, String config, Callback callback) {
         if (roomId <= 0) {
-            callback.invoke(false, -1, "The room id is invalid.");
+            callback.invoke(false, -1, "The room id is invalid.", "");
             return;
         }
         StringeeRoom mRoom = StringeeManager.getInstance().getRoomsMap().get(roomId);
         if (mRoom == null) {
-            callback.invoke(false, -2, "The room is not found.");
+            callback.invoke(false, -2, "The room is not found.", "");
             return;
         }
         localStream = new StringeeStream(getReactApplicationContext());
@@ -279,6 +279,8 @@ public class RNStringeeRoomModule extends ReactContextBaseJavaModule implements 
         if (contains(jsEvents, "onRoomError")) {
             WritableMap params = Arguments.createMap();
             params.putInt("roomId", stringeeRoom.getId());
+            params.putInt("code", stringeeError.getCode());
+            params.putString("message", stringeeError.getMessage());
             sendEvent(getReactApplicationContext(), "onRoomError", params);
         }
     }
