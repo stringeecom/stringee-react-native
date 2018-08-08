@@ -92,11 +92,6 @@ public class RNStringeeRoomModule extends ReactContextBaseJavaModule implements 
         }
 
         StringeeRoom mRoom = new StringeeRoom(StringeeManager.getInstance().getClient(), roomId);
-        if (mRoom == null) {
-            callback.invoke(false, -3, "The room is not found.");
-            return;
-        }
-
         mRoom.setRoomListener(this);
         mRoom.joinRoom();
     }
