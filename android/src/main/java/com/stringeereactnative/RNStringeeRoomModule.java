@@ -92,15 +92,24 @@ public class RNStringeeRoomModule extends ReactContextBaseJavaModule implements 
         }
 
         StringeeRoom mRoom = new StringeeRoom(StringeeManager.getInstance().getClient(), roomId);
+        if (mRoom == null) {
+            callback.invoke(false, -3, "The room is not found.");
+            return;
+        }
+
         mRoom.setRoomListener(this);
         mRoom.joinRoom();
     }
 
     @ReactMethod
     public void publishLocalStream(int roomId, String config, Callback callback) {
+        if (roomId <= 0) {
+            callback.invoke(false, -1, "The room id is invalid.");
+            return;
+        }
         StringeeRoom mRoom = StringeeManager.getInstance().getRoomsMap().get(roomId);
         if (mRoom == null) {
-            callback.invoke(false, -1, "The room is not found.");
+            callback.invoke(false, -2, "The room is not found.");
             return;
         }
         localStream = new StringeeStream(getReactApplicationContext());
@@ -112,15 +121,23 @@ public class RNStringeeRoomModule extends ReactContextBaseJavaModule implements 
 
     @ReactMethod
     public void subscribe(int roomId, String streamId, Callback callback) {
+        if (roomId <= 0) {
+            callback.invoke(false, -1, "The room id is invalid.");
+            return;
+        }
         StringeeRoom mRoom = StringeeManager.getInstance().getRoomsMap().get(roomId);
         if (mRoom == null) {
-            callback.invoke(false, -1, "The room is not found.");
+            callback.invoke(false, -2, "The room is not found.");
+            return;
+        }
+        if (streamId == null) {
+            callback.invoke(false, -3, "The stream id is not found.");
             return;
         }
 
         StringeeStream stream = StringeeManager.getInstance().getStreamsMap().get(streamId);
         if (stream == null) {
-            callback.invoke(false, -2, "The stream is not found.");
+            callback.invoke(false, -4, "The stream is not found.");
             return;
         }
 
@@ -130,15 +147,23 @@ public class RNStringeeRoomModule extends ReactContextBaseJavaModule implements 
 
     @ReactMethod
     public void unPublishLocalStream(int roomId, String streamId, Callback callback) {
+        if (roomId <= 0) {
+            callback.invoke(false, -1, "The room id is invalid.");
+            return;
+        }
         StringeeRoom mRoom = StringeeManager.getInstance().getRoomsMap().get(roomId);
         if (mRoom == null) {
-            callback.invoke(false, -1, "The room is not found.");
+            callback.invoke(false, -2, "The room is not found.");
+            return;
+        }
+        if (streamId == null) {
+            callback.invoke(false, -3, "The stream id is not found.");
             return;
         }
 
         StringeeStream stream = StringeeManager.getInstance().getStreamsMap().get(streamId);
         if (stream == null) {
-            callback.invoke(false, -2, "The stream is not found.");
+            callback.invoke(false, -4, "The stream is not found.");
             return;
         }
 
@@ -148,15 +173,23 @@ public class RNStringeeRoomModule extends ReactContextBaseJavaModule implements 
 
     @ReactMethod
     public void unSubscribe(int roomId, String streamId, Callback callback) {
+        if (roomId <= 0) {
+            callback.invoke(false, -1, "The room id is invalid.");
+            return;
+        }
         StringeeRoom mRoom = StringeeManager.getInstance().getRoomsMap().get(roomId);
         if (mRoom == null) {
-            callback.invoke(false, -1, "The room is not found.");
+            callback.invoke(false, -2, "The room is not found.");
+            return;
+        }
+        if (streamId == null) {
+            callback.invoke(false, -3, "The stream id is not found.");
             return;
         }
 
         StringeeStream stream = StringeeManager.getInstance().getStreamsMap().get(streamId);
         if (stream == null) {
-            callback.invoke(false, -2, "The stream is not found.");
+            callback.invoke(false, -4, "The stream is not found.");
             return;
         }
 
@@ -197,9 +230,13 @@ public class RNStringeeRoomModule extends ReactContextBaseJavaModule implements 
 
     @ReactMethod
     public void getStats(int roomId, String streamId, boolean isVideoTrack, final Callback callback) {
+        if (streamId == null) {
+            callback.invoke(false, -1, "The stream id is not found.");
+            return;
+        }
         StringeeStream stream = StringeeManager.getInstance().getStreamsMap().get(streamId);
         if (stream == null) {
-            callback.invoke(false, -1, "The stream is not found.");
+            callback.invoke(false, -2, "The stream is not found.");
             return;
         }
 
