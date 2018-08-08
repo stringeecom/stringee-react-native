@@ -100,7 +100,7 @@ RCT_EXPORT_METHOD(makeRoom:(RCTResponseSenderBlock)callback) {
 RCT_EXPORT_METHOD(joinRoom:(nonnull NSNumber *)roomId callback:(RCTResponseSenderBlock)callback) {
 
     if ([roomId longLongValue] == 0) {
-        callback(@[@(NO), @"RoomId is invalid."]);
+        callback(@[@(NO), @(-3), @"RoomId is invalid."]);
         return;
     }
 
@@ -125,7 +125,7 @@ RCT_EXPORT_METHOD(joinRoom:(nonnull NSNumber *)roomId callback:(RCTResponseSende
             returnCode = -1;
         } else if (code == 3) {
             // generic
-            returnCode = -3;
+            returnCode = -2;
         } else {
             returnCode = code;
         }
@@ -136,7 +136,7 @@ RCT_EXPORT_METHOD(joinRoom:(nonnull NSNumber *)roomId callback:(RCTResponseSende
 RCT_EXPORT_METHOD(publishLocalStream:(nonnull NSNumber *)roomId config:(NSString *)config callback:(RCTResponseSenderBlock)callback) {
     
     if ([roomId longLongValue] == 0) {
-        callback(@[@(NO), @"RoomId is invalid."]);
+        callback(@[@(NO), @(-1), @"RoomId is invalid."]);
         return;
     }
     
@@ -144,7 +144,7 @@ RCT_EXPORT_METHOD(publishLocalStream:(nonnull NSNumber *)roomId config:(NSString
 
     // Kiem tra current room
     if (!targetRoom) {
-        callback(@[@(NO), @"Room is not found."]);
+        callback(@[@(NO), @(-2), @"Room is not found."]);
         return;
     }
 
@@ -177,7 +177,7 @@ RCT_EXPORT_METHOD(publishLocalStream:(nonnull NSNumber *)roomId config:(NSString
 RCT_EXPORT_METHOD(unPublishLocalStream:(nonnull NSNumber *)roomId callback:(RCTResponseSenderBlock)callback) {
     
     if ([roomId longLongValue] == 0) {
-        callback(@[@(NO), @"RoomId is invalid."]);
+        callback(@[@(NO), @(-1), @"RoomId is invalid."]);
         return;
     }
     
@@ -185,12 +185,12 @@ RCT_EXPORT_METHOD(unPublishLocalStream:(nonnull NSNumber *)roomId callback:(RCTR
     
     // Kiem tra current room
     if (!targetRoom) {
-        callback(@[@(NO), @"Room is not found."]);
+        callback(@[@(NO), @(-2), @"Room is not found."]);
         return;
     }
     
     if (!localStream) {
-        callback(@[@(YES), @"Local stream is not found."]);
+        callback(@[@(YES), @(-3), @"Local stream is not found."]);
     }
     
     unPublishCallback = [callback copy];
@@ -200,7 +200,7 @@ RCT_EXPORT_METHOD(unPublishLocalStream:(nonnull NSNumber *)roomId callback:(RCTR
 RCT_EXPORT_METHOD(unSubscribe:(nonnull NSNumber *)roomId streamId:(NSString *)streamId callback:(RCTResponseSenderBlock)callback) {
     
     if ([roomId longLongValue] == 0) {
-        callback(@[@(NO), @"RoomId is invalid."]);
+        callback(@[@(NO), @(-1), @"RoomId is invalid."]);
         return;
     }
     
@@ -208,17 +208,20 @@ RCT_EXPORT_METHOD(unSubscribe:(nonnull NSNumber *)roomId streamId:(NSString *)st
     
     // Kiem tra current room
     if (!targetRoom) {
-        callback(@[@(NO), @"Room is not found."]);
+        callback(@[@(NO), @(-2), @"Room is not found."]);
         return;
     }
-
+    
     if (!streamId.length) {
-        callback(@[@(NO), @"StreamId is invalid."]);
+        callback(@[@(NO), @(-3), @"StreamId is invalid."]);
+        return;
     }
+    
     StringeeRoomStream *targetStream = [remoteStreams objectForKey:streamId];
     
     if (!targetStream) {
-        callback(@[@(NO), @"Stream is not found."]);
+        callback(@[@(NO), @(-4), @"Stream is not found."]);
+        return;
     }
     
     unSubscribeCallback = [callback copy];
@@ -228,7 +231,7 @@ RCT_EXPORT_METHOD(unSubscribe:(nonnull NSNumber *)roomId streamId:(NSString *)st
 RCT_EXPORT_METHOD(subscribe:(nonnull NSNumber *)roomId streamId:(NSString *)streamId callback:(RCTResponseSenderBlock)callback) {
     
     if ([roomId longLongValue] == 0) {
-        callback(@[@(NO), @"RoomId is invalid."]);
+        callback(@[@(NO), @(-1), @"RoomId is invalid."]);
         return;
     }
     
@@ -236,19 +239,19 @@ RCT_EXPORT_METHOD(subscribe:(nonnull NSNumber *)roomId streamId:(NSString *)stre
     
     // Kiem tra current room
     if (!targetRoom) {
-        callback(@[@(NO), @"Room is not found."]);
+        callback(@[@(NO), @(-2), @"Room is not found."]);
         return;
     }
     
     if (!streamId.length) {
-        callback(@[@(NO), @"StreamId is invalid."]);
+        callback(@[@(NO), @(-3), @"StreamId is invalid."]);
         return;
     }
     
     StringeeRoomStream *targetStream = [remoteStreams objectForKey:streamId];
     
     if (!targetStream) {
-        callback(@[@(NO), @"Stream is not found."]);
+        callback(@[@(NO), @(-4), @"Stream is not found."]);
         return;
     }
     
@@ -259,7 +262,7 @@ RCT_EXPORT_METHOD(subscribe:(nonnull NSNumber *)roomId streamId:(NSString *)stre
 RCT_EXPORT_METHOD(destroy:(nonnull NSNumber *)roomId callback:(RCTResponseSenderBlock)callback) {
     
     if ([roomId longLongValue] == 0) {
-        callback(@[@(NO), @"RoomId is invalid."]);
+        callback(@[@(NO), @(-2), @"RoomId is invalid."]);
         return;
     }
     
@@ -267,7 +270,7 @@ RCT_EXPORT_METHOD(destroy:(nonnull NSNumber *)roomId callback:(RCTResponseSender
     
     // Kiem tra current room
     if (!targetRoom) {
-        callback(@[@(NO), @"Room is not found."]);
+        callback(@[@(NO), @(-3), @"Room is not found."]);
         return;
     }
     
@@ -286,7 +289,7 @@ RCT_EXPORT_METHOD(destroy:(nonnull NSNumber *)roomId callback:(RCTResponseSender
     hasChangedSpeakerPhone = NO;
     isSpeaker = YES;
     
-    callback(@[@(YES), @"Success"]);
+    callback(@[@(YES), @(0), @"Success"]);
 
 }
 
@@ -300,17 +303,17 @@ RCT_EXPORT_METHOD(mute:(BOOL)mute) {
 
 RCT_EXPORT_METHOD(turnOnCamera:(BOOL)isOn callback:(RCTResponseSenderBlock)callback) {
     if (!localStream) {
-        callback(@[@(NO), @"Local stream is not found."]);
+        callback(@[@(NO), @(-1), @"Local stream is not found."]);
     }
     
-    [localStream turnOnCammera:isOn];
-    callback(@[@(YES), @"Success."]);
+    [localStream turnOnCamera:isOn];
+    callback(@[@(YES), @(0), @"Success."]);
 }
 
 RCT_EXPORT_METHOD(getStats:(nonnull NSNumber *)roomId streamId:(NSString *)streamId useVideoTrack:(BOOL)useVideoTrack callback:(RCTResponseSenderBlock)callback) {
     
     if ([roomId longLongValue] == 0) {
-        callback(@[@(NO), @"RoomId is invalid."]);
+        callback(@[@(NO), @(-1), @"RoomId is invalid."]);
         return;
     }
     
@@ -318,7 +321,19 @@ RCT_EXPORT_METHOD(getStats:(nonnull NSNumber *)roomId streamId:(NSString *)strea
     
     // Kiem tra current room
     if (!targetRoom) {
-        callback(@[@(NO), @"Room is not found."]);
+        callback(@[@(NO), @(-2), @"Room is not found."]);
+        return;
+    }
+    
+    if (!streamId.length) {
+        callback(@[@(NO), @(-3), @"StreamId is invalid."]);
+        return;
+    }
+    
+    StringeeRoomStream *targetStream = [remoteStreams objectForKey:streamId];
+    
+    if (!targetStream) {
+        callback(@[@(NO), @(-4), @"Stream is not found."]);
         return;
     }
     
@@ -334,10 +349,10 @@ RCT_EXPORT_METHOD(getStats:(nonnull NSNumber *)roomId streamId:(NSString *)strea
                                                                options:NSJSONWritingPrettyPrinted
                                                                  error:nil];
             NSString *jsonString = [[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] stringByReplacingOccurrencesOfString:@" " withString:@""];
-            callback(@[@(YES), @"Success", jsonString]);
+            callback(@[@(YES), @(0), @"Success", jsonString]);
         }];
     } else {
-        callback(@[@(NO), @"Fail", [NSNull null]]);
+        callback(@[@(NO), @(-4), @"Stream is not found."]);
     }
 }
 
@@ -393,7 +408,7 @@ RCT_EXPORT_METHOD(setSpeakerphoneOn:(BOOL)isOn) {
     RCTLogInfo(@"Kết nối tới room lỗi");
     // [self clearAndEnd];
     if ([jsEvents containsObject:didRoomError]) {
-      [self sendEventWithName:didRoomError body:@{ @"code" : @(code), @"message" : message }];
+      [self sendEventWithName:didRoomError body:@{ @"roomId" : @(stringeeRoom.roomId), @"code" : @(code), @"message" : message }];
     }
 }
 
@@ -408,7 +423,7 @@ RCT_EXPORT_METHOD(setSpeakerphoneOn:(BOOL)isOn) {
 - (void)didStreamPublish:(StringeeRoom *)stringeeRoom stream:(StringeeRoomStream *)stream {
     RCTLogInfo(@"Publish local stream thành công - streamId: %@", stream.streamId);
     if (publishCallback) {
-        publishCallback(@[@(YES), @"Publish local stream successfully."]);
+        publishCallback(@[@(YES), @(0), @"Publish local stream successfully.", @(stream.streamId)]);
         publishCallback = nil;
     }
 }
@@ -416,7 +431,7 @@ RCT_EXPORT_METHOD(setSpeakerphoneOn:(BOOL)isOn) {
 - (void)didStreamPublishError:(StringeeRoom *)stringeeRoom stream:(StringeeRoomStream *)stream error:(NSString *)error {
     RCTLogInfo(@"%@", error);
     if (publishCallback) {
-        publishCallback(@[@(NO), error]);
+        publishCallback(@[@(NO), @(-3), @"Generic error."]);
         publishCallback = nil;
     }
 }
@@ -432,7 +447,7 @@ RCT_EXPORT_METHOD(setSpeakerphoneOn:(BOOL)isOn) {
 - (void)didStreamUnPublishError:(StringeeRoom *)stringeeRoom stream:(StringeeRoomStream *)stream error:(NSString *)error {
     RCTLogInfo(@"%@", error);
     if (unPublishCallback) {
-        unPublishCallback(@[@(NO), error]);
+        unPublishCallback(@[@(NO), @(-4), @"Generic error."]);
         unPublishCallback = nil;
     }
 }
@@ -453,7 +468,7 @@ RCT_EXPORT_METHOD(setSpeakerphoneOn:(BOOL)isOn) {
         [[StringeeAudioManager instance] setLoudspeaker:isSpeaker];
     }
     if (subscribeCallback) {
-        subscribeCallback(@[@(YES), @"Subscribe stream successfully."]);
+        subscribeCallback(@[@(YES), @(0), @"Subscribe stream successfully."]);
         subscribeCallback = nil;
     }
 }
@@ -462,7 +477,7 @@ RCT_EXPORT_METHOD(setSpeakerphoneOn:(BOOL)isOn) {
 - (void)didStreamSubscribeError:(StringeeRoom *)stringeeRoom stream:(StringeeRoomStream *)stream error:(NSString *)error {
     RCTLogInfo(@"%@", error);
     if (subscribeCallback) {
-        subscribeCallback(@[@(NO), error]);
+        subscribeCallback(@[@(NO), @(-5), @"Generic error."]);
         subscribeCallback = nil;
     }
 }
@@ -471,7 +486,7 @@ RCT_EXPORT_METHOD(setSpeakerphoneOn:(BOOL)isOn) {
 - (void)didStreamUnSubscribe:(StringeeRoom *)stringeeRoom stream:(StringeeRoomStream *)stream {
     RCTLogInfo(@"Đã unsubscribe stream - streamId: %@", stream.streamId);
     if (unSubscribeCallback) {
-        unSubscribeCallback(@[@(YES), @"Unsubscribe stream successfully."]);
+        unSubscribeCallback(@[@(YES), @(0), @"Unsubscribe stream successfully."]);
         unSubscribeCallback = nil;
     }
 }
@@ -479,7 +494,7 @@ RCT_EXPORT_METHOD(setSpeakerphoneOn:(BOOL)isOn) {
 - (void)didStreamUnSubscribeError:(StringeeRoom *)stringeeRoom stream:(StringeeRoomStream *)stream error:(NSString *)error {
     RCTLogInfo(@"%@", error);
     if (unSubscribeCallback) {
-        unSubscribeCallback(@[@(NO), error]);
+        unSubscribeCallback(@[@(NO), @(-5), @"Generic error."]);
         unSubscribeCallback = nil;
     }
 }
