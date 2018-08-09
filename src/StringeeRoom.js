@@ -77,8 +77,12 @@ export default class extends Component {
     RNStringeeRoom.publishLocalStream(roomId, config, callback);
   }
 
-  unPublishLocalStream(roomId: number, callback: RNStringeeEventCallback) {
-    RNStringeeRoom.unPublishLocalStream(roomId, callback);
+  unPublishLocalStream(
+    roomId: number,
+    streamId: string,
+    callback: RNStringeeEventCallback
+  ) {
+    RNStringeeRoom.unPublishLocalStream(roomId, streamId, callback);
   }
 
   subscribe(

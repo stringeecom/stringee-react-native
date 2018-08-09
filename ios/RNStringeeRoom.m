@@ -174,7 +174,7 @@ RCT_EXPORT_METHOD(publishLocalStream:(nonnull NSNumber *)roomId config:(NSString
     [targetRoom publish:localStream];
 }
 
-RCT_EXPORT_METHOD(unPublishLocalStream:(nonnull NSNumber *)roomId callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(unPublishLocalStream:(nonnull NSNumber *)roomId streamId:(NSString *)streamId callback:(RCTResponseSenderBlock)callback) {
     
     if ([roomId longLongValue] == 0) {
         callback(@[@(NO), @(-1), @"RoomId is invalid."]);
@@ -188,9 +188,14 @@ RCT_EXPORT_METHOD(unPublishLocalStream:(nonnull NSNumber *)roomId callback:(RCTR
         callback(@[@(NO), @(-2), @"Room is not found."]);
         return;
     }
+
+    if (!streamId.length) {
+        callback(@[@(NO), @(-3), @"StreamId is invalid."]);
+        return;
+    }
     
     if (!localStream) {
-        callback(@[@(YES), @(-3), @"Local stream is not found."]);
+        callback(@[@(YES), @(-4), @"Stream is not found."]);
     }
     
     unPublishCallback = [callback copy];
