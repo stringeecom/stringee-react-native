@@ -335,13 +335,6 @@ RCT_EXPORT_METHOD(getStats:(nonnull NSNumber *)roomId streamId:(NSString *)strea
         return;
     }
     
-    StringeeRoomStream *targetStream = [remoteStreams objectForKey:streamId];
-    
-    if (!targetStream) {
-        callback(@[@(NO), @(-4), @"Stream is not found."]);
-        return;
-    }
-    
     StringeeRoomStream *targetStream;
     if ([streamId isEqualToString:localStream.streamId]) {
         targetStream = localStream;
@@ -428,7 +421,7 @@ RCT_EXPORT_METHOD(setSpeakerphoneOn:(BOOL)isOn) {
 - (void)didStreamPublish:(StringeeRoom *)stringeeRoom stream:(StringeeRoomStream *)stream {
     RCTLogInfo(@"Publish local stream thành công - streamId: %@", stream.streamId);
     if (publishCallback) {
-        publishCallback(@[@(YES), @(0), @"Publish local stream successfully.", @(stream.streamId)]);
+        publishCallback(@[@(YES), @(0), @"Publish local stream successfully.", stream.streamId]);
         publishCallback = nil;
     }
 }
