@@ -95,4 +95,8 @@ export default class extends Component {
   unregisterPush(deviceToken: string, callback: RNStringeeEventCallback) {
     RNStringeeClient.unregisterPushToken(deviceToken, callback);
   }
+
+  sendCustomMessage(message: string, toUserId: string, callback: RNStringeeEventCallback) {
+    RNStringeeClient.sendCustomMessage(message, toUserId, callback);
+  }
 }

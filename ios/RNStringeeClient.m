@@ -92,6 +92,34 @@ RCT_EXPORT_METHOD(unregisterPushToken:(NSString *)deviceToken callback:(RCTRespo
     
 }
 
+RCT_EXPORT_METHOD(sendCustomMessage:(NSString *)message toUserId:(NSString *)userId callback:(RCTResponseSenderBlock)callback) {
+    
+    if (!_client || !_client.hasConnected) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized or connected."]);
+        return;
+    }
+
+    if (!message) {
+        callback(@[@(NO), @(-3), @"Message can not be nil."]);
+        return;
+    }
+    
+    NSError *jsonError;
+    NSData *objectData = [message dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *data = [NSJSONSerialization JSONObjectWithData:objectData
+                                                         options:NSJSONReadingMutableContainers
+                                                           error:&jsonError];
+    
+    if (jsonError) {
+        callback(@[@(NO), @(-4), @"Message format is invalid."]);
+        return;
+    }
+    
+    [_client sendCustomMessage:data toUserId:userId completionHandler:^(BOOL status, int code, NSString *message) {
+        callback(@[@(status), @(code), message]);
+    }];
+}
+
 // Connect
 - (void)requestAccessToken:(StringeeClient *)stringeeClient {
     [self sendEventWithName:requestAccessToken body:@{ @"userId" : stringeeClient.userId }];
