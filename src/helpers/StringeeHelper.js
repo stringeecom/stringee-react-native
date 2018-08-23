@@ -4,14 +4,16 @@ const clientEvents = {
     onDisConnect: "didDisConnect",
     onFailWithError: "didFailWithError",
     onRequestAccessToken: "requestAccessToken",
-    onIncomingCall: "incomingCall"
+    onIncomingCall: "incomingCall",
+    onCustomMessage: "didReceiveCustomMessage"
   },
   android: {
     onConnect: "onConnectionConnected",
     onDisConnect: "onConnectionDisconnected",
     onFailWithError: "onConnectionError",
     onRequestAccessToken: "onRequestNewToken",
-    onIncomingCall: "onIncomingCall"
+    onIncomingCall: "onIncomingCall",
+    onCustomMessage: "onCustomMessage"
   }
 };
 

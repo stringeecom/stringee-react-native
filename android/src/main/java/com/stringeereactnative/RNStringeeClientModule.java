@@ -13,7 +13,11 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.stringee.StringeeClient;
 import com.stringee.call.StringeeCall;
 import com.stringee.exception.StringeeError;
+import com.stringee.listener.StatusListener;
 import com.stringee.listener.StringeeConnectionListener;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -55,7 +59,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
 
     @ReactMethod
     public void registerPushToken(String token, final Callback callback) {
-        if (mClient == null || !mClient.isConnected()) {
+        if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected");
             return;
         }
@@ -81,6 +85,11 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
 
     @ReactMethod
     public void unregisterPushToken(final String token, final Callback callback) {
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
+            return;
+        }
+
         mClient.unregisterPushToken(token, new StringeeClient.RegisterPushTokenListener() {
             @Override
             public void onPushTokenRegistered(boolean b, String s) {
@@ -98,6 +107,32 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
                 callback.invoke(b, code, s);
             }
         });
+    }
+
+    @ReactMethod
+    public void sendCustomMessage(String toUser, String msg, final Callback callback) {
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
+            return;
+        }
+
+        try {
+            JSONObject jsonObject = new JSONObject(msg);
+            mClient.sendCustomMessage(toUser, jsonObject, new StatusListener() {
+                @Override
+                public void onSuccess() {
+                    callback.invoke(true, 0, "Success");
+                }
+
+                @Override
+                public void onError(StringeeError error) {
+                    callback.invoke(false, error.getCode(), error.getMessage());
+                }
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+            callback.invoke(false, -2, "Message is not not in JSON format");
+        }
     }
 
     @Override
@@ -160,6 +195,16 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
     public void onRequestNewToken(StringeeClient stringeeClient) {
         if (contains(jsEvents, "onRequestNewToken")) {
             sendEvent(getReactApplicationContext(), "onRequestNewToken", null);
+        }
+    }
+
+    @Override
+    public void onCustomMessage(String s, JSONObject jsonObject) {
+        if (contains(jsEvents, "onCustomMessage")) {
+            WritableMap params = Arguments.createMap();
+            params.putString("from", s);
+            params.putString("data", jsonObject.toString());
+            sendEvent(getReactApplicationContext(), "onCustomMessage", params);
         }
     }
 

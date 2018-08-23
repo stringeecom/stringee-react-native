@@ -12,6 +12,8 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.stringee.call.StringeeCall;
 import com.stringee.common.StringeeConstant;
+import com.stringee.exception.StringeeError;
+import com.stringee.listener.StatusListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -223,7 +225,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
     }
 
     @ReactMethod
-    public void sendDTMF(String callId, String key, Callback callback) {
+    public void sendDTMF(String callId, String key, final Callback callback) {
         if (StringeeManager.getInstance().getClient() == null || !StringeeManager.getInstance().getClient().isConnected()) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected.");
             return;
@@ -239,8 +241,17 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             callback.invoke(false, -3, "The call is not found.");
             return;
         }
-        call.sendDTMF(key);
-        callback.invoke(true, 0, "Success");
+        call.sendDTMF(key, new StatusListener() {
+            @Override
+            public void onSuccess() {
+                callback.invoke(true, 0, "Success");
+            }
+
+            @Override
+            public void onError(StringeeError error) {
+                callback.invoke(false, error.getCode(), error.getMessage());
+            }
+        });
     }
 
     @ReactMethod

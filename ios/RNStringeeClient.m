@@ -94,7 +94,7 @@ RCT_EXPORT_METHOD(unregisterPushToken:(NSString *)deviceToken callback:(RCTRespo
     
 }
 
-RCT_EXPORT_METHOD(sendCustomMessage:(NSString *)message toUserId:(NSString *)userId callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(sendCustomMessage:(NSString *)userId message:(NSString *)message callback:(RCTResponseSenderBlock)callback) {
     
     if (!_client || !_client.hasConnected) {
         callback(@[@(NO), @(-1), @"StringeeClient is not initialized or connected."]);
@@ -147,7 +147,7 @@ RCT_EXPORT_METHOD(sendCustomMessage:(NSString *)message toUserId:(NSString *)use
 
 - (void)didReceiveCustomMessage:(StringeeClient *)stringeeClient message:(NSDictionary *)message fromUserId:(NSString *)userId {
     if ([jsEvents containsObject:didReceiveCustomMessage]) {
-        [self sendEventWithName:didReceiveCustomMessage body:@{ @"userId" : stringeeClient.userId, @"message" : message, @"fromUserId" : userId }];
+        [self sendEventWithName:didReceiveCustomMessage body:@{ @"fromUserId" : userId, @"message" : message }];
     }
 }
 
