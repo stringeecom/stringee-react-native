@@ -11,6 +11,7 @@ static NSString *requestAccessToken       = @"requestAccessToken";
 
 // Call 1-1
 static NSString *incomingCall               = @"incomingCall";
+static NSString *didReceiveCustomMessage    = @"didReceiveCustomMessage";
 
 
 @implementation RNStringeeClient {
@@ -33,7 +34,8 @@ RCT_EXPORT_MODULE();
              didDisConnect,
              didFailWithError,
              requestAccessToken,
-             incomingCall
+             incomingCall,
+             didReceiveCustomMessage
              ];
 }
 
@@ -140,6 +142,12 @@ RCT_EXPORT_METHOD(sendCustomMessage:(NSString *)message toUserId:(NSString *)use
 - (void)didFailWithError:(StringeeClient *)stringeeClient code:(int)code message:(NSString *)message {
     if ([jsEvents containsObject:didFailWithError]) {
         [self sendEventWithName:didFailWithError body:@{ @"userId" : stringeeClient.userId, @"code" : @(code), @"message" : message }];
+    }
+}
+
+- (void)didReceiveCustomMessage:(StringeeClient *)stringeeClient message:(NSDictionary *)message fromUserId:(NSString *)userId {
+    if ([jsEvents containsObject:didReceiveCustomMessage]) {
+        [self sendEventWithName:didReceiveCustomMessage body:@{ @"userId" : stringeeClient.userId, @"message" : message, @"fromUserId" : userId }];
     }
 }
 
