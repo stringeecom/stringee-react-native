@@ -16,6 +16,7 @@ static NSString *didReceiveCustomMessage    = @"didReceiveCustomMessage";
 
 @implementation RNStringeeClient {
     NSMutableArray<NSString *> *jsEvents;
+    BOOL isConnecting;
 }
 
 @synthesize bridge = _bridge;
@@ -56,6 +57,10 @@ RCT_EXPORT_METHOD(removeNativeEvent:(NSString *)event) {
 }
 
 RCT_EXPORT_METHOD(connect:(NSString *)accessToken) {
+    if (isConnecting) {
+        return;
+    }
+    isConnecting = YES;
     if (!_client) {
         _client = [[StringeeClient alloc] initWithConnectionDelegate:self];
         _client.incomingCallDelegate = self;
@@ -67,6 +72,7 @@ RCT_EXPORT_METHOD(disconnect) {
     if (_client) {
         [_client disconnect];
     }
+    isConnecting = NO;
 }
 
 RCT_EXPORT_METHOD(registerPushForDeviceToken:(NSString *)deviceToken isProduction:(BOOL)isProduction isVoip:(BOOL)isVoip callback:(RCTResponseSenderBlock)callback) {
@@ -124,6 +130,7 @@ RCT_EXPORT_METHOD(sendCustomMessage:(NSString *)userId message:(NSString *)messa
 
 // Connect
 - (void)requestAccessToken:(StringeeClient *)stringeeClient {
+    isConnecting = NO;
     [self sendEventWithName:requestAccessToken body:@{ @"userId" : stringeeClient.userId }];
 }
 
