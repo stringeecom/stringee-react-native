@@ -67,21 +67,15 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
             return;
         }
 
-        mClient.registerPushToken(token, new StringeeClient.RegisterPushTokenListener() {
+        mClient.registerPushToken(token, new StatusListener() {
             @Override
-            public void onPushTokenRegistered(boolean b, String s) {
-                int code;
-                if (b) {
-                    code = 0;
-                } else {
-                    code = 1;
-                }
-                callback.invoke(b, code, s);
+            public void onSuccess() {
+                callback.invoke(true, 0, "Success");
             }
 
             @Override
-            public void onPushTokenUnRegistered(boolean b, String s) {
-
+            public void onError(StringeeError error) {
+                callback.invoke(false, error.getCode(), error.getMessage());
             }
         });
     }
@@ -93,21 +87,15 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
             return;
         }
 
-        mClient.unregisterPushToken(token, new StringeeClient.RegisterPushTokenListener() {
+        mClient.unregisterPushToken(token, new StatusListener() {
             @Override
-            public void onPushTokenRegistered(boolean b, String s) {
-
+            public void onSuccess() {
+                callback.invoke(true, 0, "Success");
             }
 
             @Override
-            public void onPushTokenUnRegistered(boolean b, String s) {
-                int code;
-                if (b) {
-                    code = 0;
-                } else {
-                    code = 1;
-                }
-                callback.invoke(b, code, s);
+            public void onError(StringeeError error) {
+                callback.invoke(false, error.getCode(), error.getMessage());
             }
         });
     }

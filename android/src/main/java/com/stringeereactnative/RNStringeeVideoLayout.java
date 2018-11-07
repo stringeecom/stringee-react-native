@@ -1,5 +1,7 @@
 package com.stringeereactnative;
 
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -51,9 +53,17 @@ public class RNStringeeVideoLayout extends FrameLayout {
                     mViewContainer.removeAllViews();
                 }
                 if (isLocal) {
+                    View v = stringeeCall.getLocalView();
+                    if (v.getParent() != null) {
+                        ((ViewGroup) v.getParent()).removeView(v);
+                    }
                     mViewContainer.addView(stringeeCall.getLocalView());
                     stringeeCall.renderLocalView(false);
                 } else {
+                    View v = stringeeCall.getRemoteView();
+                    if (v.getParent() != null) {
+                        ((ViewGroup) v.getParent()).removeView(v);
+                    }
                     mViewContainer.addView(stringeeCall.getRemoteView());
                     stringeeCall.renderRemoteView(false);
                 }
@@ -63,6 +73,10 @@ public class RNStringeeVideoLayout extends FrameLayout {
             if (stringeeStream != null && setOverlay) {
                 if (mViewContainer.getChildCount() > 0) {
                     mViewContainer.removeAllViews();
+                }
+                View v = stringeeStream.getView();
+                if (v.getParent() != null) {
+                    ((ViewGroup) v.getParent()).removeView(v);
                 }
                 mViewContainer.addView(stringeeStream.getView());
                 stringeeStream.renderView(isOverlay);
