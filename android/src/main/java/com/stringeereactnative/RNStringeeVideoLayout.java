@@ -58,14 +58,14 @@ public class RNStringeeVideoLayout extends FrameLayout {
                         ((ViewGroup) v.getParent()).removeView(v);
                     }
                     mViewContainer.addView(stringeeCall.getLocalView());
-                    stringeeCall.renderLocalView(false);
+                    stringeeCall.renderLocalView(isOverlay);
                 } else {
                     View v = stringeeCall.getRemoteView();
                     if (v.getParent() != null) {
                         ((ViewGroup) v.getParent()).removeView(v);
                     }
                     mViewContainer.addView(stringeeCall.getRemoteView());
-                    stringeeCall.renderRemoteView(false);
+                    stringeeCall.renderRemoteView(isOverlay);
                 }
             }
         } else if (streamId != null) {
