@@ -160,7 +160,9 @@ RCT_EXPORT_METHOD(sendCustomMessage:(NSString *)userId message:(NSString *)messa
 
 // Call
 - (void)incomingCallWithStringeeClient:(StringeeClient *)stringeeClient stringeeCall:(StringeeCall *)stringeeCall {
-    [[RNStringeeInstanceManager instance].calls setObject:stringeeCall forKey:stringeeCall.callId];
+    if (stringeeCall.callId) {
+        [[RNStringeeInstanceManager instance].calls setObject:stringeeCall forKey:stringeeCall.callId];
+    }
 
     if ([jsEvents containsObject:incomingCall]) {
 
@@ -179,8 +181,16 @@ RCT_EXPORT_METHOD(sendCustomMessage:(NSString *)userId message:(NSString *)messa
             // App-to-app-outgoing-call
             index = 0;
         }
+        
+        id returnUserId = stringeeClient.userId ? stringeeClient.userId : [NSNull null];
+        id returnCallId = stringeeClient.callId ? stringeeClient.callId : [NSNull null];
+        id returnFrom = stringeeClient.from ? stringeeClient.from : [NSNull null];
+        id returnTo = stringeeClient.to ? stringeeClient.to : [NSNull null];
+        id returnFromAlias = stringeeClient.fromAlias ? stringeeClient.fromAlias : [NSNull null];
+        id returnToAlias = stringeeClient.toAlias ? stringeeClient.toAlias : [NSNull null];
+        id returnCustomData = stringeeClient.customDataFromYourServer ? stringeeClient.customDataFromYourServer : [NSNull null];
 
-        [self sendEventWithName:incomingCall body:@{ @"userId" : stringeeClient.userId, @"callId" : stringeeCall.callId, @"from" : stringeeCall.from, @"to" : stringeeCall.to, @"fromAlias" : stringeeCall.fromAlias, @"toAlias" : stringeeCall.toAlias, @"callType" : @(index), @"isVideoCall" : @(stringeeCall.isVideoCall), @"customDataFromYourServer" : stringeeCall.customDataFromYourServer}];
+        [self sendEventWithName:incomingCall body:@{ @"userId" : returnUserId, @"callId" : returnCallId, @"from" : returnFrom, @"to" : returnTo, @"fromAlias" : returnFromAlias, @"toAlias" : returnToAlias, @"callType" : @(index), @"isVideoCall" : @(stringeeCall.isVideoCall), @"customDataFromYourServer" : returnCustomData}];
     }
     
 }
