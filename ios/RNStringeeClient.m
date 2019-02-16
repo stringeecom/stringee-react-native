@@ -183,12 +183,12 @@ RCT_EXPORT_METHOD(sendCustomMessage:(NSString *)userId message:(NSString *)messa
         }
         
         id returnUserId = stringeeClient.userId ? stringeeClient.userId : [NSNull null];
-        id returnCallId = stringeeClient.callId ? stringeeClient.callId : [NSNull null];
-        id returnFrom = stringeeClient.from ? stringeeClient.from : [NSNull null];
-        id returnTo = stringeeClient.to ? stringeeClient.to : [NSNull null];
-        id returnFromAlias = stringeeClient.fromAlias ? stringeeClient.fromAlias : [NSNull null];
-        id returnToAlias = stringeeClient.toAlias ? stringeeClient.toAlias : [NSNull null];
-        id returnCustomData = stringeeClient.customDataFromYourServer ? stringeeClient.customDataFromYourServer : [NSNull null];
+        id returnCallId = stringeeCall.callId ? stringeeCall.callId : [NSNull null];
+        id returnFrom = stringeeCall.from ? stringeeCall.from : [NSNull null];
+        id returnTo = stringeeCall.to ? stringeeCall.to : [NSNull null];
+        id returnFromAlias = stringeeCall.fromAlias ? stringeeCall.fromAlias : [NSNull null];
+        id returnToAlias = stringeeCall.toAlias ? stringeeCall.toAlias : [NSNull null];
+        id returnCustomData = stringeeCall.customDataFromYourServer ? stringeeCall.customDataFromYourServer : [NSNull null];
 
         [self sendEventWithName:incomingCall body:@{ @"userId" : returnUserId, @"callId" : returnCallId, @"from" : returnFrom, @"to" : returnTo, @"fromAlias" : returnFromAlias, @"toAlias" : returnToAlias, @"callType" : @(index), @"isVideoCall" : @(stringeeCall.isVideoCall), @"customDataFromYourServer" : returnCustomData}];
     }
