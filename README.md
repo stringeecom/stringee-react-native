@@ -65,7 +65,7 @@
 
 1. Open up `android/app/src/main/java/[...]/MainApplication.java`
   - Add `import com.stringeereactnative.RNStringeeReactPackage;` to the imports at the top of the file
-  - Add `new RNStringeePackage()` to the list returned by the `getPackages()` method
+  - Add `new RNStringeeReactPackage()` to the list returned by the `getPackages()` method
 2. Append the following lines to `android/settings.gradle`:
   	```
   	include ':stringee-react-native'
