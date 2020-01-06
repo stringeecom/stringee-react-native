@@ -343,7 +343,9 @@ RCT_EXPORT_METHOD(switchCamera:(NSString *)callId callback:(RCTResponseSenderBlo
         return;
     }
 
-    [call switchCamera];
+    DispatchQueue.main.async {
+        [call switchCamera];
+    }
     callback(@[@(YES), @(0), @"Success"]);
 }
 
@@ -361,7 +363,9 @@ RCT_EXPORT_METHOD(enableVideo:(NSString *)callId enableVideo:(BOOL)enableVideo c
         return;
     }
 
-    [call enableLocalVideo:enableVideo];
+    DispatchQueue.main.async {
+        [call enableLocalVideo:enableVideo];
+    }
     callback(@[@(YES), @(0), @"Success"]);
 }
 
