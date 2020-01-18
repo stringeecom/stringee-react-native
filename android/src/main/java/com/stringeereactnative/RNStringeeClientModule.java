@@ -50,7 +50,17 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
 
     @ReactMethod
     public void connect(String accessToken) {
-        mClient.connect(accessToken);
+        if (mClient.isConnected()) {
+            if (contains(jsEvents, "onConnectionConnected")) {
+                WritableMap params = Arguments.createMap();
+                params.putString("userId", mClient.getUserId());
+                params.putInt("projectId", mClient.getProjectId());
+                params.putBoolean("isReconnecting", false);
+                sendEvent(getReactApplicationContext(), "onConnectionConnected", params);
+            }
+        } else {
+            mClient.connect(accessToken);
+        }
     }
 
     @ReactMethod
@@ -197,6 +207,11 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
             params.putString("data", jsonObject.toString());
             sendEvent(getReactApplicationContext(), "onCustomMessage", params);
         }
+    }
+
+    @Override
+    public void onTopicMessage(String s, JSONObject jsonObject) {
+
     }
 
     private void sendEvent(ReactContext reactContext, String eventName, @Nullable WritableMap eventData) {
