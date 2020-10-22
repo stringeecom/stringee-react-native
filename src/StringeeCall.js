@@ -48,9 +48,9 @@ export default class extends Component {
       const eventName = callEvents[platform][type];
       if (eventName !== undefined) {
         this._subscriptions.push(
-          this._eventEmitter.addListener(eventName, data => {
-            handler(data);
-          })
+            this._eventEmitter.addListener(eventName, data => {
+              handler(data);
+            })
         );
 
         this._events.push(eventName);
@@ -86,9 +86,9 @@ export default class extends Component {
   }
 
   sendCallInfo(
-    callId: string,
-    callInfo: string,
-    callback: RNStringeeEventCallback
+      callId: string,
+      callInfo: string,
+      callback: RNStringeeEventCallback
   ) {
     RNStringeeCall.sendCallInfo(callId, callInfo, callback);
   }
@@ -102,9 +102,9 @@ export default class extends Component {
   }
 
   enableVideo(
-    callId: string,
-    enabled: boolean,
-    callback: RNStringeeEventCallback
+      callId: string,
+      enabled: boolean,
+      callback: RNStringeeEventCallback
   ) {
     RNStringeeCall.enableVideo(callId, enabled, callback);
   }
@@ -114,10 +114,17 @@ export default class extends Component {
   }
 
   setSpeakerphoneOn(
-    callId: string,
-    on: boolean,
-    callback: RNStringeeEventCallback
+      callId: string,
+      on: boolean,
+      callback: RNStringeeEventCallback
   ) {
     RNStringeeCall.setSpeakerphoneOn(callId, on, callback);
+  }
+
+  resumeVideo(
+      callId: string,
+      callback: RNStringeeEventCallback
+  ) {
+    RNStringeeCall.resumeVideo(callId, callback);
   }
 }

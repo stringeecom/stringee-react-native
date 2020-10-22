@@ -1,6 +1,9 @@
 package com.stringeereactnative;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
+import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
@@ -18,12 +21,14 @@ import com.stringee.listener.StatusListener;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Set;
 import java.util.ArrayList;
 
 public class RNStringeeCallModule extends ReactContextBaseJavaModule implements StringeeCall.StringeeCallListener {
 
     private Callback mCallback;
     private ArrayList<String> jsEvents = new ArrayList<String>();
+    private Handler handler;
 
     public RNStringeeCallModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -54,8 +59,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             String customData = jsonObject.optString("customData");
             String resolution = jsonObject.optString("videoResolution");
 
-
-            StringeeCall mStringeeCall = new StringeeCall(getReactApplicationContext(), StringeeManager.getInstance().getClient(), from, to);
+            final StringeeCall mStringeeCall = new StringeeCall(StringeeManager.getInstance().getClient(), from, to);
             mStringeeCall.setCallListener(this);
             mStringeeCall.setVideoCall(isVideoCall);
             if (customData != null) {
@@ -68,6 +72,42 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
                     mStringeeCall.setQuality(StringeeConstant.QUALITY_HD);
                 }
             }
+
+            handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    StringeeAudioManager audioManager = StringeeAudioManager.create(getReactApplicationContext());
+                    audioManager.start(new StringeeAudioManager.AudioManagerEvents() {
+                        @Override
+                        public void onAudioDeviceChanged(StringeeAudioManager.AudioDevice selectedAudioDevice, Set<StringeeAudioManager.AudioDevice> availableAudioDevices) {
+                            if (!mStringeeCall.isVideoCall()) {
+                                switch (selectedAudioDevice) {
+                                    case WIRED_HEADSET:
+                                        audioManager.setSpeakerphoneOn(false);
+                                        break;
+                                    case BLUETOOTH:
+                                        audioManager.setSpeakerphoneOn(false);
+                                        break;
+                                    case SPEAKER_PHONE:
+                                        audioManager.setSpeakerphoneOn(mStringeeCall.isVideoCall());
+                                        break;
+                                }
+                            } else {
+                                if (selectedAudioDevice == StringeeAudioManager.AudioDevice.WIRED_HEADSET || selectedAudioDevice == StringeeAudioManager.AudioDevice.BLUETOOTH) {
+                                    audioManager.setSpeakerphoneOn(false);
+                                } else {
+                                    audioManager.setSpeakerphoneOn(true);
+                                }
+                            }
+                            Log.d("Stringee", "onAudioManagerDevicesChanged: " + availableAudioDevices + ", "
+                                    + "selected: " + selectedAudioDevice);
+                        }
+                    });
+                    StringeeManager.getInstance().setAudioManager(audioManager);
+                }
+            });
+
             mStringeeCall.makeCall();
         } catch (JSONException e) {
             callback.invoke(false, -4, "The parameters format is invalid.", "");
@@ -92,8 +132,43 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             callback.invoke(false, -3, "The call is not found.");
             return;
         }
+
+        handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                StringeeAudioManager audioManager = StringeeAudioManager.create(getReactApplicationContext());
+                audioManager.start(new StringeeAudioManager.AudioManagerEvents() {
+                    @Override
+                    public void onAudioDeviceChanged(StringeeAudioManager.AudioDevice selectedAudioDevice, Set<StringeeAudioManager.AudioDevice> availableAudioDevices) {
+                        if (!call.isVideoCall()) {
+                            switch (selectedAudioDevice) {
+                                case WIRED_HEADSET:
+                                    audioManager.setSpeakerphoneOn(false);
+                                    break;
+                                case BLUETOOTH:
+                                    audioManager.setSpeakerphoneOn(false);
+                                    break;
+                                case SPEAKER_PHONE:
+                                    audioManager.setSpeakerphoneOn(call.isVideoCall());
+                                    break;
+                            }
+                        } else {
+                            if (selectedAudioDevice == StringeeAudioManager.AudioDevice.WIRED_HEADSET || selectedAudioDevice == StringeeAudioManager.AudioDevice.BLUETOOTH) {
+                                audioManager.setSpeakerphoneOn(false);
+                            } else {
+                                audioManager.setSpeakerphoneOn(true);
+                            }
+                        }
+                        Log.d("Stringee", "onAudioManagerDevicesChanged: " + availableAudioDevices + ", "
+                                + "selected: " + selectedAudioDevice);
+                    }
+                });
+                StringeeManager.getInstance().setAudioManager(audioManager);
+            }
+        });
+
         call.setCallListener(this);
-        call.initAnswer(getReactApplicationContext(), StringeeManager.getInstance().getClient());
         callback.invoke(true, 0, "Success");
     }
 
@@ -114,6 +189,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             callback.invoke(false, -3, "The call is not found.");
             return;
         }
+
         call.answer();
         callback.invoke(true, 0, "Success");
     }
@@ -135,6 +211,19 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             callback.invoke(false, -3, "The call is not found.");
             return;
         }
+
+        handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                StringeeAudioManager audioManager = StringeeManager.getInstance().getAudioManager();
+                if (audioManager != null) {
+                    audioManager.stop();
+                    audioManager = null;
+                }
+            }
+        });
+
         call.reject();
         callback.invoke(true, 0, "Success");
     }
@@ -156,6 +245,19 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             callback.invoke(false, -3, "The call is not found.");
             return;
         }
+
+        handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                StringeeAudioManager audioManager = StringeeManager.getInstance().getAudioManager();
+                if (audioManager != null) {
+                    audioManager.stop();
+                    audioManager = null;
+                }
+            }
+        });
+
         call.hangup();
         callback.invoke(true, 0, "Success");
     }
@@ -317,7 +419,36 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             callback.invoke(false, -3, "The call is not found.");
             return;
         }
-        call.setSpeakerphoneOn(on);
+
+        handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                StringeeAudioManager audioManager = StringeeManager.getInstance().getAudioManager();
+                if (audioManager != null) {
+                    audioManager.setSpeakerphoneOn(on);
+                }
+            }
+        });
+
+        callback.invoke(true, 0, "Success");
+    }
+
+    @ReactMethod
+    public void resumeVideo(String callId, Callback callback) {
+        if (callId == null || callId.length() == 0) {
+            callback.invoke(false, -2, "The call id is invalid.");
+            return;
+        }
+
+        StringeeCall call = StringeeManager.getInstance().getCallsMap().get(callId);
+        if (call == null) {
+            callback.invoke(false, -3, "The call is not found.");
+            return;
+        }
+
+        call.resumeVideo();
+
         callback.invoke(true, 0, "Success");
     }
 
