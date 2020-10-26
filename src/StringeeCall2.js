@@ -1,10 +1,12 @@
-import { Component } from "react";
+import {Component} from "react";
 import PropTypes from "prop-types";
-import { NativeModules, NativeEventEmitter, Platform } from "react-native";
-import { callEvents } from "./helpers/StringeeHelper";
-import { each } from "underscore";
+import {NativeModules, NativeEventEmitter, Platform} from "react-native";
+import {callEvents} from "./helpers/StringeeHelper";
+import {each} from "underscore";
 
 const RNStringeeCall2 = NativeModules.RNStringeeCall2;
+
+const iOS = Platform.OS === "ios" ? true : false;
 
 export default class extends Component {
     static propTypes = {
@@ -125,6 +127,10 @@ export default class extends Component {
         callId: string,
         callback: RNStringeeEventCallback
     ) {
-        RNStringeeCall2.resumeVideo(callId, callback);
+        if (iOS) {
+            console.log('this function only for android');
+        } else {
+            RNStringeeCall2.resumeVideo(callId, callback);
+        }
     }
 }

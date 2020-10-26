@@ -1,130 +1,136 @@
-import { Component } from "react";
+import {Component} from "react";
 import PropTypes from "prop-types";
-import { NativeModules, NativeEventEmitter, Platform } from "react-native";
-import { callEvents } from "./helpers/StringeeHelper";
-import { each } from "underscore";
+import {NativeModules, NativeEventEmitter, Platform} from "react-native";
+import {callEvents} from "./helpers/StringeeHelper";
+import {each} from "underscore";
 
 const RNStringeeCall = NativeModules.RNStringeeCall;
 
+const iOS = Platform.OS === "ios" ? true : false;
+
 export default class extends Component {
-  static propTypes = {
-    eventHandlers: PropTypes.object
-  };
+    static propTypes = {
+        eventHandlers: PropTypes.object
+    };
 
-  constructor(props) {
-    super(props);
-    this._events = [];
-    this._subscriptions = [];
-    this._eventEmitter = new NativeEventEmitter(RNStringeeCall);
-  }
-
-  componentWillMount() {
-    this.sanitizeCallEvents(this.props.eventHandlers);
-  }
-
-  componentWillUnmount() {
-    this._unregisterEvents();
-  }
-
-  render() {
-    return null;
-  }
-
-  _unregisterEvents() {
-    this._subscriptions.forEach(e => e.remove());
-    this._subscriptions = [];
-
-    this._events.forEach(e => RNStringeeCall.removeNativeEvent(e));
-    this._events = [];
-  }
-
-  sanitizeCallEvents(events) {
-    if (typeof events !== "object") {
-      return;
+    constructor(props) {
+        super(props);
+        this._events = [];
+        this._subscriptions = [];
+        this._eventEmitter = new NativeEventEmitter(RNStringeeCall);
     }
-    const platform = Platform.OS;
 
-    each(events, (handler, type) => {
-      const eventName = callEvents[platform][type];
-      if (eventName !== undefined) {
-        this._subscriptions.push(
-            this._eventEmitter.addListener(eventName, data => {
-              handler(data);
-            })
-        );
+    componentWillMount() {
+        this.sanitizeCallEvents(this.props.eventHandlers);
+    }
 
-        this._events.push(eventName);
-        RNStringeeCall.setNativeEvent(eventName);
-      } else {
-        console.log(`${type} is not a supported event`);
-      }
-    });
-  }
+    componentWillUnmount() {
+        this._unregisterEvents();
+    }
 
-  makeCall(parameters: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall.makeCall(parameters, callback);
-  }
+    render() {
+        return null;
+    }
 
-  initAnswer(callId: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall.initAnswer(callId, callback);
-  }
+    _unregisterEvents() {
+        this._subscriptions.forEach(e => e.remove());
+        this._subscriptions = [];
 
-  answer(callId: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall.answer(callId, callback);
-  }
+        this._events.forEach(e => RNStringeeCall.removeNativeEvent(e));
+        this._events = [];
+    }
 
-  hangup(callId: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall.hangup(callId, callback);
-  }
+    sanitizeCallEvents(events) {
+        if (typeof events !== "object") {
+            return;
+        }
+        const platform = Platform.OS;
 
-  reject(callId: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall.reject(callId, callback);
-  }
+        each(events, (handler, type) => {
+            const eventName = callEvents[platform][type];
+            if (eventName !== undefined) {
+                this._subscriptions.push(
+                    this._eventEmitter.addListener(eventName, data => {
+                        handler(data);
+                    })
+                );
 
-  sendDTMF(callId: string, dtmf: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall.sendDTMF(callId, dtmf, callback);
-  }
+                this._events.push(eventName);
+                RNStringeeCall.setNativeEvent(eventName);
+            } else {
+                console.log(`${type} is not a supported event`);
+            }
+        });
+    }
 
-  sendCallInfo(
-      callId: string,
-      callInfo: string,
-      callback: RNStringeeEventCallback
-  ) {
-    RNStringeeCall.sendCallInfo(callId, callInfo, callback);
-  }
+    makeCall(parameters: string, callback: RNStringeeEventCallback) {
+        RNStringeeCall.makeCall(parameters, callback);
+    }
 
-  getCallStats(callId: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall.getCallStats(callId, callback);
-  }
+    initAnswer(callId: string, callback: RNStringeeEventCallback) {
+        RNStringeeCall.initAnswer(callId, callback);
+    }
 
-  switchCamera(callId: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall.switchCamera(callId, callback);
-  }
+    answer(callId: string, callback: RNStringeeEventCallback) {
+        RNStringeeCall.answer(callId, callback);
+    }
 
-  enableVideo(
-      callId: string,
-      enabled: boolean,
-      callback: RNStringeeEventCallback
-  ) {
-    RNStringeeCall.enableVideo(callId, enabled, callback);
-  }
+    hangup(callId: string, callback: RNStringeeEventCallback) {
+        RNStringeeCall.hangup(callId, callback);
+    }
 
-  mute(callId: string, mute: boolean, callback: RNStringeeEventCallback) {
-    RNStringeeCall.mute(callId, mute, callback);
-  }
+    reject(callId: string, callback: RNStringeeEventCallback) {
+        RNStringeeCall.reject(callId, callback);
+    }
 
-  setSpeakerphoneOn(
-      callId: string,
-      on: boolean,
-      callback: RNStringeeEventCallback
-  ) {
-    RNStringeeCall.setSpeakerphoneOn(callId, on, callback);
-  }
+    sendDTMF(callId: string, dtmf: string, callback: RNStringeeEventCallback) {
+        RNStringeeCall.sendDTMF(callId, dtmf, callback);
+    }
 
-  resumeVideo(
-      callId: string,
-      callback: RNStringeeEventCallback
-  ) {
-    RNStringeeCall.resumeVideo(callId, callback);
-  }
+    sendCallInfo(
+        callId: string,
+        callInfo: string,
+        callback: RNStringeeEventCallback
+    ) {
+        RNStringeeCall.sendCallInfo(callId, callInfo, callback);
+    }
+
+    getCallStats(callId: string, callback: RNStringeeEventCallback) {
+        RNStringeeCall.getCallStats(callId, callback);
+    }
+
+    switchCamera(callId: string, callback: RNStringeeEventCallback) {
+        RNStringeeCall.switchCamera(callId, callback);
+    }
+
+    enableVideo(
+        callId: string,
+        enabled: boolean,
+        callback: RNStringeeEventCallback
+    ) {
+        RNStringeeCall.enableVideo(callId, enabled, callback);
+    }
+
+    mute(callId: string, mute: boolean, callback: RNStringeeEventCallback) {
+        RNStringeeCall.mute(callId, mute, callback);
+    }
+
+    setSpeakerphoneOn(
+        callId: string,
+        on: boolean,
+        callback: RNStringeeEventCallback
+    ) {
+        RNStringeeCall.setSpeakerphoneOn(callId, on, callback);
+    }
+
+    resumeVideo(
+        callId: string,
+        callback: RNStringeeEventCallback
+    ) {
+        if (iOS) {
+            console.log('this function only for android');
+        } else {
+            RNStringeeCall.resumeVideo(callId, callback);
+        }
+    }
 }
