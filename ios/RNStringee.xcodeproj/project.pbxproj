@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		511CA582254803D200A697B9 /* RNStringeeCall2.m in Sources */ = {isa = PBXBuildFile; fileRef = 511CA580254803D200A697B9 /* RNStringeeCall2.m */; };
 		51491993208EE2DA00EF9B47 /* RNStringeeVideoViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 51491990208EE2D900EF9B47 /* RNStringeeVideoViewManager.m */; };
 		51491994208EE2DA00EF9B47 /* RNStringeeVideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 51491991208EE2D900EF9B47 /* RNStringeeVideoView.m */; };
 		51540543208C66DF00914AE1 /* RNStringeeClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 51540538208C66DE00914AE1 /* RNStringeeClient.m */; };
@@ -29,6 +30,8 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRNStringee.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNStringee.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		511CA580254803D200A697B9 /* RNStringeeCall2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNStringeeCall2.m; sourceTree = "<group>"; };
+		511CA581254803D200A697B9 /* RNStringeeCall2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNStringeeCall2.h; sourceTree = "<group>"; };
 		5149198F208EE2D900EF9B47 /* RNStringeeVideoViewManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNStringeeVideoViewManager.h; sourceTree = "<group>"; };
 		51491990208EE2D900EF9B47 /* RNStringeeVideoViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNStringeeVideoViewManager.m; sourceTree = "<group>"; };
 		51491991208EE2D900EF9B47 /* RNStringeeVideoView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNStringeeVideoView.m; sourceTree = "<group>"; };
@@ -71,6 +74,8 @@
 				51540538208C66DE00914AE1 /* RNStringeeClient.m */,
 				51540541208C66DF00914AE1 /* RNStringeeCall.h */,
 				5154053D208C66DF00914AE1 /* RNStringeeCall.m */,
+				511CA581254803D200A697B9 /* RNStringeeCall2.h */,
+				511CA580254803D200A697B9 /* RNStringeeCall2.m */,
 				51540537208C66DE00914AE1 /* RNStringeeRoom.h */,
 				51540539208C66DE00914AE1 /* RNStringeeRoom.m */,
 				51491992208EE2D900EF9B47 /* RNStringeeVideoView.h */,
@@ -120,6 +125,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 58B511D21A9E6C8500147676;
@@ -139,6 +145,7 @@
 			files = (
 				51540543208C66DF00914AE1 /* RNStringeeClient.m in Sources */,
 				51491994208EE2DA00EF9B47 /* RNStringeeVideoView.m in Sources */,
+				511CA582254803D200A697B9 /* RNStringeeCall2.m in Sources */,
 				51540547208C66DF00914AE1 /* RNStringeeCall.m in Sources */,
 				51540544208C66DF00914AE1 /* RNStringeeRoom.m in Sources */,
 				5154054A208C66DF00914AE1 /* RNStringeeInstanceManager.m in Sources */,

@@ -83,22 +83,6 @@ export default class extends Component {
         RNStringeeCall2.reject(callId, callback);
     }
 
-    sendDTMF(callId: string, dtmf: string, callback: RNStringeeEventCallback) {
-        RNStringeeCall2.sendDTMF(callId, dtmf, callback);
-    }
-
-    sendCallInfo(
-        callId: string,
-        callInfo: string,
-        callback: RNStringeeEventCallback
-    ) {
-        RNStringeeCall2.sendCallInfo(callId, callInfo, callback);
-    }
-
-    getCallStats(callId: string, callback: RNStringeeEventCallback) {
-        RNStringeeCall2.getCallStats(callId, callback);
-    }
-
     switchCamera(callId: string, callback: RNStringeeEventCallback) {
         RNStringeeCall2.switchCamera(callId, callback);
     }

@@ -30,6 +30,7 @@
     if (!hasDisplayed) {
         if (_callId.length) {
             [[RNStringeeInstanceManager instance].rnCall addRenderToView:self callId:_callId isLocal:_local];
+            [[RNStringeeInstanceManager instance].rnCall2 addRenderToView:self callId:_callId isLocal:_local];
             hasDisplayed = YES;
         } else {
             if (_local) {
