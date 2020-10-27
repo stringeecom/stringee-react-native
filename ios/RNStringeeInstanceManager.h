@@ -2,6 +2,7 @@
 #import <Foundation/Foundation.h>
 #import "RNStringeeClient.h"
 #import "RNStringeeCall.h"
+#import "RNStringeeCall2.h"
 #import "RNStringeeRoom.h"
 
 @interface RNStringeeInstanceManager : NSObject
