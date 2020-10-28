@@ -160,6 +160,12 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
         });
 
         call.setCallListener(this);
+        call.ringing(new StatusListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+        });
         callback.invoke(true, 0, "Success");
     }
 
@@ -446,7 +452,7 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
     @Override
     public void onSignalingStateChange(StringeeCall2 stringeeCall, StringeeCall2.SignalingState signalingState, String reason, int sipCode, String sipReason) {
         if (contains(jsEvents, "onSignalingStateChange")) {
-            if (signalingState == StringeeCall2.SignalingState.CALLING) {
+            if (signalingState == StringeeCall2.SignalingState.RINGING) {
                 StringeeManager.getInstance().getCalls2Map().put(stringeeCall.getCallId(), stringeeCall);
                 mCallback.invoke(true, 0, "Success", stringeeCall.getCallId(), stringeeCall.getCustomDataFromYourServer());
             }
