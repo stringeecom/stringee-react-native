@@ -68,69 +68,69 @@ RCT_EXPORT_METHOD(removeNativeEvent:(NSString *)event) {
 
 RCT_EXPORT_METHOD(makeRoom:(RCTResponseSenderBlock)callback) {
     
-    StringeeRoom *room = [[StringeeRoom alloc] initWithStringeeClient:[RNStringeeInstanceManager instance].rnClient.client];
-    room.delegate = self;
-    
-    RNStringeeRoom *weakself = self;
-
-    [room makeRoomWithCompletionHandler:^(BOOL status, int code, NSString *message) {
-        
-        RNStringeeRoom *strongself = weakself;
-
-        id roomId = (room.roomId != 0) ? [NSNumber numberWithLongLong:room.roomId] : [NSNull null];
-
-        if (status) {
-            [strongself.rooms setObject:room forKey:[self keyForLongValue:room.roomId]];
-        }
-        
-        int returnCode;
-        if (code == 2) {
-            // not connected
-            returnCode = -1;
-        } else if (code == 3) {
-            // generic
-            returnCode = -2;
-        } else {
-            returnCode = code;
-        }
-        callback(@[@(status), @(returnCode), message, roomId]);
-    }];
+//    StringeeRoom *room = [[StringeeRoom alloc] initWithStringeeClient:[RNStringeeInstanceManager instance].rnClient.client];
+//    room.delegate = self;
+//
+//    RNStringeeRoom *weakself = self;
+//
+//    [room makeRoomWithCompletionHandler:^(BOOL status, int code, NSString *message) {
+//
+//        RNStringeeRoom *strongself = weakself;
+//
+//        id roomId = (room.roomId != 0) ? [NSNumber numberWithLongLong:room.roomId] : [NSNull null];
+//
+//        if (status) {
+//            [strongself.rooms setObject:room forKey:[self keyForLongValue:room.roomId]];
+//        }
+//
+//        int returnCode;
+//        if (code == 2) {
+//            // not connected
+//            returnCode = -1;
+//        } else if (code == 3) {
+//            // generic
+//            returnCode = -2;
+//        } else {
+//            returnCode = code;
+//        }
+//        callback(@[@(status), @(returnCode), message, roomId]);
+//    }];
 }
 
 RCT_EXPORT_METHOD(joinRoom:(nonnull NSNumber *)roomId callback:(RCTResponseSenderBlock)callback) {
 
-    if ([roomId longLongValue] == 0) {
-        callback(@[@(NO), @(-3), @"RoomId is invalid."]);
-        return;
-    }
-
-    StringeeRoom *room = [[StringeeRoom alloc] initWithStringeeClient:[RNStringeeInstanceManager instance].rnClient.client];
-    room.delegate = self;
-    
-    RNStringeeRoom *weakself = self;
-    
-    long long lRoomId = [roomId longLongValue];
-
-    [room joinRoomWithRoomId:lRoomId completionHandler:^(BOOL status, int code, NSString *message) {
-        
-        RNStringeeRoom *strongself = weakself;
-        
-        if (status) {
-            [strongself.rooms setObject:room forKey:[self keyForLongValue:room.roomId]];
-        }
-        
-        int returnCode;
-        if (code == 2) {
-            // not connected
-            returnCode = -1;
-        } else if (code == 3) {
-            // generic
-            returnCode = -2;
-        } else {
-            returnCode = code;
-        }
-        callback(@[@(status), @(returnCode), message]);
-    }];
+//    if ([roomId longLongValue] == 0) {
+//        callback(@[@(NO), @(-3), @"RoomId is invalid."]);
+//        return;
+//    }
+//
+//    StringeeRoom *room = [[StringeeRoom alloc] initWithStringeeClient:[RNStringeeInstanceManager instance].rnClient.client];
+//    room.delegate = self;
+//
+//    RNStringeeRoom *weakself = self;
+//
+//    long long lRoomId = [roomId longLongValue];
+//
+//    [room joinRoomWithRoomId:lRoomId completionHandler:^(BOOL status, int code, NSString *message) {
+//
+//        RNStringeeRoom *strongself = weakself;
+//
+//        if (status) {
+//            [strongself.rooms setObject:room forKey:[self keyForLongValue:room.roomId]];
+//        }
+//
+//        int returnCode;
+//        if (code == 2) {
+//            // not connected
+//            returnCode = -1;
+//        } else if (code == 3) {
+//            // generic
+//            returnCode = -2;
+//        } else {
+//            returnCode = code;
+//        }
+//        callback(@[@(status), @(returnCode), message]);
+//    }];
 }
 
 RCT_EXPORT_METHOD(publishLocalStream:(nonnull NSNumber *)roomId config:(NSString *)config callback:(RCTResponseSenderBlock)callback) {

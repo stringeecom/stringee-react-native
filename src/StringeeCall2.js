@@ -64,11 +64,11 @@ export default class extends Component {
     }
 
     makeCall(parameters: string, callback: RNStringeeEventCallback) {
-        RNStringeeCall2.makeCall(parameters, callback);
+        RNStringeeCall2.makeCall(this.props.clientId, parameters, callback);
     }
 
     initAnswer(callId: string, callback: RNStringeeEventCallback) {
-        RNStringeeCall2.initAnswer(callId, callback);
+        RNStringeeCall2.initAnswer(this.props.clientId, callId, callback);
     }
 
     answer(callId: string, callback: RNStringeeEventCallback) {
