@@ -270,7 +270,7 @@ export default class extends Component {
             });
         } else {
             // Android chi su dung userId
-            RNStringeeClient.getLocalConversations(userId, (status, code, message, conversations) => {
+            RNStringeeClient.getLocalConversations(this.uuid, userId, (status, code, message, conversations) => {
                 var returnConversations = [];
                 if (status) {
                     if (isAscending) {
