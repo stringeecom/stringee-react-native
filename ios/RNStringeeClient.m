@@ -11,6 +11,7 @@ static NSString *requestAccessToken       = @"requestAccessToken";
 
 // Call 1-1
 static NSString *incomingCall               = @"incomingCall";
+static NSString *incomingCall2               = @"incomingCall2";
 static NSString *didReceiveCustomMessage    = @"didReceiveCustomMessage";
 
 
@@ -36,6 +37,7 @@ RCT_EXPORT_MODULE();
              didFailWithError,
              requestAccessToken,
              incomingCall,
+             incomingCall2,
              didReceiveCustomMessage
              ];
 }
@@ -190,11 +192,44 @@ RCT_EXPORT_METHOD(sendCustomMessage:(NSString *)userId message:(NSString *)messa
         id returnToAlias = stringeeCall.toAlias ? stringeeCall.toAlias : [NSNull null];
         id returnCustomData = stringeeCall.customDataFromYourServer ? stringeeCall.customDataFromYourServer : [NSNull null];
 
-        [self sendEventWithName:incomingCall body:@{ @"userId" : returnUserId, @"callId" : returnCallId, @"from" : returnFrom, @"to" : returnTo, @"fromAlias" : returnFromAlias, @"toAlias" : returnToAlias, @"callType" : @(index), @"isVideoCall" : @(stringeeCall.isVideoCall), @"customDataFromYourServer" : returnCustomData}];
+        [self sendEventWithName:incomingCall body:@{ @"userId" : returnUserId, @"callId" : returnCallId, @"from" : returnFrom, @"to" : returnTo, @"fromAlias" : returnFromAlias, @"toAlias" : returnToAlias, @"callType" : @(index), @"isVideoCall" : @(stringeeCall.isVideoCall), @"customDataFromYourServer" : returnCustomData, @"serial" : @(stringeeCall.serial)}];
     }
     
 }
 
+- (void)incomingCallWithStringeeClient:(StringeeClient *)stringeeClient stringeeCall2:(StringeeCall2 *)stringeeCall2 {
+    if (stringeeCall2.callId) {
+        [[RNStringeeInstanceManager instance].call2s setObject:stringeeCall2 forKey:stringeeCall2.callId];
+    }
 
+    if ([jsEvents containsObject:incomingCall2]) {
+
+        int index = 0;
+
+        if (stringeeCall2.callType == CallTypeCallIn) {
+            // Phone-to-app
+            index = 3;
+        } else if (stringeeCall2.callType == CallTypeCallOut) {
+            // App-to-phone
+            index = 2;
+        } else if (stringeeCall2.callType == CallTypeInternalIncomingCall) {
+            // App-to-app-incoming-call
+            index = 1;
+        } else {
+            // App-to-app-outgoing-call
+            index = 0;
+        }
+        
+        id returnUserId = stringeeClient.userId ? stringeeClient.userId : [NSNull null];
+        id returnCallId = stringeeCall2.callId ? stringeeCall2.callId : [NSNull null];
+        id returnFrom = stringeeCall2.from ? stringeeCall2.from : [NSNull null];
+        id returnTo = stringeeCall2.to ? stringeeCall2.to : [NSNull null];
+        id returnFromAlias = stringeeCall2.fromAlias ? stringeeCall2.fromAlias : [NSNull null];
+        id returnToAlias = stringeeCall2.toAlias ? stringeeCall2.toAlias : [NSNull null];
+        id returnCustomData = stringeeCall2.customDataFromYourServer ? stringeeCall2.customDataFromYourServer : [NSNull null];
+
+        [self sendEventWithName:incomingCall2 body:@{ @"userId" : returnUserId, @"callId" : returnCallId, @"from" : returnFrom, @"to" : returnTo, @"fromAlias" : returnFromAlias, @"toAlias" : returnToAlias, @"callType" : @(index), @"isVideoCall" : @(stringeeCall2.isVideoCall), @"customDataFromYourServer" : returnCustomData, @"serial" : @(stringeeCall2.serial)}];
+    }
+}
 
 @end

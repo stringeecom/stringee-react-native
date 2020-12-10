@@ -4,7 +4,7 @@ import {NativeModules, NativeEventEmitter, Platform} from "react-native";
 import {callEvents} from "./helpers/StringeeHelper";
 import {each} from "underscore";
 
-const RNStringeeCall = NativeModules.RNStringeeCall;
+const RNStringeeCall2 = NativeModules.RNStringeeCall2;
 
 const iOS = Platform.OS === "ios" ? true : false;
 
@@ -17,7 +17,7 @@ export default class extends Component {
         super(props);
         this._events = [];
         this._subscriptions = [];
-        this._eventEmitter = new NativeEventEmitter(RNStringeeCall);
+        this._eventEmitter = new NativeEventEmitter(RNStringeeCall2);
     }
 
     componentWillMount() {
@@ -36,7 +36,7 @@ export default class extends Component {
         this._subscriptions.forEach(e => e.remove());
         this._subscriptions = [];
 
-        this._events.forEach(e => RNStringeeCall.removeNativeEvent(e));
+        this._events.forEach(e => RNStringeeCall2.removeNativeEvent(e));
         this._events = [];
     }
 
@@ -56,7 +56,7 @@ export default class extends Component {
                 );
 
                 this._events.push(eventName);
-                RNStringeeCall.setNativeEvent(eventName);
+                RNStringeeCall2.setNativeEvent(eventName);
             } else {
                 console.log(`${type} is not a supported event`);
             }
@@ -64,43 +64,27 @@ export default class extends Component {
     }
 
     makeCall(parameters: string, callback: RNStringeeEventCallback) {
-        RNStringeeCall.makeCall(parameters, callback);
+        RNStringeeCall2.makeCall(parameters, callback);
     }
 
     initAnswer(callId: string, callback: RNStringeeEventCallback) {
-        RNStringeeCall.initAnswer(callId, callback);
+        RNStringeeCall2.initAnswer(callId, callback);
     }
 
     answer(callId: string, callback: RNStringeeEventCallback) {
-        RNStringeeCall.answer(callId, callback);
+        RNStringeeCall2.answer(callId, callback);
     }
 
     hangup(callId: string, callback: RNStringeeEventCallback) {
-        RNStringeeCall.hangup(callId, callback);
+        RNStringeeCall2.hangup(callId, callback);
     }
 
     reject(callId: string, callback: RNStringeeEventCallback) {
-        RNStringeeCall.reject(callId, callback);
-    }
-
-    sendDTMF(callId: string, dtmf: string, callback: RNStringeeEventCallback) {
-        RNStringeeCall.sendDTMF(callId, dtmf, callback);
-    }
-
-    sendCallInfo(
-        callId: string,
-        callInfo: string,
-        callback: RNStringeeEventCallback
-    ) {
-        RNStringeeCall.sendCallInfo(callId, callInfo, callback);
-    }
-
-    getCallStats(callId: string, callback: RNStringeeEventCallback) {
-        RNStringeeCall.getCallStats(callId, callback);
+        RNStringeeCall2.reject(callId, callback);
     }
 
     switchCamera(callId: string, callback: RNStringeeEventCallback) {
-        RNStringeeCall.switchCamera(callId, callback);
+        RNStringeeCall2.switchCamera(callId, callback);
     }
 
     enableVideo(
@@ -108,11 +92,11 @@ export default class extends Component {
         enabled: boolean,
         callback: RNStringeeEventCallback
     ) {
-        RNStringeeCall.enableVideo(callId, enabled, callback);
+        RNStringeeCall2.enableVideo(callId, enabled, callback);
     }
 
     mute(callId: string, mute: boolean, callback: RNStringeeEventCallback) {
-        RNStringeeCall.mute(callId, mute, callback);
+        RNStringeeCall2.mute(callId, mute, callback);
     }
 
     setSpeakerphoneOn(
@@ -120,7 +104,7 @@ export default class extends Component {
         on: boolean,
         callback: RNStringeeEventCallback
     ) {
-        RNStringeeCall.setSpeakerphoneOn(callId, on, callback);
+        RNStringeeCall2.setSpeakerphoneOn(callId, on, callback);
     }
 
     resumeVideo(
@@ -130,7 +114,7 @@ export default class extends Component {
         if (iOS) {
             console.log('this function only for android');
         } else {
-            RNStringeeCall.resumeVideo(callId, callback);
+            RNStringeeCall2.resumeVideo(callId, callback);
         }
     }
 }

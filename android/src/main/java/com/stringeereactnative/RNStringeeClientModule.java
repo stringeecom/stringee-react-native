@@ -1,6 +1,6 @@
 package com.stringeereactnative;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
@@ -12,6 +12,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.stringee.StringeeClient;
 import com.stringee.call.StringeeCall;
+import com.stringee.call.StringeeCall2;
 import com.stringee.exception.StringeeError;
 import com.stringee.listener.StatusListener;
 import com.stringee.listener.StringeeConnectionListener;
@@ -179,6 +180,27 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
             params.putBoolean("isVideoCall", stringeeCall.isVideoCall());
             params.putString("customDataFromYourServer", stringeeCall.getCustomDataFromYourServer());
             sendEvent(getReactApplicationContext(), "onIncomingCall", params);
+        }
+    }
+
+    @Override
+    public void onIncomingCall2(StringeeCall2 stringeeCall) {
+        if (contains(jsEvents, "onIncomingCall2")) {
+            StringeeManager.getInstance().getCalls2Map().put(stringeeCall.getCallId(), stringeeCall);
+            WritableMap params = Arguments.createMap();
+            if (mClient != null) {
+                params.putString("userId", mClient.getUserId());
+            }
+            params.putString("callId", stringeeCall.getCallId());
+            params.putString("from", stringeeCall.getFrom());
+            params.putString("to", stringeeCall.getTo());
+            params.putString("fromAlias", stringeeCall.getFromAlias());
+            params.putString("toAlias", stringeeCall.getToAlias());
+            int callType = 2;
+            params.putInt("callType", callType);
+            params.putBoolean("isVideoCall", stringeeCall.isVideoCall());
+            params.putString("customDataFromYourServer", stringeeCall.getCustomDataFromYourServer());
+            sendEvent(getReactApplicationContext(), "onIncomingCall2", params);
         }
     }
 

@@ -1,132 +1,132 @@
-import { Component } from "react";
+import {Component} from "react";
 import PropTypes from "prop-types";
-import { NativeModules, NativeEventEmitter, Platform } from "react-native";
-import { roomEvents } from "./helpers/StringeeHelper";
-import { each } from "underscore";
+import {NativeModules, NativeEventEmitter, Platform} from "react-native";
+import {roomEvents} from "./helpers/StringeeHelper";
+import {each} from "underscore";
 
 const RNStringeeRoom = NativeModules.RNStringeeRoom;
 
 export default class extends Component {
-  static propTypes = {
-    eventHandlers: PropTypes.object
-  };
+    static propTypes = {
+        eventHandlers: PropTypes.object
+    };
 
-  constructor(props) {
-    super(props);
-    this._events = [];
-    this._subscriptions = [];
-    this._eventEmitter = new NativeEventEmitter(RNStringeeRoom);
-  }
-
-  componentWillMount() {
-    this.sanitizeRoomEvents(this.props.eventHandlers);
-  }
-
-  componentWillUnmount() {
-    this._unregisterEvents();
-  }
-
-  render() {
-    return null;
-  }
-
-  _unregisterEvents() {
-    this._subscriptions.forEach(e => e.remove());
-    this._subscriptions = [];
-
-    this._events.forEach(e => RNStringeeRoom.removeNativeEvent(e));
-    this._events = [];
-  }
-
-  sanitizeRoomEvents(events) {
-    if (typeof events !== "object") {
-      return;
+    constructor(props) {
+        super(props);
+        this._events = [];
+        this._subscriptions = [];
+        this._eventEmitter = new NativeEventEmitter(RNStringeeRoom);
     }
-    const platform = Platform.OS;
 
-    each(events, (handler, type) => {
-      const eventName = roomEvents[platform][type];
-      if (eventName !== undefined) {
-        this._subscriptions.push(
-          this._eventEmitter.addListener(eventName, data => {
-            handler(data);
-          })
-        );
+    componentWillMount() {
+        this.sanitizeRoomEvents(this.props.eventHandlers);
+    }
 
-        this._events.push(eventName);
-        RNStringeeRoom.setNativeEvent(eventName);
-      } else {
-        console.log(`${type} is not a supported event`);
-      }
-    });
-  }
+    componentWillUnmount() {
+        this._unregisterEvents();
+    }
 
-  makeRoom(callback: RNStringeeEventCallback) {
-    RNStringeeRoom.makeRoom(callback);
-  }
+    render() {
+        return null;
+    }
 
-  joinRoom(roomId: number, callback: RNStringeeEventCallback) {
-    RNStringeeRoom.joinRoom(roomId, callback);
-  }
+    _unregisterEvents() {
+        this._subscriptions.forEach(e => e.remove());
+        this._subscriptions = [];
 
-  publishLocalStream(
-    roomId: number,
-    config: string,
-    callback: RNStringeeEventCallback
-  ) {
-    RNStringeeRoom.publishLocalStream(roomId, config, callback);
-  }
+        this._events.forEach(e => RNStringeeRoom.removeNativeEvent(e));
+        this._events = [];
+    }
 
-  unPublishLocalStream(
-    roomId: number,
-    streamId: string,
-    callback: RNStringeeEventCallback
-  ) {
-    RNStringeeRoom.unPublishLocalStream(roomId, streamId, callback);
-  }
+    sanitizeRoomEvents(events) {
+        if (typeof events !== "object") {
+            return;
+        }
+        const platform = Platform.OS;
 
-  subscribe(
-    roomId: number,
-    streamId: string,
-    callback: RNStringeeEventCallback
-  ) {
-    RNStringeeRoom.subscribe(roomId, streamId, callback);
-  }
+        each(events, (handler, type) => {
+            const eventName = roomEvents[platform][type];
+            if (eventName !== undefined) {
+                this._subscriptions.push(
+                    this._eventEmitter.addListener(eventName, data => {
+                        handler(data);
+                    })
+                );
 
-  unSubscribe(
-    roomId: number,
-    streamId: string,
-    callback: RNStringeeEventCallback
-  ) {
-    RNStringeeRoom.unSubscribe(roomId, streamId, callback);
-  }
+                this._events.push(eventName);
+                RNStringeeRoom.setNativeEvent(eventName);
+            } else {
+                console.log(`${type} is not a supported event`);
+            }
+        });
+    }
 
-  destroy(roomId: number, callback: RNStringeeEventCallback) {
-    RNStringeeRoom.destroy(roomId, callback);
-  }
+    makeRoom(callback: RNStringeeEventCallback) {
+        RNStringeeRoom.makeRoom(callback);
+    }
 
-  switchCamera() {
-    RNStringeeRoom.switchCamera();
-  }
+    joinRoom(roomId: number, callback: RNStringeeEventCallback) {
+        RNStringeeRoom.joinRoom(roomId, callback);
+    }
 
-  mute(isMute: boolean) {
-    RNStringeeRoom.mute(isMute);
-  }
+    publishLocalStream(
+        roomId: number,
+        config: string,
+        callback: RNStringeeEventCallback
+    ) {
+        RNStringeeRoom.publishLocalStream(roomId, config, callback);
+    }
 
-  turnOnCamera(isOn: boolean, callback: RNStringeeEventCallback) {
-    RNStringeeRoom.turnOnCamera(isOn, callback);
-  }
+    unPublishLocalStream(
+        roomId: number,
+        streamId: string,
+        callback: RNStringeeEventCallback
+    ) {
+        RNStringeeRoom.unPublishLocalStream(roomId, streamId, callback);
+    }
 
-  setSpeakerphoneOn(isOn: boolean) {
-    RNStringeeRoom.setSpeakerphoneOn(isOn);
-  }
+    subscribe(
+        roomId: number,
+        streamId: string,
+        callback: RNStringeeEventCallback
+    ) {
+        RNStringeeRoom.subscribe(roomId, streamId, callback);
+    }
 
-  getStats(
-    roomId: number,
-    streamId: string,
-    useVideoTrack: boolean,
-    callback: RNStringeeEventCallback
-  ) {
-    RNStringeeRoom.getStats(roomId, streamId, useVideoTrack, callback);
-  }
+    unSubscribe(
+        roomId: number,
+        streamId: string,
+        callback: RNStringeeEventCallback
+    ) {
+        RNStringeeRoom.unSubscribe(roomId, streamId, callback);
+    }
+
+    destroy(roomId: number, callback: RNStringeeEventCallback) {
+        RNStringeeRoom.destroy(roomId, callback);
+    }
+
+    switchCamera() {
+        RNStringeeRoom.switchCamera();
+    }
+
+    mute(isMute: boolean) {
+        RNStringeeRoom.mute(isMute);
+    }
+
+    turnOnCamera(isOn: boolean, callback: RNStringeeEventCallback) {
+        RNStringeeRoom.turnOnCamera(isOn, callback);
+    }
+
+    setSpeakerphoneOn(isOn: boolean) {
+        RNStringeeRoom.setSpeakerphoneOn(isOn);
+    }
+
+    getStats(
+        roomId: number,
+        streamId: string,
+        useVideoTrack: boolean,
+        callback: RNStringeeEventCallback
+    ) {
+        RNStringeeRoom.getStats(roomId, streamId, useVideoTrack, callback);
+    }
 }
