@@ -169,6 +169,12 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
         });
 
         call.setCallListener(this);
+        call.ringing(new StatusListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+        });
         callback.invoke(true, 0, "Success");
     }
 
