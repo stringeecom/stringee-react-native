@@ -374,8 +374,12 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             callback.invoke(false, -3, "The call is not found.");
             return;
         }
-        call.switchCamera(null);
-        callback.invoke(true, 0, "Success");
+        call.switchCamera(new StatusListener() {
+            @Override
+            public void onSuccess() {
+                callback.invoke(true, 0, "Success");
+            }
+        });
     }
 
     @ReactMethod
