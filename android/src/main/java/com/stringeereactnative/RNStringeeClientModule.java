@@ -43,9 +43,9 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule implement
         mClient = mStringeeManager.getClient();
         if (mClient == null) {
             mClient = new StringeeClient(getReactApplicationContext());
-            mClient.setConnectionListener(this);
         }
 
+        mClient.setConnectionListener(this);
         mStringeeManager.setClient(mClient);
     }
 

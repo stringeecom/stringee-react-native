@@ -2,6 +2,7 @@
 #import "RNStringeeCall.h"
 #import "RNStringeeInstanceManager.h"
 #import <React/RCTLog.h>
+#import <objc/runtime.h>
 
 static NSString *didChangeSignalingState    = @"didChangeSignalingState";
 static NSString *didChangeMediaState        = @"didChangeMediaState";
@@ -12,6 +13,12 @@ static NSString *didReceiveDtmfDigit        = @"didReceiveDtmfDigit";
 static NSString *didReceiveCallInfo         = @"didReceiveCallInfo";
 static NSString *didHandleOnAnotherDevice   = @"didHandleOnAnotherDevice";
 
+@implementation NSString (Helpers)
+
++(BOOL)stringIsNilOrEmpty:(NSString*)aString {
+    return !aString || ![aString length] || [aString length] == 0;
+}
+@end
 
 @implementation RNStringeeCall {
     NSMutableArray<NSString *> *jsEvents;
@@ -43,6 +50,48 @@ RCT_EXPORT_MODULE();
 
 + (BOOL)requiresMainQueueSetup {
     return YES;
+}
+
+void updateStringeeClzz() {
+    SEL selectorOrigin = NSSelectorFromString(@"originalAddAllCandidate:");
+    if (![StringeeCall respondsToSelector: selectorOrigin]) {
+        SEL selector = @selector(addAllCandidate:);
+        Class clzStringeeCall = [StringeeCall class];
+        Class clzSelf = [RNStringeeCall class];
+
+        Method overrideAddAllCandidate = class_getInstanceMethod(clzSelf, selector);
+        Method originalAddAllCandidate = class_getInstanceMethod(clzStringeeCall, selector);
+        
+        BOOL success = class_addMethod(clzStringeeCall, selectorOrigin, method_getImplementation(originalAddAllCandidate), method_getTypeEncoding(originalAddAllCandidate));
+        
+        if (success) {
+            class_replaceMethod(clzStringeeCall, @selector(addAllCandidate:), method_getImplementation(overrideAddAllCandidate), method_getTypeEncoding(overrideAddAllCandidate));
+        }
+    }
+}
+
+- (void)addAllCandidate: (NSMutableArray*) candidates {
+    BOOL isNullorEmpty = candidates == nil || [candidates count] == 0;
+    if (!isNullorEmpty) {
+        NSUInteger total = [candidates count] - 1;
+        for (NSUInteger i = total; i > NSIntegerMax; i--) {
+            NSString* sdp = (NSString*) [[candidates objectAtIndex: i] valueForKey:@"_sdp"];
+            if ([NSString stringIsNilOrEmpty: sdp]) {
+                [candidates removeObjectAtIndex: i];
+            }
+        }
+    }
+    SEL originalAddAllCandidate = NSSelectorFromString(@"originalAddAllCandidate:");
+    StringeeCall* call = _stringeeCall;
+    if (call != nil && [call respondsToSelector: originalAddAllCandidate])
+    {
+        NSMethodSignature * methodSignature = [[call class] instanceMethodSignatureForSelector: originalAddAllCandidate];
+        NSInvocation * delegateInvocation = [NSInvocation invocationWithMethodSignature:methodSignature];
+        [delegateInvocation setSelector: originalAddAllCandidate];
+        [delegateInvocation setTarget:call];
+        [delegateInvocation setArgument:&candidates atIndex:2];
+        [delegateInvocation invoke];
+    }
 }
 
 // TODO: - Publish Functions
@@ -127,6 +176,8 @@ RCT_EXPORT_METHOD(initAnswer:(NSString *)callId callback:(RCTResponseSenderBlock
 RCT_EXPORT_METHOD(answer:(NSString *)callId callback:(RCTResponseSenderBlock)callback) {
     if (callId.length) {
         StringeeCall *call = [[RNStringeeInstanceManager instance].calls objectForKey:callId];
+        _stringeeCall = call;
+        updateStringeeClzz();
         if (call) {
             [call answerCallWithCompletionHandler:^(BOOL status, int code, NSString *message) {
                 callback(@[@(status), @(code), message]);
