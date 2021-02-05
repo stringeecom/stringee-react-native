@@ -18,9 +18,6 @@ export default class extends Component {
         this._events = [];
         this._subscriptions = [];
         this._eventEmitter = new NativeEventEmitter(RNStringeeClient);
-    }
-
-    componentWillMount() {
         if (!iOS) {
             RNStringeeClient.init();
         }

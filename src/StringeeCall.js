@@ -18,9 +18,6 @@ export default class extends Component {
         this._events = [];
         this._subscriptions = [];
         this._eventEmitter = new NativeEventEmitter(RNStringeeCall);
-    }
-
-    componentWillMount() {
         this.sanitizeCallEvents(this.props.eventHandlers);
     }
 
