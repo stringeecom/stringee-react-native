@@ -996,35 +996,42 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                         message = new Message(msgMap.getString("content"));
                         break;
                     case 2:
-                        message.setFileUrl(msgMap.getString("filePath"));
-                        message.setThumbnailUrl(msgMap.getString("thumbnail"));
-                        message.setImageRatio((float) msgMap.getDouble("ratio"));
+                        ReadableMap photoMap = msgMap.getMap("photo");
+                        message.setFileUrl(photoMap.getString("filePath"));
+                        message.setThumbnailUrl(photoMap.getString("thumbnail"));
+                        message.setImageRatio((float) photoMap.getDouble("ratio"));
                         break;
                     case 3:
-                        message.setFileUrl(msgMap.getString("filePath"));
-                        message.setThumbnailUrl(msgMap.getString("thumbnail"));
-                        message.setImageRatio((float) msgMap.getDouble("ratio"));
-                        message.setDuration(msgMap.getInt("duration"));
+                        ReadableMap videoMap = msgMap.getMap("video");
+                        message.setFileUrl(videoMap.getString("filePath"));
+                        message.setThumbnailUrl(videoMap.getString("thumbnail"));
+                        message.setImageRatio((float) videoMap.getDouble("ratio"));
+                        message.setDuration(videoMap.getInt("duration"));
                         break;
                     case 4:
-                        message.setFileUrl(msgMap.getString("filePath"));
-                        message.setDuration(msgMap.getInt("duration"));
+                        ReadableMap audioMap = msgMap.getMap("audio");
+                        message.setFileUrl(audioMap.getString("filePath"));
+                        message.setDuration(audioMap.getInt("duration"));
                         break;
                     case 5:
-                        message.setFileUrl(msgMap.getString("filePath"));
-                        message.setFileName(msgMap.getString("filename"));
-                        message.setFileLength(msgMap.getInt("length"));
+                        ReadableMap fileMap = msgMap.getMap("file");
+                        message.setFileUrl(fileMap.getString("filePath"));
+                        message.setFileName(fileMap.getString("filename"));
+                        message.setFileLength(fileMap.getInt("length"));
                         break;
                     case 9:
-                        message.setLatitude(msgMap.getDouble("lat"));
-                        message.setLongitude(msgMap.getDouble("lon"));
+                        ReadableMap locationMap = msgMap.getMap("location");
+                        message.setLatitude(locationMap.getDouble("lat"));
+                        message.setLongitude(locationMap.getDouble("lon"));
                         break;
                     case 10:
-                        message.setContact(msgMap.getString("vcard"));
+                        ReadableMap contactMap = msgMap.getMap("contact");
+                        message.setContact(contactMap.getString("vcard"));
                         break;
                     case 11:
-                        message.setStickerCategory(msgMap.getString("category"));
-                        message.setStickerName(msgMap.getString("name"));
+                        ReadableMap stickerMap = msgMap.getMap("sticker");
+                        message.setStickerCategory(stickerMap.getString("category"));
+                        message.setStickerName(stickerMap.getString("name"));
                         break;
                     default:
                         break;
