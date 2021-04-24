@@ -14,6 +14,8 @@
 		51540544208C66DF00914AE1 /* RNStringeeRoom.m in Sources */ = {isa = PBXBuildFile; fileRef = 51540539208C66DE00914AE1 /* RNStringeeRoom.m */; };
 		51540547208C66DF00914AE1 /* RNStringeeCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 5154053D208C66DF00914AE1 /* RNStringeeCall.m */; };
 		5154054A208C66DF00914AE1 /* RNStringeeInstanceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 51540542208C66DF00914AE1 /* RNStringeeInstanceManager.m */; };
+		51C19815254A6C4B006610F4 /* RCTConvert+StringeeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 51C19812254A6C4B006610F4 /* RCTConvert+StringeeHelper.m */; };
+		51C19816254A6C4B006610F4 /* RNClientWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 51C19813254A6C4B006610F4 /* RNClientWrapper.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -44,6 +46,10 @@
 		5154053D208C66DF00914AE1 /* RNStringeeCall.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNStringeeCall.m; sourceTree = "<group>"; };
 		51540541208C66DF00914AE1 /* RNStringeeCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNStringeeCall.h; sourceTree = "<group>"; };
 		51540542208C66DF00914AE1 /* RNStringeeInstanceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNStringeeInstanceManager.m; sourceTree = "<group>"; };
+		51C19811254A6C4B006610F4 /* RNClientWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNClientWrapper.h; sourceTree = "<group>"; };
+		51C19812254A6C4B006610F4 /* RCTConvert+StringeeHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RCTConvert+StringeeHelper.m"; sourceTree = "<group>"; };
+		51C19813254A6C4B006610F4 /* RNClientWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNClientWrapper.m; sourceTree = "<group>"; };
+		51C19814254A6C4B006610F4 /* RCTConvert+StringeeHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RCTConvert+StringeeHelper.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +74,10 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				51C19814254A6C4B006610F4 /* RCTConvert+StringeeHelper.h */,
+				51C19812254A6C4B006610F4 /* RCTConvert+StringeeHelper.m */,
+				51C19811254A6C4B006610F4 /* RNClientWrapper.h */,
+				51C19813254A6C4B006610F4 /* RNClientWrapper.m */,
 				51540535208C66DE00914AE1 /* RNStringeeInstanceManager.h */,
 				51540542208C66DF00914AE1 /* RNStringeeInstanceManager.m */,
 				51540534208C66DE00914AE1 /* RNStringeeClient.h */,
@@ -144,9 +154,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				51540543208C66DF00914AE1 /* RNStringeeClient.m in Sources */,
+				51C19816254A6C4B006610F4 /* RNClientWrapper.m in Sources */,
 				51491994208EE2DA00EF9B47 /* RNStringeeVideoView.m in Sources */,
 				511CA582254803D200A697B9 /* RNStringeeCall2.m in Sources */,
 				51540547208C66DF00914AE1 /* RNStringeeCall.m in Sources */,
+				51C19815254A6C4B006610F4 /* RCTConvert+StringeeHelper.m in Sources */,
 				51540544208C66DF00914AE1 /* RNStringeeRoom.m in Sources */,
 				5154054A208C66DF00914AE1 /* RNStringeeInstanceManager.m in Sources */,
 				51491993208EE2DA00EF9B47 /* RNStringeeVideoViewManager.m in Sources */,

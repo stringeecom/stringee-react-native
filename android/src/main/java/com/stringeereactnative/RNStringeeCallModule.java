@@ -14,6 +14,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.stringee.call.StringeeCall;
+import com.stringee.StringeeClient;
 import com.stringee.common.StringeeConstant;
 import com.stringee.exception.StringeeError;
 import com.stringee.listener.StatusListener;
@@ -40,14 +41,15 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
     }
 
     @ReactMethod
-    public void makeCall(String params, Callback callback) {
+    public void makeCall(String instanceId, String params, Callback callback) {
         mCallback = callback;
-        if (StringeeManager.getInstance().getClient() == null) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected.", "");
             return;
         }
 
-        if (!StringeeManager.getInstance().getClient().isConnected()) {
+        if (!mClient.isConnected()) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected.", "");
             return;
         }
@@ -59,7 +61,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             String customData = jsonObject.optString("customData");
             String resolution = jsonObject.optString("videoResolution");
 
-            final StringeeCall mStringeeCall = new StringeeCall(StringeeManager.getInstance().getClient(), from, to);
+            final StringeeCall mStringeeCall = new StringeeCall(mClient, from, to);
             mStringeeCall.setCallListener(this);
             mStringeeCall.setVideoCall(isVideoCall);
             if (customData != null) {
@@ -116,8 +118,9 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
     }
 
     @ReactMethod
-    public void initAnswer(String callId, Callback callback) {
-        if (StringeeManager.getInstance().getClient() == null || !StringeeManager.getInstance().getClient().isConnected()) {
+    public void initAnswer(String instanceId, String callId, Callback callback) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null || !mClient.isConnected()) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected.");
             return;
         }
@@ -180,11 +183,6 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
 
     @ReactMethod
     public void answer(String callId, Callback callback) {
-        if (StringeeManager.getInstance().getClient() == null || !StringeeManager.getInstance().getClient().isConnected()) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected.");
-            return;
-        }
-
         if (callId == null || callId.length() == 0) {
             callback.invoke(false, -2, "The call id is invalid.");
             return;
@@ -202,11 +200,6 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
 
     @ReactMethod
     public void reject(String callId, Callback callback) {
-        if (StringeeManager.getInstance().getClient() == null || !StringeeManager.getInstance().getClient().isConnected()) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected.");
-            return;
-        }
-
         if (callId == null || callId.length() == 0) {
             callback.invoke(false, -2, "The call id is invalid.");
             return;
@@ -217,6 +210,8 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             callback.invoke(false, -3, "The call is not found.");
             return;
         }
+
+        call.reject();
 
         handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
@@ -229,18 +224,11 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
                 }
             }
         });
-
-        call.reject();
         callback.invoke(true, 0, "Success");
     }
 
     @ReactMethod
     public void hangup(String callId, Callback callback) {
-        if (StringeeManager.getInstance().getClient() == null || !StringeeManager.getInstance().getClient().isConnected()) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected.");
-            return;
-        }
-
         if (callId == null || callId.length() == 0) {
             callback.invoke(false, -2, "The call id is invalid.");
             return;
@@ -251,6 +239,8 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             callback.invoke(false, -3, "The call is not found.");
             return;
         }
+
+        call.hangup();
 
         handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
@@ -263,18 +253,11 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
                 }
             }
         });
-
-        call.hangup();
         callback.invoke(true, 0, "Success");
     }
 
     @ReactMethod
     public void enableVideo(String callId, boolean enabled, Callback callback) {
-        if (StringeeManager.getInstance().getClient() == null || !StringeeManager.getInstance().getClient().isConnected()) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected.");
-            return;
-        }
-
         if (callId == null || callId.length() == 0) {
             callback.invoke(false, -2, "The call id is invalid.");
             return;
@@ -308,11 +291,6 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
 
     @ReactMethod
     public void sendCallInfo(String callId, String info, Callback callback) {
-        if (StringeeManager.getInstance().getClient() == null || !StringeeManager.getInstance().getClient().isConnected()) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected.");
-            return;
-        }
-
         if (callId == null || callId.length() == 0) {
             callback.invoke(false, -2, "The call id is invalid.");
             return;
@@ -334,11 +312,6 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
 
     @ReactMethod
     public void sendDTMF(String callId, String key, final Callback callback) {
-        if (StringeeManager.getInstance().getClient() == null || !StringeeManager.getInstance().getClient().isConnected()) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected.");
-            return;
-        }
-
         if (callId == null || callId.length() == 0) {
             callback.invoke(false, -2, "The call id is invalid.");
             return;
@@ -383,8 +356,9 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
     }
 
     @ReactMethod
-    public void getCallStats(String callId, final Callback callback) {
-        if (StringeeManager.getInstance().getClient() == null || !StringeeManager.getInstance().getClient().isConnected()) {
+    public void getCallStats(String instanceId, String callId, final Callback callback) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null || !mClient.isConnected()) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected.", "");
             return;
         }
@@ -458,7 +432,6 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
         }
 
         call.resumeVideo();
-
         callback.invoke(true, 0, "Success");
     }
 

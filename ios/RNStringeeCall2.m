@@ -55,8 +55,8 @@ RCT_EXPORT_METHOD(removeNativeEvent:(NSString *)event) {
     }
 }
 
-RCT_EXPORT_METHOD(makeCall:(NSString *)parameters callback:(RCTResponseSenderBlock)callback) {
-    
+RCT_EXPORT_METHOD(makeCall:(NSString *)uuid parameters:(NSString *)parameters callback:(RCTResponseSenderBlock)callback) {
+
     NSError *jsonError;
     NSData *objectData = [parameters dataUsingEncoding:NSUTF8StringEncoding];
     NSDictionary *data = [NSJSONSerialization JSONObjectWithData:objectData
@@ -70,8 +70,19 @@ RCT_EXPORT_METHOD(makeCall:(NSString *)parameters callback:(RCTResponseSenderBlo
         NSNumber *isVideoCall = data[@"isVideoCall"];
         NSString *customData = data[@"customData"];
         NSString *videoResolution = data[@"videoResolution"];
+        
+        RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+        if (wrapper == nil) {
+            callback(@[@(NO), @(-1), @"Wrapper is not found", [NSNull null], [NSNull null]]);
+            return;
+        }
+        
+        if (!wrapper.client) {
+            callback(@[@(NO), @(-1), @"StringeeClient is not initialized", [NSNull null], [NSNull null]]);
+            return;
+        }
 
-        StringeeCall2 *outgoingCall = [[StringeeCall2 alloc] initWithStringeeClient:[RNStringeeInstanceManager instance].rnClient.client from:from to:to];
+        StringeeCall2 *outgoingCall = [[StringeeCall2 alloc] initWithStringeeClient:wrapper.client from:from to:to];
         outgoingCall.delegate = self;
         outgoingCall.isVideoCall = [isVideoCall boolValue];
 
@@ -101,8 +112,14 @@ RCT_EXPORT_METHOD(makeCall:(NSString *)parameters callback:(RCTResponseSenderBlo
     }
 }
 
-RCT_EXPORT_METHOD(initAnswer:(NSString *)callId callback:(RCTResponseSenderBlock)callback) {
-    if ([RNStringeeInstanceManager instance].rnClient.client && [RNStringeeInstanceManager instance].rnClient.client.hasConnected) {
+RCT_EXPORT_METHOD(initAnswer:(NSString *)uuid callId:(NSString *)callId callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found", [NSNull null], [NSNull null]]);
+        return;
+    }
+    
+    if (wrapper.client && wrapper.client.hasConnected) {
         if (callId.length) {
             StringeeCall2 *call = [[RNStringeeInstanceManager instance].call2s objectForKey:callId];
             if (call) {

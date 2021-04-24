@@ -4,6 +4,7 @@
 #import "RNStringeeCall.h"
 #import "RNStringeeCall2.h"
 #import "RNStringeeRoom.h"
+#import "RNClientWrapper.h"
 
 @interface RNStringeeInstanceManager : NSObject
 
@@ -16,5 +17,6 @@
 
 @property(strong, nonatomic) NSMutableDictionary *calls;
 @property(strong, nonatomic) NSMutableDictionary *call2s;
+@property(strong, nonatomic) NSMutableDictionary<NSString *, RNClientWrapper *> *clientWrappers;
 
 @end

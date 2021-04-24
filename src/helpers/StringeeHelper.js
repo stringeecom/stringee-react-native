@@ -6,7 +6,8 @@ const clientEvents = {
         onRequestAccessToken: "requestAccessToken",
         onIncomingCall: "incomingCall",
         onIncomingCall2: "incomingCall2",
-        onCustomMessage: "didReceiveCustomMessage"
+        onCustomMessage: "didReceiveCustomMessage",
+        onObjectChange: "objectChangeNotification"
     },
     android: {
         onConnect: "onConnectionConnected",
@@ -15,7 +16,8 @@ const clientEvents = {
         onRequestAccessToken: "onRequestNewToken",
         onIncomingCall: "onIncomingCall",
         onIncomingCall2: "onIncomingCall2",
-        onCustomMessage: "onCustomMessage"
+        onCustomMessage: "onCustomMessage",
+        onObjectChange: "onChangeEvent"
     }
 };
 
