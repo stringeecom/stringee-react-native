@@ -3,6 +3,7 @@ package com.stringeereactnative;
 import com.stringee.StringeeClient;
 import com.stringee.call.StringeeCall;
 import com.stringee.call.StringeeCall2;
+import com.stringee.common.StringeeAudioManager;
 import com.stringee.video.StringeeRoom;
 import com.stringee.video.StringeeStream;
 

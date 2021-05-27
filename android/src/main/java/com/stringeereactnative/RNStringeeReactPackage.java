@@ -18,7 +18,6 @@ public class RNStringeeReactPackage implements ReactPackage {
         modules.add(new RNStringeeClientModule(reactContext));
         modules.add(new RNStringeeCallModule(reactContext));
         modules.add(new RNStringeeCall2Module(reactContext));
-//        modules.add(new RNStringeeRoomModule(reactContext));
 
         return modules;
     }

@@ -15,6 +15,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.stringee.call.StringeeCall;
 import com.stringee.StringeeClient;
+import com.stringee.common.StringeeAudioManager;
 import com.stringee.common.StringeeConstant;
 import com.stringee.exception.StringeeError;
 import com.stringee.listener.StatusListener;
