@@ -120,14 +120,17 @@ export default class extends Component {
                                         objectChanges.push(new Message(object));
                                     });
                                 }
-
-                                handler({objectType, objectChanges, changeType});
+                                if (handler !== undefined) {
+                                    handler({objectType, objectChanges, changeType});
+                                }
                             })
                         );
                     } else {
                         this._subscriptions.push(this._eventEmitter.addListener(eventName, ({uuid, data}) => {
                             if (this.uuid == uuid) {
-                                handler(data);
+                                if (handler !== undefined) {
+                                    handler(data);
+                                }
                             }
                         }));
                     }
@@ -164,13 +167,17 @@ export default class extends Component {
                                             objectChanges.push(new Message(object));
                                         });
                                     }
-                                    handler({objectType, objectChanges, changeType});
+                                    if (handler !== undefined) {
+                                        handler({objectType, objectChanges, changeType});
+                                    }
                                 })
                             );
                         } else {
                             this._subscriptions.push(this._eventEmitter.addListener(eventName, ({uuid, data}) => {
                                 if (this.uuid == uuid) {
-                                    handler(data);
+                                    if (handler !== undefined) {
+                                        handler(data);
+                                    }
                                 }
                             }));
                         }

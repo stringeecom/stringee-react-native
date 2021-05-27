@@ -1,9 +1,9 @@
 package com.stringeereactnative;
 
-import androidx.annotation.Nullable;
-import android.util.Log;
 import android.os.Handler;
 import android.os.Looper;
+
+import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
@@ -11,11 +11,13 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.stringee.call.StringeeCall;
 import com.stringee.StringeeClient;
+import com.stringee.call.StringeeCall;
 import com.stringee.common.StringeeAudioManager;
+import com.stringee.common.StringeeAudioManager.AudioDevice;
 import com.stringee.common.StringeeConstant;
 import com.stringee.exception.StringeeError;
 import com.stringee.listener.StatusListener;
@@ -23,10 +25,11 @@ import com.stringee.listener.StatusListener;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Set;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
-public class RNStringeeCallModule extends ReactContextBaseJavaModule implements StringeeCall.StringeeCallListener {
+public class RNStringeeCallModule extends ReactContextBaseJavaModule implements StringeeCall.StringeeCallListener, StringeeAudioManager.AudioManagerEvents {
 
     private Callback mCallback;
     private ArrayList<String> jsEvents = new ArrayList<String>();
@@ -81,36 +84,10 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
                 @Override
                 public void run() {
                     StringeeAudioManager audioManager = StringeeAudioManager.create(getReactApplicationContext());
-                    audioManager.start(new StringeeAudioManager.AudioManagerEvents() {
-                        @Override
-                        public void onAudioDeviceChanged(StringeeAudioManager.AudioDevice selectedAudioDevice, Set<StringeeAudioManager.AudioDevice> availableAudioDevices) {
-                            if (!mStringeeCall.isVideoCall()) {
-                                switch (selectedAudioDevice) {
-                                    case WIRED_HEADSET:
-                                        audioManager.setSpeakerphoneOn(false);
-                                        break;
-                                    case BLUETOOTH:
-                                        audioManager.setSpeakerphoneOn(false);
-                                        break;
-                                    case SPEAKER_PHONE:
-                                        audioManager.setSpeakerphoneOn(mStringeeCall.isVideoCall());
-                                        break;
-                                }
-                            } else {
-                                if (selectedAudioDevice == StringeeAudioManager.AudioDevice.WIRED_HEADSET || selectedAudioDevice == StringeeAudioManager.AudioDevice.BLUETOOTH) {
-                                    audioManager.setSpeakerphoneOn(false);
-                                } else {
-                                    audioManager.setSpeakerphoneOn(true);
-                                }
-                            }
-                            Log.d("Stringee", "onAudioManagerDevicesChanged: " + availableAudioDevices + ", "
-                                    + "selected: " + selectedAudioDevice);
-                        }
-                    });
+                    audioManager.start(RNStringeeCallModule.this);
                     StringeeManager.getInstance().setAudioManager(audioManager);
                 }
             });
-
             mStringeeCall.makeCall();
         } catch (JSONException e) {
             callback.invoke(false, -4, "The parameters format is invalid.", "");
@@ -137,41 +114,6 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             return;
         }
 
-        handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                StringeeAudioManager audioManager = StringeeAudioManager.create(getReactApplicationContext());
-                audioManager.start(new StringeeAudioManager.AudioManagerEvents() {
-                    @Override
-                    public void onAudioDeviceChanged(StringeeAudioManager.AudioDevice selectedAudioDevice, Set<StringeeAudioManager.AudioDevice> availableAudioDevices) {
-                        if (!call.isVideoCall()) {
-                            switch (selectedAudioDevice) {
-                                case WIRED_HEADSET:
-                                    audioManager.setSpeakerphoneOn(false);
-                                    break;
-                                case BLUETOOTH:
-                                    audioManager.setSpeakerphoneOn(false);
-                                    break;
-                                case SPEAKER_PHONE:
-                                    audioManager.setSpeakerphoneOn(call.isVideoCall());
-                                    break;
-                            }
-                        } else {
-                            if (selectedAudioDevice == StringeeAudioManager.AudioDevice.WIRED_HEADSET || selectedAudioDevice == StringeeAudioManager.AudioDevice.BLUETOOTH) {
-                                audioManager.setSpeakerphoneOn(false);
-                            } else {
-                                audioManager.setSpeakerphoneOn(true);
-                            }
-                        }
-                        Log.d("Stringee", "onAudioManagerDevicesChanged: " + availableAudioDevices + ", "
-                                + "selected: " + selectedAudioDevice);
-                    }
-                });
-                StringeeManager.getInstance().setAudioManager(audioManager);
-            }
-        });
-
         call.setCallListener(this);
         call.ringing(new StatusListener() {
             @Override
@@ -179,6 +121,17 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
 
             }
         });
+
+        handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                StringeeAudioManager audioManager = StringeeAudioManager.create(getReactApplicationContext());
+                audioManager.start(RNStringeeCallModule.this);
+                StringeeManager.getInstance().setAudioManager(audioManager);
+            }
+        });
+
         callback.invoke(true, 0, "Success");
     }
 
@@ -515,6 +468,23 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             params.putString("callId", stringeeCall.getCallId());
             params.putString("data", jsonObject.toString());
             sendEvent(getReactApplicationContext(), "onCallInfo", params);
+        }
+    }
+
+    @Override
+    public void onAudioDeviceChanged(AudioDevice audioDevice, Set<AudioDevice> set) {
+        List<AudioDevice> listAvailableDevices = new ArrayList<>(set);
+        WritableArray availableDevicesMap = Arguments.createArray();
+        for (int j = 0; j < listAvailableDevices.size(); j++) {
+            AudioDevice device = listAvailableDevices.get(j);
+            availableDevicesMap.pushString(device.name());
+        }
+
+        if (contains(jsEvents, "onAudioDeviceChange")) {
+            WritableMap params = Arguments.createMap();
+            params.putString("selectedAudioDevice", audioDevice.name());
+            params.putArray("availableAudioDevices", availableDevicesMap);
+            sendEvent(getReactApplicationContext(), "onAudioDeviceChange", params);
         }
     }
 

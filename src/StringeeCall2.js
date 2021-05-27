@@ -55,7 +55,9 @@ export default class extends Component {
             if (eventName !== undefined) {
                 this._subscriptions.push(
                     this._eventEmitter.addListener(eventName, data => {
-                        handler(data);
+                        if (handler !== undefined) {
+                            handler(data);
+                        }
                     })
                 );
 

@@ -38,7 +38,8 @@ const callEvents = {
         onReceiveRemoteStream: "onRemoteStream",
         onReceiveDtmfDigit: "onDTMF",
         onReceiveCallInfo: "onCallInfo",
-        onHandleOnAnotherDevice: "onHandledOnAnotherDevice"
+        onHandleOnAnotherDevice: "onHandledOnAnotherDevice",
+        onAudioDeviceChange: "onAudioDeviceChange" ///only for android
     }
 };
 
