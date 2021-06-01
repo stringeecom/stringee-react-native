@@ -259,6 +259,37 @@ RCT_EXPORT_METHOD(enableVideo:(NSString *)callId enableVideo:(BOOL)enableVideo c
     callback(@[@(YES), @(0), @"Success"]);
 }
 
+RCT_EXPORT_METHOD(sendCallInfo:(NSString *)callId callInfo:(NSString *)callInfo callback:(RCTResponseSenderBlock)callback) {
+    if (callId.length) {
+        StringeeCall2 *call = [[RNStringeeInstanceManager instance].call2s objectForKey:callId];
+        if (call) {
+
+            NSError *jsonError;
+            NSData *objectData = [callInfo dataUsingEncoding:NSUTF8StringEncoding];
+            NSDictionary *data = [NSJSONSerialization JSONObjectWithData:objectData
+                                                        options:NSJSONReadingMutableContainers 
+                                                        error:&jsonError];
+
+            if (jsonError) {
+                callback(@[@(NO), @(-4), @"The call info format is invalid."]);
+            } else {
+                [call sendCallInfo:data completionHandler:^(BOOL status, int code, NSString *message) {
+                    if (status) {
+                        callback(@[@(YES), @(0), @"Sends successfully"]);
+                    } else {
+                        callback(@[@(NO), @(-1), @"Failed to send. The client is not connected to Stringee Server."]);
+                    }
+                }];
+            }
+
+        } else {
+            callback(@[@(NO), @(-3), @"Failed to send. The call is not found"]);
+        }
+    } else {
+        callback(@[@(NO), @(-2), @"Failed to send. The callId is invalid"]);
+    }
+}
+
 - (void)didChangeSignalingState2:(StringeeCall2 *)stringeeCall2 signalingState:(SignalingState)signalingState reason:(NSString *)reason sipCode:(int)sipCode sipReason:(NSString *)sipReason {
     if ([jsEvents containsObject:didChangeSignalingState]) {
         [self sendEventWithName:didChangeSignalingState body:@{ @"callId" : stringeeCall2.callId, @"code" : @(signalingState), @"reason" : reason, @"sipCode" : @(sipCode), @"sipReason" : sipReason }];
