@@ -257,8 +257,12 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
         }
         try {
             JSONObject jsonObject = new JSONObject(info);
-            call.sendCallInfo(jsonObject);
-            callback.invoke(true, 0, "Success");
+            call.sendCallInfo(jsonObject, new StatusListener() {
+                @Override
+                public void onSuccess() {
+                    callback.invoke(true, 0, "Success");
+                }
+            });
         } catch (JSONException e) {
             callback.invoke(false, -4, "The call info format is invalid.");
         }

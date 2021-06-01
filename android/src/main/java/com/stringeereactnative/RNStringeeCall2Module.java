@@ -332,6 +332,31 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
         callback.invoke(true, 0, "Success");
     }
 
+    @ReactMethod
+    public void sendCallInfo(String callId, String info, Callback callback) {
+        if (callId == null || callId.length() == 0) {
+            callback.invoke(false, -2, "The call id is invalid.");
+            return;
+        }
+
+        StringeeCall2 call = StringeeManager.getInstance().getCalls2Map().get(callId);
+        if (call == null) {
+            callback.invoke(false, -3, "The call is not found.");
+            return;
+        }
+        try {
+            JSONObject jsonObject = new JSONObject(info);
+            call.sendCallInfo(jsonObject, new StatusListener() {
+                @Override
+                public void onSuccess() {
+                    callback.invoke(true, 0, "Success");
+                }
+            });
+        } catch (JSONException e) {
+            callback.invoke(false, -4, "The call info format is invalid.");
+        }
+    }
+
     @Override
     public void onSignalingStateChange(StringeeCall2 stringeeCall, StringeeCall2.SignalingState signalingState, String reason, int sipCode, String sipReason) {
         if (contains(jsEvents, "onSignalingStateChange")) {
