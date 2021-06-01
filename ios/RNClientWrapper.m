@@ -125,7 +125,7 @@
         id returnToAlias = stringeeCall.toAlias ? stringeeCall.toAlias : [NSNull null];
         id returnCustomData = stringeeCall.customDataFromYourServer ? stringeeCall.customDataFromYourServer : [NSNull null];
 
-        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:incomingCall body: @{ @"uuid" : _identifier, @"data" : @{ @"userId" : returnUserId, @"callId" : returnCallId, @"from" : returnFrom, @"to" : returnTo, @"fromAlias" : returnFromAlias, @"toAlias" : returnToAlias, @"callType" : @(index), @"isVideoCall" : @(stringeeCall.isVideoCall), @"customDataFromYourServer" : returnCustomData}}];
+        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:incomingCall body: @{ @"uuid" : _identifier, @"data" : @{ @"userId" : returnUserId, @"callId" : returnCallId, @"from" : returnFrom, @"to" : returnTo, @"fromAlias" : returnFromAlias, @"toAlias" : returnToAlias, @"callType" : @(index), @"isVideoCall" : @(stringeeCall.isVideoCall), @"customDataFromYourServer" : returnCustomData, @"serial" : @(stringeeCall.serial)}}];
     }
     
 }
@@ -161,7 +161,7 @@
         id returnToAlias = stringeeCall2.toAlias ? stringeeCall2.toAlias : [NSNull null];
         id returnCustomData = stringeeCall2.customDataFromYourServer ? stringeeCall2.customDataFromYourServer : [NSNull null];
 
-        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:incomingCall2 body: @{ @"uuid" : _identifier, @"data" : @{ @"userId" : returnUserId, @"callId" : returnCallId, @"from" : returnFrom, @"to" : returnTo, @"fromAlias" : returnFromAlias, @"toAlias" : returnToAlias, @"callType" : @(index), @"isVideoCall" : @(stringeeCall2.isVideoCall), @"customDataFromYourServer" : returnCustomData}}];
+        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:incomingCall2 body: @{ @"uuid" : _identifier, @"data" : @{ @"userId" : returnUserId, @"callId" : returnCallId, @"from" : returnFrom, @"to" : returnTo, @"fromAlias" : returnFromAlias, @"toAlias" : returnToAlias, @"callType" : @(index), @"isVideoCall" : @(stringeeCall2.isVideoCall), @"customDataFromYourServer" : returnCustomData, @"serial" : @(stringeeCall2.serial)}}];
     }
 }
 
