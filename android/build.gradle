@@ -1,7 +1,6 @@
 buildscript {
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
 
@@ -34,6 +33,6 @@ android {
 
 dependencies {
     implementation 'com.facebook.react:react-native:+'
-    implementation 'com.stringee.sdk.android:stringee-android-sdk:1.7.1'
+    implementation 'com.stringee.sdk.android:stringee-android-sdk:1.7.2'
     implementation 'com.android.volley:volley:1.2.0'
 }
