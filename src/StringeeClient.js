@@ -5,11 +5,13 @@ import {each} from "underscore";
 import Conversation from "./chat/Conversation";
 import Message from "./chat/Message";
 import User from "./chat/User";
-import {clientEvents} from "./helpers/StringeeHelper";
+import {channelType, clientEvents} from "./helpers/StringeeHelper";
+import ChatRequest from "./chat/ChatRequest";
+import type {RNStringeeEventCallback} from "./helpers/StringeeHelper";
 
 const RNStringeeClient = NativeModules.RNStringeeClient;
 
-const iOS = Platform.OS === "ios" ? true : false;
+const iOS = (Platform.OS === "ios");
 
 export default class extends Component {
     static propTypes = {
@@ -61,9 +63,22 @@ export default class extends Component {
         this.getAllMessagesAfter = this.getAllMessagesAfter.bind(this);
         this.getAllMessagesBefore = this.getAllMessagesBefore.bind(this);
         this.clearDb = this.clearDb.bind(this);
+        this.getChatRequests = this.getChatRequests.bind(this);
+        this.acceptChatRequest = this.acceptChatRequest.bind(this);
+        this.rejectChatRequest = this.rejectChatRequest.bind(this);
+        this.endChat = this.endChat.bind(this);
+        this.blockUser = this.blockUser.bind(this);
+        this.preventAddingToGroup = this.preventAddingToGroup.bind(this);
+        this.getChatProfile = this.getChatProfile.bind(this);
+        this.getLiveChatToken = this.getLiveChatToken.bind(this);
+        this.startLiveChat = this.startLiveChat.bind(this);
+        this.createLiveChatTicket = this.createLiveChatTicket.bind(this);
+        this.updateUser = this.updateUser.bind(this);
+        this.revokeMessages = this.revokeMessages.bind(this);
+        this.getLiveChat = this.getLiveChat.bind(this);
     }
 
-    componentWillMount() {
+    componentDidMount() {
         this.sanitizeClientEvents(this.props.eventHandlers);
     }
 
@@ -98,11 +113,11 @@ export default class extends Component {
                 const eventName = clientEvents[platform][type];
                 if (eventName !== undefined) {
                     // Voi phan chat can format du lieu
-                    if (type == "onObjectChange") {
+                    if (type === "onObjectChange") {
                         this._subscriptions.push(
                             this._eventEmitter.addListener(eventName, ({uuid, data}) => {
                                 // Event cua thang khac
-                                if (this.uuid != uuid) {
+                                if (this.uuid !== uuid) {
                                     return;
                                 }
 
@@ -111,11 +126,11 @@ export default class extends Component {
                                 var changeType = data["changeType"];
 
                                 var objectChanges = [];
-                                if (objectType == 0) {
+                                if (objectType === 0) {
                                     objects.map((object) => {
                                         objectChanges.push(new Conversation(object));
                                     });
-                                } else if (objectType == 1) {
+                                } else if (objectType === 1) {
                                     objects.map((object) => {
                                         objectChanges.push(new Message(object));
                                     });
@@ -127,7 +142,7 @@ export default class extends Component {
                         );
                     } else {
                         this._subscriptions.push(this._eventEmitter.addListener(eventName, ({uuid, data}) => {
-                            if (this.uuid == uuid) {
+                            if (this.uuid === uuid) {
                                 if (handler !== undefined) {
                                     handler(data);
                                 }
@@ -147,10 +162,10 @@ export default class extends Component {
                 if (eventName !== undefined) {
                     if (!this._events.includes(eventName)) {
                         // Voi phan chat can format du lieu
-                        if (type == "onObjectChange") {
+                        if (type === "onObjectChange") {
                             this._subscriptions.push(
                                 this._eventEmitter.addListener(eventName, ({uuid, data}) => {
-                                    if (this.uuid != uuid) {
+                                    if (this.uuid !== uuid) {
                                         return;
                                     }
                                     var objectType = data["objectType"];
@@ -158,11 +173,11 @@ export default class extends Component {
                                     var changeType = data["changeType"];
 
                                     var objectChanges = [];
-                                    if (objectType == 0) {
+                                    if (objectType === 0) {
                                         objects.map((object) => {
                                             objectChanges.push(new Conversation(object));
                                         });
-                                    } else if (objectType == 1) {
+                                    } else if (objectType === 1) {
                                         objects.map((object) => {
                                             objectChanges.push(new Message(object));
                                         });
@@ -174,7 +189,7 @@ export default class extends Component {
                             );
                         } else {
                             this._subscriptions.push(this._eventEmitter.addListener(eventName, ({uuid, data}) => {
-                                if (this.uuid == uuid) {
+                                if (this.uuid === uuid) {
                                     if (handler !== undefined) {
                                         handler(data);
                                     }
@@ -235,7 +250,7 @@ export default class extends Component {
         RNStringeeClient.sendCustomMessage(this.uuid, toUserId, message, callback);
     }
 
-    createConversation(userIds, options, callback) {
+    createConversation(userIds: string, options, callback: RNStringeeEventCallback) {
         RNStringeeClient.createConversation(this.uuid, userIds, options, (status, code, message, conversation) => {
             var returnConversation;
             if (status) {
@@ -245,7 +260,7 @@ export default class extends Component {
         });
     }
 
-    getConversationById(conversationId, callback) {
+    getConversationById(conversationId: string, callback: RNStringeeEventCallback) {
         RNStringeeClient.getConversationById(this.uuid, conversationId, (status, code, message, conversation) => {
             var returnConversation;
             if (status) {
@@ -255,7 +270,7 @@ export default class extends Component {
         });
     }
 
-    getLocalConversations(userId: string, count, isAscending, callback) {
+    getLocalConversations(userId: string, count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
         var param = iOS ? count : userId;
 
         if (iOS) {
@@ -295,7 +310,7 @@ export default class extends Component {
         }
     }
 
-    getLastConversations(count, isAscending, callback) {
+    getLastConversations(count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getLastConversations(this.uuid, count, (status, code, message, conversations) => {
             var returnConversations = [];
             if (status) {
@@ -314,7 +329,7 @@ export default class extends Component {
         });
     }
 
-    getAllLastConversations(count, isAscending, callback) {
+    getAllLastConversations(count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getAllLastConversations(this.uuid, count, (status, code, message, conversations) => {
             var returnConversations = [];
             if (status) {
@@ -333,7 +348,7 @@ export default class extends Component {
         });
     }
 
-    getConversationsAfter(datetime, count, isAscending, callback) {
+    getConversationsAfter(datetime: number, count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getConversationsAfter(this.uuid, datetime, count, (status, code, message, conversations) => {
             var returnConversations = [];
             if (status) {
@@ -351,7 +366,7 @@ export default class extends Component {
         });
     }
 
-    getAllConversationsAfter(datetime, count, isAscending, callback) {
+    getAllConversationsAfter(datetime: number, count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getAllConversationsAfter(this.uuid, datetime, count, (status, code, message, conversations) => {
             var returnConversations = [];
             if (status) {
@@ -369,7 +384,7 @@ export default class extends Component {
         });
     }
 
-    getConversationsBefore(datetime, count, isAscending, callback) {
+    getConversationsBefore(datetime: number, count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getConversationsBefore(this.uuid, datetime, count, (status, code, message, conversations) => {
             var returnConversations = [];
             if (status) {
@@ -387,7 +402,7 @@ export default class extends Component {
         });
     }
 
-    getAllConversationsBefore(datetime, count, isAscending, callback) {
+    getAllConversationsBefore(datetime: number, count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getAllConversationsBefore(this.uuid, datetime, count, (status, code, message, conversations) => {
             var returnConversations = [];
             if (status) {
@@ -405,7 +420,7 @@ export default class extends Component {
         });
     }
 
-    getLastUnreadConversations(count, isAscending, callback) {
+    getLastUnreadConversations(count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getLastUnreadConversations(this.uuid, count, (status, code, message, conversations) => {
             var returnConversations = [];
             if (status) {
@@ -424,7 +439,7 @@ export default class extends Component {
         });
     }
 
-    getUnreadConversationsAfter(datetime, count, isAscending, callback) {
+    getUnreadConversationsAfter(datetime: number, count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getUnreadConversationsAfter(this.uuid, datetime, count, (status, code, message, conversations) => {
             var returnConversations = [];
             if (status) {
@@ -442,7 +457,7 @@ export default class extends Component {
         });
     }
 
-    getUnreadConversationsBefore(datetime, count, isAscending, callback) {
+    getUnreadConversationsBefore(datetime: number, count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getUnreadConversationsBefore(this.uuid, datetime, count, (status, code, message, conversations) => {
             var returnConversations = [];
             if (status) {
@@ -460,11 +475,11 @@ export default class extends Component {
         });
     }
 
-    deleteConversation(conversationId, callback) {
+    deleteConversation(conversationId: string, callback: RNStringeeEventCallback) {
         RNStringeeClient.deleteConversation(this.uuid, conversationId, callback);
     }
 
-    addParticipants(conversationId, userIds, callback) {
+    addParticipants(conversationId: string, userIds, callback: RNStringeeEventCallback) {
         RNStringeeClient.addParticipants(this.uuid, conversationId, userIds, (status, code, message, users) => {
             var returnUsers = [];
             if (status) {
@@ -476,7 +491,7 @@ export default class extends Component {
         });
     }
 
-    removeParticipants(conversationId, userIds, callback) {
+    removeParticipants(conversationId: string, userIds, callback: RNStringeeEventCallback) {
         RNStringeeClient.removeParticipants(this.uuid, conversationId, userIds, (status, code, message, users) => {
             var returnUsers = [];
             if (status) {
@@ -488,15 +503,15 @@ export default class extends Component {
         });
     }
 
-    updateConversation(conversationId, params, callback) {
+    updateConversation(conversationId: string, params, callback: RNStringeeEventCallback) {
         RNStringeeClient.updateConversation(this.uuid, conversationId, params, callback);
     }
 
-    markConversationAsRead(conversationId, callback) {
+    markConversationAsRead(conversationId: string, callback: RNStringeeEventCallback) {
         RNStringeeClient.markConversationAsRead(this.uuid, conversationId, callback);
     }
 
-    getConversationWithUser(userId, callback) {
+    getConversationWithUser(userId: string, callback: RNStringeeEventCallback) {
         RNStringeeClient.getConversationWithUser(this.uuid, userId, (status, code, message, conversation) => {
             var returnConversation;
             if (status) {
@@ -506,19 +521,19 @@ export default class extends Component {
         });
     }
 
-    getUnreadConversationCount(callback) {
+    getUnreadConversationCount(callback: RNStringeeEventCallback) {
         RNStringeeClient.getUnreadConversationCount(this.uuid, callback);
     }
 
-    sendMessage(message, callback) {
+    sendMessage(message, callback: RNStringeeEventCallback) {
         RNStringeeClient.sendMessage(this.uuid, message, callback);
     }
 
-    deleteMessage(conversationId, messageId, callback) {
+    deleteMessage(conversationId: string, messageId: string, callback: RNStringeeEventCallback) {
         RNStringeeClient.deleteMessage(this.uuid, conversationId, messageId, callback);
     }
 
-    getLocalMessages(conversationId, count, isAscending, callback) {
+    getLocalMessages(conversationId: string, count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getLocalMessages(this.uuid, conversationId, count, (status, code, message, messages) => {
             var returnMessages = [];
             if (status) {
@@ -536,7 +551,7 @@ export default class extends Component {
         });
     }
 
-    getLastMessages(conversationId, count, isAscending, loadDeletedMessage, loadDeletedMessageContent, callback) {
+    getLastMessages(conversationId: string, count: number, isAscending: boolean, loadDeletedMessage: boolean, loadDeletedMessageContent: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getLastMessages(this.uuid, conversationId, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
             var returnMessages = [];
             if (status) {
@@ -554,7 +569,7 @@ export default class extends Component {
         });
     }
 
-    getAllLastMessages(conversationId, count, isAscending, loadDeletedMessage, loadDeletedMessageContent, callback) {
+    getAllLastMessages(conversationId: string, count: number, isAscending: boolean, loadDeletedMessage: boolean, loadDeletedMessageContent: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getAllLastMessages(this.uuid, conversationId, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
             var returnMessages = [];
             if (status) {
@@ -572,7 +587,7 @@ export default class extends Component {
         });
     }
 
-    getMessagesAfter(conversationId, sequence, count, isAscending, loadDeletedMessage, loadDeletedMessageContent, callback) {
+    getMessagesAfter(conversationId: string, sequence: number, count: number, isAscending: boolean, loadDeletedMessage: boolean, loadDeletedMessageContent: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getMessagesAfter(this.uuid, conversationId, sequence, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
             var returnMessages = [];
             if (status) {
@@ -590,7 +605,7 @@ export default class extends Component {
         });
     }
 
-    getAllMessagesAfter(conversationId, sequence, count, isAscending, loadDeletedMessage, loadDeletedMessageContent, callback) {
+    getAllMessagesAfter(conversationId: string, sequence: number, count: number, isAscending: boolean, loadDeletedMessage: boolean, loadDeletedMessageContent: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getAllMessagesAfter(this.uuid, conversationId, sequence, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
             var returnMessages = [];
             if (status) {
@@ -608,7 +623,7 @@ export default class extends Component {
         });
     }
 
-    getMessagesBefore(conversationId, sequence, count, isAscending, loadDeletedMessage, loadDeletedMessageContent, callback) {
+    getMessagesBefore(conversationId: string, sequence: number, count: number, isAscending: boolean, loadDeletedMessage: boolean, loadDeletedMessageContent: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getMessagesBefore(this.uuid, conversationId, sequence, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
             var returnMessages = [];
             if (status) {
@@ -626,7 +641,7 @@ export default class extends Component {
         });
     }
 
-    getAllMessagesBefore(conversationId, sequence, count, isAscending, loadDeletedMessage, loadDeletedMessageContent, callback) {
+    getAllMessagesBefore(conversationId: string, sequence: number, count: number, isAscending: boolean, loadDeletedMessage: boolean, loadDeletedMessageContent: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getAllMessagesBefore(this.uuid, conversationId, sequence, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
             var returnMessages = [];
             if (status) {
@@ -644,7 +659,74 @@ export default class extends Component {
         });
     }
 
-    clearDb(callback) {
+    clearDb(callback: RNStringeeEventCallback) {
         RNStringeeClient.clearDb(this.uuid, callback);
+    }
+
+    getChatRequests(count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
+        RNStringeeClient.getChatRequests(this.uuid, (status, code, message, chatRequests) => {
+            var returnChatRequests = [];
+            if (status) {
+                if (isAscending) {
+                    // Tăng dần -> Cần đảo mảng
+                    chatRequests.reverse().map((chatRequest) => {
+                        returnChatRequests.push(new ChatRequest(chatRequest));
+                    });
+                } else {
+                    chatRequests.map((conversation) => {
+                        returnChatRequests.push(new Conversation(conversation));
+                    });
+                }
+            }
+            return callback(status, code, message, returnChatRequests);
+        });
+    }
+
+    acceptChatRequest(conversationId: string, channelType: channelType, callback: RNStringeeEventCallback) {
+        RNStringeeClient.acceptChatRequest(this.uuid, conversationId, channelType, callback);
+    }
+
+    rejectChatRequest(conversationId: string, channelType: channelType, callback: RNStringeeEventCallback) {
+        RNStringeeClient.rejectChatRequest(this.uuid, conversationId, channelType, callback);
+    }
+
+    endChat(conversationId: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.endChat(this.uuid, conversationId, callback);
+    }
+
+    blockUser(userId: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.blockUser(this.uuid, userId, callback);
+    }
+
+    preventAddingToGroup(conversationId: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.preventAddingToGroup(this.uuid, conversationId, callback);
+    }
+
+    getChatProfile(widgetKey: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.getChatProfile(this.uuid, widgetKey, callback);
+    }
+
+    getLiveChatToken(widgetKey: string, name: string, email: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.getLiveChatToken(this.uuid, widgetKey, name, email, callback);
+    }
+
+    startLiveChat(queueId: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.startLiveChat(this.uuid, queueId, callback);
+    }
+
+    createLiveChatTicket(widgetKey: string, name: string, email: string, note: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.createLiveChatTicket(this.uuid, widgetKey, name, email, note, callback);
+    }
+
+    updateUser(name: string, email: string, avatar: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.updateUser(this.uuid, name, email, avatar, callback);
+    }
+
+    revokeMessages(conversationId: string, msgIds, deleted: boolean, callback: RNStringeeEventCallback) {
+        RNStringeeClient.revokeMessages(this.uuid, conversationId, msgIds, deleted, callback);
+    }
+
+    getLiveChat(ended: boolean, callback: RNStringeeEventCallback) {
+        RNStringeeClient.getLiveChat(this.uuid, ended, callback);
     }
 }

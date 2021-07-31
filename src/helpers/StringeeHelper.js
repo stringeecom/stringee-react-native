@@ -60,10 +60,16 @@ const roomEvents = {
     }
 };
 
+const channelType = {
+    liveChat: "liveChat",
+    facebook: "facebook",
+    zalo: "zalo",
+};
+
 export type RNStringeeEventCallback = (
     status: boolean,
-    code: int,
+    code: number,
     message: string
 ) => void;
 
-export {clientEvents, callEvents};
+export {clientEvents, callEvents, channelType};
