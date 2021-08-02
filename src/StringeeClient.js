@@ -722,8 +722,8 @@ export default class extends Component {
         RNStringeeClient.updateUser(this.uuid, name, email, avatar, callback);
     }
 
-    revokeMessages(conversationId: string, msgIds, deleted: boolean, callback: RNStringeeEventCallback) {
-        RNStringeeClient.revokeMessages(this.uuid, conversationId, msgIds, deleted, callback);
+    revokeMessages(conversationId: string, msgId, deleted: boolean, callback: RNStringeeEventCallback) {
+        RNStringeeClient.revokeMessages(this.uuid, conversationId, msgId, deleted, callback);
     }
 
     getLiveChat(ended: boolean, callback: RNStringeeEventCallback) {
