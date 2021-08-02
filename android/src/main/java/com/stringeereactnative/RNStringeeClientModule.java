@@ -530,42 +530,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         mClient.createConversation(participants, convOptions, new CallbackListener<Conversation>() {
             @Override
             public void onSuccess(Conversation conversation) {
-                WritableMap params = Arguments.createMap();
-                params.putString("id", conversation.getId());
-                params.putString("localId", conversation.getLocalId());
-                params.putString("name", conversation.getName());
-                params.putBoolean("isDistinct", conversation.isDistinct());
-                params.putBoolean("isGroup", conversation.isGroup());
-                params.putDouble("updatedAt", conversation.getUpdateAt());
-                params.putString("lastMsgSender", conversation.getLastMsgSender());
-                params.putInt("lastMsgType", conversation.getLastMsgType());
-                params.putInt("unreadCount", conversation.getTotalUnread());
-                params.putString("lastMsgId", conversation.getLastMsgId());
-                params.putString("creator", conversation.getCreator());
-                params.putDouble("created", conversation.getCreateAt());
-                params.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                params.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                params.putInt("lastMsgState", conversation.getLastMsgState());
-                if (conversation.getLastMsg() != null) {
-                    try {
-                        Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                        WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                        params.putMap("text", lastMsgMap);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                List<User> participants = conversation.getParticipants();
-                WritableArray participantsMap = Arguments.createArray();
-                for (int i = 0; i < participants.size(); i++) {
-                    User user = participants.get(i);
-                    WritableMap userMap = Arguments.createMap();
-                    userMap.putString("userId", user.getUserId());
-                    userMap.putString("name", user.getName());
-                    userMap.putString("avatar", user.getAvatarUrl());
-                    participantsMap.pushMap(userMap);
-                }
-                params.putArray("participants", participantsMap);
+                WritableMap params = Utils.getConversationMap(conversation);
                 callback.invoke(true, 0, "Success", params);
             }
 
@@ -592,43 +557,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         mClient.getConversation(id, new CallbackListener<Conversation>() {
             @Override
             public void onSuccess(Conversation conversation) {
-                WritableMap params = Arguments.createMap();
-                params.putString("id", conversation.getId());
-                params.putString("localId", conversation.getLocalId());
-                params.putString("name", conversation.getName());
-                params.putBoolean("isDistinct", conversation.isDistinct());
-                params.putBoolean("isGroup", conversation.isGroup());
-                params.putDouble("updatedAt", conversation.getUpdateAt());
-                params.putString("lastMsgSender", conversation.getLastMsgSender());
-                params.putString("text", conversation.getText());
-                params.putInt("lastMsgType", conversation.getLastMsgType());
-                params.putInt("unreadCount", conversation.getTotalUnread());
-                params.putString("lastMsgId", conversation.getLastMsgId());
-                params.putString("creator", conversation.getCreator());
-                params.putDouble("created", conversation.getCreateAt());
-                params.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                params.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                params.putInt("lastMsgState", conversation.getLastMsgState());
-                if (conversation.getLastMsg() != null) {
-                    try {
-                        Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                        WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                        params.putMap("text", lastMsgMap);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                List<User> participants = conversation.getParticipants();
-                WritableArray participantsMap = Arguments.createArray();
-                for (int i = 0; i < participants.size(); i++) {
-                    User user = participants.get(i);
-                    WritableMap userMap = Arguments.createMap();
-                    userMap.putString("userId", user.getUserId());
-                    userMap.putString("name", user.getName());
-                    userMap.putString("avatar", user.getAvatarUrl());
-                    participantsMap.pushMap(userMap);
-                }
-                params.putArray("participants", participantsMap);
+                WritableMap params = Utils.getConversationMap(conversation);
                 callback.invoke(true, 0, "Success", params);
             }
 
@@ -657,45 +586,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             public void onSuccess(List<Conversation> conversations) {
                 WritableArray params = Arguments.createArray();
                 for (int i = 0; i < conversations.size(); i++) {
-                    Conversation conversation = conversations.get(i);
-                    WritableMap param = Arguments.createMap();
-                    param.putString("id", conversation.getId());
-                    param.putString("localId", conversation.getLocalId());
-                    param.putString("name", conversation.getName());
-                    param.putBoolean("isDistinct", conversation.isDistinct());
-                    param.putBoolean("isGroup", conversation.isGroup());
-                    param.putDouble("updatedAt", conversation.getUpdateAt());
-                    param.putString("lastMsgSender", conversation.getLastMsgSender());
-                    param.putString("text", conversation.getText());
-                    param.putInt("lastMsgType", conversation.getLastMsgType());
-                    param.putInt("unreadCount", conversation.getTotalUnread());
-                    param.putString("lastMsgId", conversation.getLastMsgId());
-                    param.putString("creator", conversation.getCreator());
-                    param.putDouble("created", conversation.getCreateAt());
-                    param.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                    param.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                    param.putInt("lastMsgState", conversation.getLastMsgState());
-                    if (conversation.getLastMsg() != null) {
-                        try {
-                            Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                            WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                            param.putMap("text", lastMsgMap);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    List<User> participants = conversation.getParticipants();
-                    WritableArray participantsMap = Arguments.createArray();
-                    for (int j = 0; j < participants.size(); j++) {
-                        User user = participants.get(j);
-                        WritableMap userMap = Arguments.createMap();
-                        userMap.putString("userId", user.getUserId());
-                        userMap.putString("name", user.getName());
-                        userMap.putString("avatar", user.getAvatarUrl());
-                        participantsMap.pushMap(userMap);
-                    }
-                    param.putArray("participants", participantsMap);
-
+                    WritableMap param = Utils.getConversationMap(conversations.get(i));
                     params.pushMap(param);
                 }
                 callback.invoke(true, 0, "Success", params);
@@ -721,45 +612,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             public void onSuccess(List<Conversation> conversations) {
                 WritableArray params = Arguments.createArray();
                 for (int i = 0; i < conversations.size(); i++) {
-                    Conversation conversation = conversations.get(i);
-                    WritableMap param = Arguments.createMap();
-                    param.putString("id", conversation.getId());
-                    param.putString("localId", conversation.getLocalId());
-                    param.putString("name", conversation.getName());
-                    param.putBoolean("isDistinct", conversation.isDistinct());
-                    param.putBoolean("isGroup", conversation.isGroup());
-                    param.putDouble("updatedAt", conversation.getUpdateAt());
-                    param.putString("lastMsgSender", conversation.getLastMsgSender());
-                    param.putString("text", conversation.getText());
-                    param.putInt("lastMsgType", conversation.getLastMsgType());
-                    param.putInt("unreadCount", conversation.getTotalUnread());
-                    param.putString("lastMsgId", conversation.getLastMsgId());
-                    param.putString("creator", conversation.getCreator());
-                    param.putDouble("created", conversation.getCreateAt());
-                    param.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                    param.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                    param.putInt("lastMsgState", conversation.getLastMsgState());
-                    if (conversation.getLastMsg() != null) {
-                        try {
-                            Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                            WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                            param.putMap("text", lastMsgMap);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    List<User> participants = conversation.getParticipants();
-                    WritableArray participantsMap = Arguments.createArray();
-                    for (int j = 0; j < participants.size(); j++) {
-                        User user = participants.get(j);
-                        WritableMap userMap = Arguments.createMap();
-                        userMap.putString("userId", user.getUserId());
-                        userMap.putString("name", user.getName());
-                        userMap.putString("avatar", user.getAvatarUrl());
-                        participantsMap.pushMap(userMap);
-                    }
-                    param.putArray("participants", participantsMap);
-
+                    WritableMap param = Utils.getConversationMap(conversations.get(i));
                     params.pushMap(param);
                 }
                 callback.invoke(true, 0, "Success", params);
@@ -785,45 +638,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             public void onSuccess(List<Conversation> conversations) {
                 WritableArray params = Arguments.createArray();
                 for (int i = 0; i < conversations.size(); i++) {
-                    Conversation conversation = conversations.get(i);
-                    WritableMap param = Arguments.createMap();
-                    param.putString("id", conversation.getId());
-                    param.putString("localId", conversation.getLocalId());
-                    param.putString("name", conversation.getName());
-                    param.putBoolean("isDistinct", conversation.isDistinct());
-                    param.putBoolean("isGroup", conversation.isGroup());
-                    param.putDouble("updatedAt", conversation.getUpdateAt());
-                    param.putString("lastMsgSender", conversation.getLastMsgSender());
-                    param.putString("text", conversation.getText());
-                    param.putInt("lastMsgType", conversation.getLastMsgType());
-                    param.putInt("unreadCount", conversation.getTotalUnread());
-                    param.putString("lastMsgId", conversation.getLastMsgId());
-                    param.putString("creator", conversation.getCreator());
-                    param.putDouble("created", conversation.getCreateAt());
-                    param.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                    param.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                    param.putInt("lastMsgState", conversation.getLastMsgState());
-                    if (conversation.getLastMsg() != null) {
-                        try {
-                            Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                            WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                            param.putMap("text", lastMsgMap);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    List<User> participants = conversation.getParticipants();
-                    WritableArray participantsMap = Arguments.createArray();
-                    for (int j = 0; j < participants.size(); j++) {
-                        User user = participants.get(j);
-                        WritableMap userMap = Arguments.createMap();
-                        userMap.putString("userId", user.getUserId());
-                        userMap.putString("name", user.getName());
-                        userMap.putString("avatar", user.getAvatarUrl());
-                        participantsMap.pushMap(userMap);
-                    }
-                    param.putArray("participants", participantsMap);
-
+                    WritableMap param = Utils.getConversationMap(conversations.get(i));
                     params.pushMap(param);
                 }
                 callback.invoke(true, 0, "Success", params);
@@ -849,45 +664,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             public void onSuccess(List<Conversation> conversations) {
                 WritableArray params = Arguments.createArray();
                 for (int i = 0; i < conversations.size(); i++) {
-                    Conversation conversation = conversations.get(i);
-                    WritableMap param = Arguments.createMap();
-                    param.putString("id", conversation.getId());
-                    param.putString("localId", conversation.getLocalId());
-                    param.putString("name", conversation.getName());
-                    param.putBoolean("isDistinct", conversation.isDistinct());
-                    param.putBoolean("isGroup", conversation.isGroup());
-                    param.putDouble("updatedAt", conversation.getUpdateAt());
-                    param.putString("lastMsgSender", conversation.getLastMsgSender());
-                    param.putString("text", conversation.getText());
-                    param.putInt("lastMsgType", conversation.getLastMsgType());
-                    param.putInt("unreadCount", conversation.getTotalUnread());
-                    param.putString("lastMsgId", conversation.getLastMsgId());
-                    param.putString("creator", conversation.getCreator());
-                    param.putDouble("created", conversation.getCreateAt());
-                    param.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                    param.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                    param.putInt("lastMsgState", conversation.getLastMsgState());
-                    if (conversation.getLastMsg() != null) {
-                        try {
-                            Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                            WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                            param.putMap("text", lastMsgMap);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    List<User> participants = conversation.getParticipants();
-                    WritableArray participantsMap = Arguments.createArray();
-                    for (int j = 0; j < participants.size(); j++) {
-                        User user = participants.get(j);
-                        WritableMap userMap = Arguments.createMap();
-                        userMap.putString("userId", user.getUserId());
-                        userMap.putString("name", user.getName());
-                        userMap.putString("avatar", user.getAvatarUrl());
-                        participantsMap.pushMap(userMap);
-                    }
-                    param.putArray("participants", participantsMap);
-
+                    WritableMap param = Utils.getConversationMap(conversations.get(i));
                     params.pushMap(param);
                 }
                 callback.invoke(true, 0, "Success", params);
@@ -2764,6 +2541,38 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         mClient.getLiveChat(mClient.getUserId(), ended, new CallbackListener<List<Conversation>>() {
             @Override
             public void onSuccess(List<Conversation> conversations) {
+
+            }
+        });
+    }
+
+    @ReactMethod
+    public void acceptChatTransfer(String instanceId, String convId, Callback callback) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
+            return;
+        }
+
+        mClient.acceptChatTransfer(convId, new StatusListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+        });
+    }
+
+    @ReactMethod
+    public void rejectChatTransfer(String instanceId, String convId, Callback callback) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
+            return;
+        }
+
+        mClient.rejectChatTransfer(convId, new StatusListener() {
+            @Override
+            public void onSuccess() {
 
             }
         });

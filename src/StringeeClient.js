@@ -76,6 +76,9 @@ export default class extends Component {
         this.updateUser = this.updateUser.bind(this);
         this.revokeMessages = this.revokeMessages.bind(this);
         this.getLiveChat = this.getLiveChat.bind(this);
+        this.acceptChatTransfer = this.acceptChatTransfer.bind(this);
+        this.rejectChatTransfer = this.rejectChatTransfer.bind(this);
+
     }
 
     componentDidMount() {
@@ -728,5 +731,13 @@ export default class extends Component {
 
     getLiveChat(ended: boolean, callback: RNStringeeEventCallback) {
         RNStringeeClient.getLiveChat(this.uuid, ended, callback);
+    }
+
+    acceptChatTransfer(conversationId: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.acceptChatTransfer(this.uuid, ended, callback);
+    }
+
+    rejectChatTransfer(conversationId: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.rejectChatTransfer(this.uuid, ended, callback);
     }
 }
