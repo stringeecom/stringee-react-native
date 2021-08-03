@@ -7,7 +7,11 @@ const clientEvents = {
         onIncomingCall: "incomingCall",
         onIncomingCall2: "incomingCall2",
         onCustomMessage: "didReceiveCustomMessage",
-        onObjectChange: "objectChangeNotification"
+        onObjectChange: "objectChangeNotification",
+        onReceiveChatRequest: "didReceiveChatRequest",
+        onReceiveTransferChatRequest: "didReceiveTransferChatRequest",
+        onChatRequestTimeout: "chatRequestTimeout",
+        onEndChatSupport: "didEndChatSupport",
     },
     android: {
         onConnect: "onConnectionConnected",
@@ -17,7 +21,11 @@ const clientEvents = {
         onIncomingCall: "onIncomingCall",
         onIncomingCall2: "onIncomingCall2",
         onCustomMessage: "onCustomMessage",
-        onObjectChange: "onChangeEvent"
+        onObjectChange: "onChangeEvent",
+        onReceiveChatRequest: "",
+        onReceiveTransferChatRequest: "",
+        onChatRequestTimeout: "",
+        onEndChatSupport: "",
     }
 };
 

@@ -63,19 +63,31 @@ export default class extends Component {
         this.getAllMessagesAfter = this.getAllMessagesAfter.bind(this);
         this.getAllMessagesBefore = this.getAllMessagesBefore.bind(this);
         this.clearDb = this.clearDb.bind(this);
-        this.getChatRequests = this.getChatRequests.bind(this);
-        this.acceptChatRequest = this.acceptChatRequest.bind(this);
-        this.rejectChatRequest = this.rejectChatRequest.bind(this);
-        this.endChat = this.endChat.bind(this);
-        this.blockUser = this.blockUser.bind(this);
-        this.preventAddingToGroup = this.preventAddingToGroup.bind(this);
+
+        // live-chat
         this.getChatProfile = this.getChatProfile.bind(this);
         this.getLiveChatToken = this.getLiveChatToken.bind(this);
+        this.updateUserInfo = this.updateUserInfo.bind(this);
         this.startLiveChat = this.startLiveChat.bind(this);
-        this.createLiveChatTicket = this.createLiveChatTicket.bind(this);
-        this.updateUser = this.updateUser.bind(this);
-        this.revokeMessages = this.revokeMessages.bind(this);
-        this.getLiveChat = this.getLiveChat.bind(this);
+        this.sendChatTranscript = this.sendChatTranscript.bind(this);
+        this.endChat = this.endChat.bind(this);
+        this.createTicketForMissedChat = this.createTicketForMissedChat.bind(this);
+        this.acceptChatRequest = this.acceptChatRequest.bind(this);
+        this.rejectChatRequest = this.rejectChatRequest.bind(this);
+
+        // this.getChatRequests = this.getChatRequests.bind(this);
+        // this.acceptChatRequest = this.acceptChatRequest.bind(this);
+        // this.rejectChatRequest = this.rejectChatRequest.bind(this);
+        // this.endChat = this.endChat.bind(this);
+        // this.blockUser = this.blockUser.bind(this);
+        // this.preventAddingToGroup = this.preventAddingToGroup.bind(this);
+        // this.getChatProfile = this.getChatProfile.bind(this);
+        // this.getLiveChatToken = this.getLiveChatToken.bind(this);
+        // this.startLiveChat = this.startLiveChat.bind(this);
+        // this.createLiveChatTicket = this.createLiveChatTicket.bind(this);
+        // this.updateUser = this.updateUser.bind(this);
+        // this.revokeMessages = this.revokeMessages.bind(this);
+        // this.getLiveChat = this.getLiveChat.bind(this);
     }
 
     componentDidMount() {
@@ -663,70 +675,123 @@ export default class extends Component {
         RNStringeeClient.clearDb(this.uuid, callback);
     }
 
-    getChatRequests(count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
-        RNStringeeClient.getChatRequests(this.uuid, (status, code, message, chatRequests) => {
-            var returnChatRequests = [];
-            if (status) {
-                if (isAscending) {
-                    // Tăng dần -> Cần đảo mảng
-                    chatRequests.reverse().map((chatRequest) => {
-                        returnChatRequests.push(new ChatRequest(chatRequest));
-                    });
-                } else {
-                    chatRequests.map((conversation) => {
-                        returnChatRequests.push(new Conversation(conversation));
-                    });
-                }
-            }
-            return callback(status, code, message, returnChatRequests);
-        });
-    }
+    // ============================== LIVE-CHAT ================================
 
-    acceptChatRequest(conversationId: string, channelType: channelType, callback: RNStringeeEventCallback) {
-        RNStringeeClient.acceptChatRequest(this.uuid, conversationId, channelType, callback);
-    }
+    // ===== CUSTOMER-SIDE =====
 
-    rejectChatRequest(conversationId: string, channelType: channelType, callback: RNStringeeEventCallback) {
-        RNStringeeClient.rejectChatRequest(this.uuid, conversationId, channelType, callback);
-    }
-
-    endChat(conversationId: string, callback: RNStringeeEventCallback) {
-        RNStringeeClient.endChat(this.uuid, conversationId, callback);
-    }
-
-    blockUser(userId: string, callback: RNStringeeEventCallback) {
-        RNStringeeClient.blockUser(this.uuid, userId, callback);
-    }
-
-    preventAddingToGroup(conversationId: string, callback: RNStringeeEventCallback) {
-        RNStringeeClient.preventAddingToGroup(this.uuid, conversationId, callback);
-    }
-
+    // 1
     getChatProfile(widgetKey: string, callback: RNStringeeEventCallback) {
         RNStringeeClient.getChatProfile(this.uuid, widgetKey, callback);
     }
 
+    // 2
     getLiveChatToken(widgetKey: string, name: string, email: string, callback: RNStringeeEventCallback) {
         RNStringeeClient.getLiveChatToken(this.uuid, widgetKey, name, email, callback);
     }
 
+    // 3
+    updateUserInfo(name: string, email: string, avatar: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.updateUserInfo(this.uuid, name, email, avatar, callback);
+    }
+
+    // 4
     startLiveChat(queueId: string, callback: RNStringeeEventCallback) {
         RNStringeeClient.startLiveChat(this.uuid, queueId, callback);
     }
 
-    createLiveChatTicket(widgetKey: string, name: string, email: string, note: string, callback: RNStringeeEventCallback) {
-        RNStringeeClient.createLiveChatTicket(this.uuid, widgetKey, name, email, note, callback);
+    // 5
+    sendChatTranscript(email: string, convId: string, domain: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.sendChatTranscript(this.uuid, email, convId, domain, callback);
     }
 
-    updateUser(name: string, email: string, avatar: string, callback: RNStringeeEventCallback) {
-        RNStringeeClient.updateUser(this.uuid, name, email, avatar, callback);
+    // 6
+    endChat(convId: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.endChat(this.uuid, convId, callback);
     }
 
-    revokeMessages(conversationId: string, msgIds, deleted: boolean, callback: RNStringeeEventCallback) {
-        RNStringeeClient.revokeMessages(this.uuid, conversationId, msgIds, deleted, callback);
+    createTicketForMissedChat(widgetKey: string, name: string, email: string, note: string, callback: RNStringeeEventCallback) {
+        RNStringeeClient.createTicketForMissedChat(this.uuid, widgetKey, name, email, note, callback);
     }
 
-    getLiveChat(ended: boolean, callback: RNStringeeEventCallback) {
-        RNStringeeClient.getLiveChat(this.uuid, ended, callback);
+    // ===== AGENT-SIDE =====
+
+    acceptChatRequest(request: ChatRequest, callback: RNStringeeEventCallback) {
+        RNStringeeClient.acceptChatRequest(this.uuid, request.id, callback);
     }
+
+    rejectChatRequest(request: ChatRequest, callback: RNStringeeEventCallback) {
+        RNStringeeClient.rejectChatRequest(this.uuid, request.id, callback);
+    }
+
+
+
+
+
+
+    // getChatRequests(count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
+    //     RNStringeeClient.getChatRequests(this.uuid, (status, code, message, chatRequests) => {
+    //         var returnChatRequests = [];
+    //         if (status) {
+    //             if (isAscending) {
+    //                 // Tăng dần -> Cần đảo mảng
+    //                 chatRequests.reverse().map((chatRequest) => {
+    //                     returnChatRequests.push(new ChatRequest(chatRequest));
+    //                 });
+    //             } else {
+    //                 chatRequests.map((conversation) => {
+    //                     returnChatRequests.push(new Conversation(conversation));
+    //                 });
+    //             }
+    //         }
+    //         return callback(status, code, message, returnChatRequests);
+    //     });
+    // }
+    //
+    // acceptChatRequest(conversationId: string, channelType: channelType, callback: RNStringeeEventCallback) {
+    //     RNStringeeClient.acceptChatRequest(this.uuid, conversationId, channelType, callback);
+    // }
+    //
+    // rejectChatRequest(conversationId: string, channelType: channelType, callback: RNStringeeEventCallback) {
+    //     RNStringeeClient.rejectChatRequest(this.uuid, conversationId, channelType, callback);
+    // }
+    //
+    // endChat(conversationId: string, callback: RNStringeeEventCallback) {
+    //     RNStringeeClient.endChat(this.uuid, conversationId, callback);
+    // }
+    //
+    // blockUser(userId: string, callback: RNStringeeEventCallback) {
+    //     RNStringeeClient.blockUser(this.uuid, userId, callback);
+    // }
+    //
+    // preventAddingToGroup(conversationId: string, callback: RNStringeeEventCallback) {
+    //     RNStringeeClient.preventAddingToGroup(this.uuid, conversationId, callback);
+    // }
+    //
+    // getChatProfile(widgetKey: string, callback: RNStringeeEventCallback) {
+    //     RNStringeeClient.getChatProfile(this.uuid, widgetKey, callback);
+    // }
+    //
+    // getLiveChatToken(widgetKey: string, name: string, email: string, callback: RNStringeeEventCallback) {
+    //     RNStringeeClient.getLiveChatToken(this.uuid, widgetKey, name, email, callback);
+    // }
+    //
+    // startLiveChat(queueId: string, callback: RNStringeeEventCallback) {
+    //     RNStringeeClient.startLiveChat(this.uuid, queueId, callback);
+    // }
+    //
+    // createLiveChatTicket(widgetKey: string, name: string, email: string, note: string, callback: RNStringeeEventCallback) {
+    //     RNStringeeClient.createLiveChatTicket(this.uuid, widgetKey, name, email, note, callback);
+    // }
+    //
+    // updateUser(name: string, email: string, avatar: string, callback: RNStringeeEventCallback) {
+    //     RNStringeeClient.updateUser(this.uuid, name, email, avatar, callback);
+    // }
+    //
+    // revokeMessages(conversationId: string, msgIds, deleted: boolean, callback: RNStringeeEventCallback) {
+    //     RNStringeeClient.revokeMessages(this.uuid, conversationId, msgIds, deleted, callback);
+    // }
+    //
+    // getLiveChat(ended: boolean, callback: RNStringeeEventCallback) {
+    //     RNStringeeClient.getLiveChat(this.uuid, ended, callback);
+    // }
 }
