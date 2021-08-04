@@ -30,6 +30,12 @@ static NSString *didReceiveCustomMessage    = @"didReceiveCustomMessage";
 // Chat
 static NSString *objectChangeNotification   = @"objectChangeNotification";
 
+// Live-chat
+static NSString *didReceiveChatRequest          = @"didReceiveChatRequest";
+static NSString *didReceiveTransferChatRequest  = @"didReceiveTransferChatRequest";
+static NSString *chatRequestTimeout             = @"chatRequestTimeout";
+static NSString *didEndChatSupport              = @"didEndChatSupport";
+
 @interface RNStringeeClient : RCTEventEmitter <RCTBridgeModule, StringeeConnectionDelegate, StringeeIncomingCallDelegate>
 
 //@property (strong, nonatomic) StringeeClient *client;

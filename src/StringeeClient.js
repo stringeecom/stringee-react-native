@@ -8,6 +8,8 @@ import User from "./chat/User";
 import {channelType, clientEvents} from "./helpers/StringeeHelper";
 import ChatRequest from "./chat/ChatRequest";
 import type {RNStringeeEventCallback} from "./helpers/StringeeHelper";
+import StringeeChatProfile from './chat/StringeeChatProfile';
+import StringeeChatRequest from './chat/StringeeChatRequest';
 
 const RNStringeeClient = NativeModules.RNStringeeClient;
 
@@ -152,6 +154,14 @@ export default class extends Component {
                                 }
                             })
                         );
+                    } else if (type === "onReceiveChatRequest") {
+                        this.handleChatRequestEvent(eventName, handler)
+                    } else if (type === "onReceiveTransferChatRequest") {
+                        this.handleTransferChatRequestEvent(eventName, handler)
+                    } else if (type === "onChatRequestTimeout") {
+                        this.handleChatRequestEvent(eventName, handler)
+                    } else if (type === "onEndChatSupport") {
+                        this.handleEndChatEvent(eventName, handler)
                     } else {
                         this._subscriptions.push(this._eventEmitter.addListener(eventName, ({uuid, data}) => {
                             if (this.uuid === uuid) {
@@ -681,7 +691,13 @@ export default class extends Component {
 
     // 1
     getChatProfile(widgetKey: string, callback: RNStringeeEventCallback) {
-        RNStringeeClient.getChatProfile(this.uuid, widgetKey, callback);
+        RNStringeeClient.getChatProfile(this.uuid, widgetKey, (status, code, message, chatProfile) => {
+            var returnProfile;
+            if (status) {
+                returnProfile = new StringeeChatProfile(chatProfile);
+            }
+            return callback(status, code, message, returnProfile);
+        });
     }
 
     // 2
@@ -696,7 +712,13 @@ export default class extends Component {
 
     // 4
     startLiveChat(queueId: string, callback: RNStringeeEventCallback) {
-        RNStringeeClient.startLiveChat(this.uuid, queueId, callback);
+        RNStringeeClient.startLiveChat(this.uuid, queueId, (status, code, message, conversation) => {
+            var returnConversation;
+            if (status) {
+                returnConversation = new Conversation(conversation);
+            }
+            return callback(status, code, message, returnConversation);
+        });
     }
 
     // 5
@@ -723,7 +745,60 @@ export default class extends Component {
         RNStringeeClient.rejectChatRequest(this.uuid, request.id, callback);
     }
 
+    // =============================== Utils ===============================
 
+    handleChatRequestEvent(eventName, handler) {
+        this._subscriptions.push(
+            this._eventEmitter.addListener(eventName, ({uuid, data}) => {
+                if (this.uuid !== uuid) {
+                    return;
+                }
+
+                var requestData = data["request"];
+                var request = new StringeeChatRequest(requestData);
+
+                if (handler !== undefined) {
+                    handler({request});
+                }
+            })
+        );
+    }
+
+    handleTransferChatRequestEvent(eventName, handler) {
+        this._subscriptions.push(
+            this._eventEmitter.addListener(eventName, ({uuid, data}) => {
+                if (this.uuid !== uuid) {
+                    return;
+                }
+
+                var requestData = data["request"];
+                var request = new StringeeChatRequest(requestData);
+
+                var fromUserData = data["fromUser"];
+                var fromUser = new User(fromUserData);
+
+                if (handler !== undefined) {
+                    handler({request, fromUser});
+                }
+            })
+        );
+    }
+
+    handleEndChatEvent(eventName, handler) {
+        this._subscriptions.push(
+            this._eventEmitter.addListener(eventName, ({uuid, data}) => {
+                if (this.uuid !== uuid) {
+                    return;
+                }
+
+                var info = data["info"];
+
+                if (handler !== undefined) {
+                    handler({info});
+                }
+            })
+        );
+    }
 
 
 

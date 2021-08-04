@@ -23,7 +23,13 @@
 
 + (NSArray *)StringeeMessages:(NSArray<StringeeMessage *> *)messages;
 
++ (NSDictionary *)SXChatProfile:(SXChatProfile *)profile;
+
++ (NSDictionary *)StringeeChatRequest:(StringeeChatRequest *)request;
+
 + (BOOL)isValid:(NSString *)value;
+
++ (BOOL)isValidEmail:(NSString *)emailTxt;
 
 @end
 

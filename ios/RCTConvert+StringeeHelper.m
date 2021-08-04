@@ -300,6 +300,77 @@
     return response;
 }
 
++ (NSDictionary *)SXChatProfile:(SXChatProfile *)profile {
+    if (!profile) return RCTNullIfNil(nil);
+
+    NSString *identifier = profile.identifier ? profile.identifier : @"";
+    NSString *background = profile.background ? profile.background : @"";
+    NSString *hour = profile.hour ? profile.hour : @"";
+    NSString *language = profile.language ? profile.language : @"";
+    NSString *logo_url = profile.logo_url ? profile.logo_url : @"";
+    NSString *popup_answer_url = profile.popup_answer_url ? profile.popup_answer_url : @"";
+    NSString *portal = profile.portal ? profile.portal : @"";
+    NSArray *queues = [self SXQueues:profile.queues];
+
+    return @{
+             @"id": identifier,
+             @"autoCreateTicket": @(profile.auto_create_ticket),
+             @"background": background,
+             @"enabled": @(profile.enabled),
+             @"facebookAsLivechat" : @(profile.facebook_as_livechat),
+             @"hour" : hour,
+             @"language": language,
+             @"logoUrl": logo_url,
+             @"popupAnswerUrl": popup_answer_url,
+             @"portal": portal,
+             @"projectId" : @(profile.project_id),
+             @"zaloAsLivechat": @(profile.zalo_as_livechat),
+             @"queues": queues
+             };
+}
+
++ (NSDictionary *)SXQueue:(SXQueue *)queue {
+    if (!queue) return RCTNullIfNil(nil);
+
+    NSString *identifier = queue.identifier ? queue.identifier : @"";
+    NSString *name = queue.name ? queue.name : @"";
+
+    return @{
+             @"id": identifier,
+             @"name": name
+             };
+}
+
++ (NSArray *)SXQueues:(NSArray<SXQueue *> *)queues {
+    if (!queues) {
+        return RCTNullIfNil(nil);
+    }
+    NSMutableArray *response = [NSMutableArray array];
+    for (SXQueue *queue in queues) {
+        [response addObject:[self SXQueue:queue]];
+    }
+    return response;
+}
+
++ (NSDictionary *)StringeeChatRequest:(StringeeChatRequest *)request {
+    if (!request) return RCTNullIfNil(nil);
+
+    NSString *convId = request.convId ? request.convId : @"";
+    NSString *customerId = request.customerId ? request.customerId : @"";
+    NSString *customerName = request.customerName ? request.customerName : @"";
+    NSString *identifier = request.identifier ? request.identifier : @"";
+
+    return @{
+             @"id": identifier,
+             @"convId": convId,
+             @"customerId": customerId,
+             @"customerName": customerName,
+             @"channelType": @(request.channelType),
+             @"requestTimeout": @(request.requestTimeout),
+             @"type": @(request.type)
+             };
+}
+
 // MARK: - Utils
 
 + (id)StringToDictionary:(NSString *)str {
@@ -326,6 +397,12 @@
     }
     
     return true;
+}
+
++ (BOOL)isValidEmail:(NSString *)emailTxt {
+    NSString *emailRegex = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
+    NSPredicate *emailTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", emailRegex];
+    return [emailTest evaluateWithObject:emailTxt];
 }
 
 @end
