@@ -28,7 +28,11 @@ RCT_EXPORT_MODULE();
              incomingCall,
              incomingCall2,
              didReceiveCustomMessage,
-             objectChangeNotification
+             objectChangeNotification,
+             didReceiveChatRequest,
+             didReceiveTransferChatRequest,
+             chatRequestTimeout,
+             didEndChatSupport
              ];
 }
 
@@ -53,6 +57,7 @@ RCT_EXPORT_METHOD(createClientWrapper:(NSString *)uuid) {
     }
     
     RNClientWrapper *newClientWrapper = [[RNClientWrapper alloc] initWithIdentifier:uuid];
+    [newClientWrapper createClientIfNeed];
     [RNStringeeInstanceManager.instance.clientWrappers setObject:newClientWrapper forKey:uuid];
 }
 
@@ -68,7 +73,7 @@ RCT_EXPORT_METHOD(connect:(NSString *)uuid token:(NSString *)token) {
         return;
     }
     wrapper.isConnecting = YES;
-    [wrapper createClientIfNeed];
+//    [wrapper createClientIfNeed];
     
     [wrapper.client connectWithAccessToken:token];
 }
@@ -1176,6 +1181,286 @@ RCT_EXPORT_METHOD(clearDb:(NSString *)uuid callback:(RCTResponseSenderBlock)call
     
     [wrapper.client clearData];
     callback(@[@(YES), @(0), @"Success."]);
+}
+
+#pragma mark - Live-Chat
+
+RCT_EXPORT_METHOD(getChatProfile:(NSString *)uuid widgetKey:(NSString *)widgetKey callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+    
+    if (!wrapper.client) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized"]);
+        return;
+    }
+    
+    if (![RCTConvert isValid:widgetKey]) {
+        callback(@[@(NO), @(-2), @"WidgetKey invalid"]);
+        return;
+    }
+    
+    [wrapper.client getChatProfileWithKey:widgetKey completion:^(BOOL status, int code, NSString *message, SXChatProfile *chatProfile) {
+        callback(@[@(status), @(code), message, [RCTConvert SXChatProfile:chatProfile]]);
+    }];
+}
+
+RCT_EXPORT_METHOD(getLiveChatToken:(NSString *)uuid widgetKey:(NSString *)widgetKey name:(NSString *)name email:(NSString *)email callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+    
+    if (!wrapper.client) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized"]);
+        return;
+    }
+    
+    if (![RCTConvert isValid:widgetKey] || ![RCTConvert isValid:name] || ![RCTConvert isValid:email] || ![RCTConvert isValidEmail:email]) {
+        callback(@[@(NO), @(-2), @"Parameters invalid"]);
+        return;
+    }
+    
+    [wrapper.client generateTokenForCustomerWithKey:widgetKey username:name email:email completion:^(BOOL status, int code, NSString *message, NSString *token) {
+        if (status) {
+            callback(@[@(status), @(code), message, token]);
+        } else {
+            callback(@[@(status), @(code), message, [NSNull null]]);
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(updateUserInfo:(NSString *)uuid name:(NSString *)name email:(NSString *)email avatar:(NSString *)avatar callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+    
+    if (!wrapper.client) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized"]);
+        return;
+    }
+    
+    if (![RCTConvert isValid:avatar] || ![RCTConvert isValid:name] || ![RCTConvert isValid:email] || ![RCTConvert isValidEmail:email]) {
+        callback(@[@(NO), @(-2), @"Parameters invalid"]);
+        return;
+    }
+    
+    [wrapper.client getCustomerInfo:^(BOOL status, int code, NSString *message, SXCustomerInfo *customerInfo) {
+        if (status) {
+            [wrapper.client updateUserInfo:customerInfo username:name email:email avatar:avatar completion:^(BOOL status, int code, NSString *message) {
+                callback(@[@(status), @(code), message]);
+            }];
+        } else {
+            callback(@[@(status), @(code), message]);
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(startLiveChat:(NSString *)uuid queueId:(NSString *)queueId callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+    
+    if (!wrapper.client) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized"]);
+        return;
+    }
+    
+    if (![RCTConvert isValid:queueId]) {
+        callback(@[@(NO), @(-2), @"QueueId invalid"]);
+        return;
+    }
+    
+    [wrapper.client createLiveChatConversationWithQueueId:queueId completion:^(BOOL status, int code, NSString *message, StringeeConversation *conversation) {
+        callback(@[@(status), @(code), message, [RCTConvert StringeeConversation:conversation]]);
+    }];
+}
+
+RCT_EXPORT_METHOD(sendChatTranscript:(NSString *)uuid email:(NSString *)email convId:(NSString *)convId domain:(NSString *)domain callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+    
+    if (!wrapper.client) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized"]);
+        return;
+    }
+    
+    if (![RCTConvert isValid:convId] || ![RCTConvert isValid:domain] || ![RCTConvert isValid:email] || ![RCTConvert isValidEmail:email]) {
+        callback(@[@(NO), @(-2), @"Parameters invalid"]);
+        return;
+    }
+    
+    [wrapper.client sendChatTranscriptTo:email convId:convId domain:domain completion:^(BOOL status, int code, NSString *message) {
+        callback(@[@(status), @(code), message]);
+    }];
+}
+
+RCT_EXPORT_METHOD(endChat:(NSString *)uuid convId:(NSString *)convId callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+    
+    if (!wrapper.client) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized"]);
+        return;
+    }
+    
+    if (![RCTConvert isValid:convId]) {
+        callback(@[@(NO), @(-2), @"convId invalid"]);
+        return;
+    }
+    
+    [wrapper.client endChatSupportWithConvId:convId completion:^(BOOL status, int code, NSString *message) {
+        callback(@[@(status), @(code), message]);
+    }];
+}
+
+RCT_EXPORT_METHOD(createTicketForMissedChat:(NSString *)uuid widgetKey:(NSString *)widgetKey name:(NSString *)name email:(NSString *)email note:(NSString *)note callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+    
+    if (!wrapper.client) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized"]);
+        return;
+    }
+    
+    if (![RCTConvert isValid:widgetKey] || ![RCTConvert isValid:name] || ![RCTConvert isValid:email] || ![RCTConvert isValid:note] || ![RCTConvert isValidEmail:email]) {
+        callback(@[@(NO), @(-2), @"Parameters invalid"]);
+        return;
+    }
+    
+    [wrapper.client createTicketForMissChatWithKey:widgetKey username:name email:email note:note completion:^(BOOL status, int code, NSString *message) {
+        callback(@[@(status), @(code), message]);
+    }];
+}
+
+RCT_EXPORT_METHOD(acceptChatRequest:(NSString *)uuid requestId:(NSString *)requestId callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+    
+    if (!wrapper.client) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized"]);
+        return;
+    }
+    
+    if (![RCTConvert isValid:requestId]) {
+        callback(@[@(NO), @(-2), @"Request invalid"]);
+        return;
+    }
+    
+    StringeeChatRequest *request = [wrapper.client.chatRequestQueue objectForKey:requestId];
+    if (request == nil) {
+        callback(@[@(NO), @(-3), @"Request not found"]);
+        return;
+    }
+    
+    [request answerWithCompletionHandler:^(BOOL status, int code, NSString * _Nonnull message) {
+        callback(@[@(status), @(code), message]);
+    }];
+}
+
+RCT_EXPORT_METHOD(rejectChatRequest:(NSString *)uuid requestId:(NSString *)requestId callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+    
+    if (!wrapper.client) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized"]);
+        return;
+    }
+    
+    if (![RCTConvert isValid:requestId]) {
+        callback(@[@(NO), @(-2), @"Request invalid"]);
+        return;
+    }
+    
+    StringeeChatRequest *request = [wrapper.client.chatRequestQueue objectForKey:requestId];
+    if (request == nil) {
+        callback(@[@(NO), @(-3), @"Request not found"]);
+        return;
+    }
+    
+    [request rejectWithCompletionHandler:^(BOOL status, int code, NSString * _Nonnull message) {
+        callback(@[@(status), @(code), message]);
+    }];
+}
+
+
+
+RCT_EXPORT_METHOD(acceptTransferChatRequest:(NSString *)uuid requestId:(NSString *)requestId callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+    
+    if (!wrapper.client) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized"]);
+        return;
+    }
+    
+    if (![RCTConvert isValid:requestId]) {
+        callback(@[@(NO), @(-2), @"Request invalid"]);
+        return;
+    }
+    
+    StringeeChatRequest *request = [wrapper.client.chatRequestQueue objectForKey:requestId];
+    if (request == nil) {
+        callback(@[@(NO), @(-3), @"Request not found"]);
+        return;
+    }
+    
+    [request answerChatTransferWithCompletionHandler:^(BOOL status, int code, NSString * _Nonnull message) {
+        callback(@[@(status), @(code), message]);
+    }];
+}
+
+RCT_EXPORT_METHOD(rejectTransferChatRequest:(NSString *)uuid requestId:(NSString *)requestId callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+    
+    if (!wrapper.client) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized"]);
+        return;
+    }
+    
+    if (![RCTConvert isValid:requestId]) {
+        callback(@[@(NO), @(-2), @"Request invalid"]);
+        return;
+    }
+    
+    StringeeChatRequest *request = [wrapper.client.chatRequestQueue objectForKey:requestId];
+    if (request == nil) {
+        callback(@[@(NO), @(-3), @"Request not found"]);
+        return;
+    }
+    
+    [request rejectChatTransferWithCompletionHandler:^(BOOL status, int code, NSString * _Nonnull message) {
+        callback(@[@(status), @(code), message]);
+    }];
 }
 
 @end

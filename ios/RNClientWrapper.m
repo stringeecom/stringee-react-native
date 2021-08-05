@@ -94,6 +94,32 @@
     }
 }
 
+- (void)didReceiveChatRequest:(StringeeClient *)stringeeClient request:(StringeeChatRequest *)request {
+    if ([jsEvents containsObject:didReceiveChatRequest]) {
+        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:didReceiveChatRequest body: @{ @"uuid" : _identifier, @"data" : @{ @"request" : [RCTConvert StringeeChatRequest:request] }}];
+    }
+}
+
+- (void)didReceiveTransferChatRequest:(StringeeClient *)stringeeClient request:(StringeeChatRequest *)request fromUser:(StringeeIdentity *)user {
+    if ([jsEvents containsObject:didReceiveTransferChatRequest]) {
+        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:didReceiveTransferChatRequest body: @{ @"uuid" : _identifier, @"data" : @{ @"request" : [RCTConvert StringeeChatRequest:request], @"fromUser" : [RCTConvert StringeeIdentity:user] }}];
+    }
+}
+
+- (void)chatRequestTimeout:(StringeeClient *)stringeeClient request:(StringeeChatRequest *)request {
+    if ([jsEvents containsObject:chatRequestTimeout]) {
+        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:chatRequestTimeout body: @{ @"uuid" : _identifier, @"data" : @{ @"request" : [RCTConvert StringeeChatRequest:request] }}];
+    }
+}
+
+- (void)didEndChatSupport:(StringeeClient *)stringeeClient infos:(NSDictionary *)infos {
+    if ([jsEvents containsObject:didEndChatSupport]) {
+        id info = infos != nil ? infos : [NSNull null];
+        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:didEndChatSupport body: @{ @"uuid" : _identifier, @"data" : @{ @"info" : info }}];
+    }
+}
+
+
 #pragma mark Call Delelgate
 
 - (void)incomingCallWithStringeeClient:(StringeeClient *)stringeeClient stringeeCall:(StringeeCall *)stringeeCall {

@@ -1,6 +1,4 @@
-import User from "./User";
-
-class ChatRequest {
+class StringeeChatRequest {
     constructor(props) {
         // Request info
         this.id = props.id;
@@ -14,4 +12,4 @@ class ChatRequest {
     }
 }
 
-export default ChatRequest;
+export default StringeeChatRequest;
