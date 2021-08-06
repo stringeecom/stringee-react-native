@@ -33,6 +33,6 @@ android {
 
 dependencies {
     implementation 'com.facebook.react:react-native:+'
-    implementation 'com.stringee.sdk.android:stringee-android-sdk:1.7.2'
+    implementation 'com.stringee.sdk.android:stringee-android-sdk:1.7.4'
     implementation 'com.android.volley:volley:1.2.0'
 }

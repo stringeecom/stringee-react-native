@@ -26,9 +26,13 @@ import com.stringee.listener.StatusListener;
 import com.stringee.listener.StringeeConnectionListener;
 import com.stringee.messaging.ChatProfile;
 import com.stringee.messaging.ChatRequest;
+import com.stringee.messaging.ChatRequest.ChannelType;
+import com.stringee.messaging.ChatRequest.RequestType;
 import com.stringee.messaging.Conversation;
+import com.stringee.messaging.Conversation.State;
 import com.stringee.messaging.ConversationOptions;
 import com.stringee.messaging.Message;
+import com.stringee.messaging.Message.Type;
 import com.stringee.messaging.StringeeChange;
 import com.stringee.messaging.StringeeObject;
 import com.stringee.messaging.User;
@@ -41,7 +45,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -255,143 +258,93 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                         public void run() {
                             StringeeClient mClient = mStringeeManager.getClientsMap().get(instanceId);
                             ArrayList<String> jsEvents = eventsMap.get(instanceId);
-                            if (jsEvents != null && contains(jsEvents, "onChangeEvent")) {
-                                WritableMap data = Arguments.createMap();
-                                StringeeObject.Type objectType = stringeeChange.getObjectType();
-                                data.putInt("objectType", objectType.getValue());
-                                data.putInt("changeType", stringeeChange.getChangeType().getValue());
-                                WritableArray objects = Arguments.createArray();
-                                WritableMap object = Arguments.createMap();
-                                if (objectType == StringeeObject.Type.CONVERSATION) {
-                                    Conversation conversation = (Conversation) stringeeChange.getObject();
-                                    object.putString("id", conversation.getId());
-                                    object.putString("localId", conversation.getLocalId());
-                                    object.putString("name", conversation.getName());
-                                    object.putBoolean("isGroup", conversation.isGroup());
-                                    object.putDouble("updatedAt", conversation.getUpdateAt());
-                                    object.putString("lastMsgSender", conversation.getLastMsgSender());
-                                    object.putInt("lastMsgType", conversation.getLastMsgType());
-                                    object.putInt("unreadCount", conversation.getTotalUnread());
-                                    object.putString("lastMsgId", conversation.getLastMsgId());
-                                    object.putString("creator", conversation.getCreator());
-                                    object.putDouble("created", conversation.getCreateAt());
-                                    object.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                                    object.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                                    object.putInt("lastMsgState", conversation.getLastMsgState());
-                                    if (conversation.getLastMsg() != null) {
+                            StringeeObject.Type objectType = stringeeChange.getObjectType();
+                            StringeeChange.Type changeType = stringeeChange.getChangeType();
+                            WritableMap data = Arguments.createMap();
+                            WritableMap object = Arguments.createMap();
+
+                            WritableMap params = Arguments.createMap();
+                            params.putString("uuid", instanceId);
+
+                            switch (objectType) {
+                                case MESSAGE:
+                                    Message message = (Message) stringeeChange.getObject();
+                                    if (message.getType() == com.stringee.messaging.Message.Type.NOTIFICATION) {
                                         try {
-                                            Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                                            WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                                            object.putMap("text", lastMsgMap);
+                                            Bundle msg = Utils.jsonToBundle(message.getText());
+                                            if (msg.getInt("type") == 4) {
+                                                if (jsEvents != null && contains(jsEvents, "onEndChatSupport")) {
+                                                    WritableMap msgMap = Arguments.fromBundle(msg);
+                                                    data.putMap("info", msgMap);
+                                                    params.putMap("data", data);
+                                                    sendEvent(getReactApplicationContext(), "onEndChatSupport", params);
+                                                    break;
+                                                }
+                                            }
                                         } catch (JSONException e) {
                                             e.printStackTrace();
                                         }
                                     }
+                                    if (jsEvents != null && contains(jsEvents, "onChangeEvent")) {
+                                        data.putInt("objectType", objectType.getValue());
+                                        data.putInt("changeType", changeType.getValue());
+                                        WritableArray objects = Arguments.createArray();
 
-                                    List<User> participants = conversation.getParticipants();
-                                    WritableArray participantsMap = Arguments.createArray();
-                                    for (int i = 0; i < participants.size(); i++) {
-                                        User user = participants.get(i);
-                                        WritableMap userMap = Arguments.createMap();
-                                        userMap.putString("userId", user.getUserId());
-                                        userMap.putString("name", user.getName());
-                                        userMap.putString("avatar", user.getAvatarUrl());
-                                        participantsMap.pushMap(userMap);
+                                        object = Utils.getMessageMap(mClient, message);
+                                        objects.pushMap(object);
+                                        data.putArray("objects", objects);
+
+                                        params.putMap("data", data);
+                                        sendEvent(getReactApplicationContext(), "onChangeEvent", params);
+                                        break;
                                     }
-                                    object.putArray("participants", participantsMap);
-                                } else if (objectType == StringeeObject.Type.MESSAGE) {
-                                    Message message = (Message) stringeeChange.getObject();
-                                    object.putString("id", message.getId());
-                                    object.putString("localId", message.getLocalId());
-                                    object.putString("conversationId", message.getConversationId());
-                                    object.putDouble("createdAt", message.getCreatedAt());
-                                    object.putInt("state", message.getState().getValue());
-                                    object.putDouble("sequence", message.getSequence());
-                                    object.putInt("type", message.getType());
-                                    WritableMap contentMap = Arguments.createMap();
-                                    switch (message.getType()) {
-                                        case 1:
-                                            contentMap.putString("content", message.getText());
-                                            break;
-                                        case 2:
-                                            WritableMap photoMap = Arguments.createMap();
-                                            photoMap.putString("filePath", message.getFileUrl());
-                                            photoMap.putString("thumbnail", message.getThumbnailUrl());
-                                            photoMap.putDouble("ratio", message.getImageRatio());
-                                            contentMap.putMap("photo", photoMap);
-                                            break;
-                                        case 3:
-                                            WritableMap videoMap = Arguments.createMap();
-                                            videoMap.putString("filePath", message.getFileUrl());
-                                            videoMap.putString("thumbnail", message.getThumbnailUrl());
-                                            videoMap.putDouble("ratio", message.getImageRatio());
-                                            videoMap.putInt("duration", message.getDuration());
-                                            contentMap.putMap("video", videoMap);
-                                            break;
-                                        case 4:
-                                            WritableMap audioMap = Arguments.createMap();
-                                            audioMap.putString("filePath", message.getFileUrl());
-                                            audioMap.putInt("duration", message.getDuration());
-                                            contentMap.putMap("audio", audioMap);
-                                            break;
-                                        case 5:
-                                            WritableMap fileMap = Arguments.createMap();
-                                            fileMap.putString("filePath", message.getFileUrl());
-                                            fileMap.putString("filename", message.getFileName());
-                                            fileMap.putDouble("length", message.getFileLength());
-                                            contentMap.putMap("file", fileMap);
-                                            break;
-                                        case 7:
-                                            try {
-                                                contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                            } catch (JSONException e) {
-                                                e.printStackTrace();
-                                            }
-                                            break;
-                                        case 9:
-                                            WritableMap locationMap = Arguments.createMap();
-                                            locationMap.putDouble("lat", message.getLatitude());
-                                            locationMap.putDouble("lon", message.getLongitude());
-                                            contentMap.putMap("location", locationMap);
-                                            break;
-                                        case 10:
-                                            WritableMap contactMap = Arguments.createMap();
-                                            contactMap.putString("vcard", message.getContact());
-                                            contentMap.putMap("contact", contactMap);
-                                            break;
-                                        case 11:
-                                            WritableMap stickerMap = Arguments.createMap();
-                                            stickerMap.putString("name", message.getStickerName());
-                                            stickerMap.putString("category", message.getStickerCategory());
-                                            contentMap.putMap("sticker", stickerMap);
-                                            break;
-                                        case 100:
-                                            try {
-                                                contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                            } catch (JSONException e) {
-                                                e.printStackTrace();
-                                            }
-                                            break;
+                                    break;
+                                case CONVERSATION:
+                                    if (jsEvents != null && contains(jsEvents, "onChangeEvent")) {
+                                        data.putInt("objectType", objectType.getValue());
+                                        data.putInt("changeType", changeType.getValue());
+                                        WritableArray objects = Arguments.createArray();
+
+                                        object = Utils.getConversationMap((Conversation) stringeeChange.getObject());
+                                        objects.pushMap(object);
+                                        data.putArray("objects", objects);
+
+                                        params.putMap("data", data);
+                                        sendEvent(getReactApplicationContext(), "onChangeEvent", params);
+                                        break;
                                     }
-                                    object.putMap("content", contentMap);
-                                    String senderId = message.getSenderId();
-                                    User user = mClient.getUser(senderId);
-                                    String name = "";
-                                    if (user != null) {
-                                        name = user.getName();
-                                        if (name == null || name.length() == 0) {
-                                            name = user.getUserId();
+                                    break;
+                                case REQUEST:
+                                    ChatRequest request = (ChatRequest) stringeeChange.getObject();
+                                    data.putMap("request", Utils.getChatRequestMap(request));
+                                    if (changeType == StringeeChange.Type.TIME_OUT) {
+                                        if (jsEvents != null && contains(jsEvents, "onChatRequestTimeout")) {
+                                            params.putMap("data", data);
+                                            sendEvent(getReactApplicationContext(), "onChatRequestTimeout", params);
+                                            break;
                                         }
                                     }
-                                    object.putString("sender", name);
-                                }
-                                objects.pushMap(object);
-                                data.putArray("objects", objects);
+                                    if (changeType == StringeeChange.Type.INSERT || changeType == StringeeChange.Type.UPDATE) {
+                                        if (request.getRequestType() == RequestType.NORMAL) {
+                                            if (jsEvents != null && contains(jsEvents, "onReceiveChatRequest")) {
+                                                params.putMap("data", data);
+                                                sendEvent(getReactApplicationContext(), "onReceiveChatRequest", params);
+                                                break;
+                                            }
+                                        } else {
+                                            if (jsEvents != null && contains(jsEvents, "onReceiveTransferChatRequest")) {
+                                                User user = new User(request.getTransferFrom());
+                                                user.setName(request.getTransferFromName());
+                                                user.setName(request.getTransferFromAvatar());
 
-                                WritableMap params = Arguments.createMap();
-                                params.putString("uuid", instanceId);
-                                params.putMap("data", data);
-                                sendEvent(getReactApplicationContext(), "onChangeEvent", params);
+                                                data.putMap("fromUser", Utils.getUserMap(user));
+                                                params.putMap("data", data);
+                                                sendEvent(getReactApplicationContext(), "onReceiveTransferChatRequest", params);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    break;
                             }
                         }
                     });
@@ -689,7 +642,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             @Override
             public void onSuccess(final Conversation conversation) {
                 if (conversation.isGroup()) {
-                    if (conversation.getState() != Conversation.STATE_LEFT) {
+                    if (conversation.getState() != State.LEFT) {
                         callback.invoke(false, -2, "You must leave this group before deleting");
                         return;
                     }
@@ -735,11 +688,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<User> users) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < users.size(); i++) {
-                            User user = users.get(i);
-                            WritableMap param = Arguments.createMap();
-                            param.putString("userId", user.getUserId());
-                            param.putString("name", user.getName());
-                            param.putString("avatar", user.getAvatarUrl());
+                            WritableMap param = Utils.getUserMap(users.get(i));
                             params.pushMap(param);
                         }
 
@@ -781,11 +730,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<User> users) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < users.size(); i++) {
-                            User user = users.get(i);
-                            WritableMap param = Arguments.createMap();
-                            param.putString("userId", user.getUserId());
-                            param.putString("name", user.getName());
-                            param.putString("avatar", user.getAvatarUrl());
+                            WritableMap param = Utils.getUserMap(users.get(i));
                             params.pushMap(param);
                         }
 
@@ -815,7 +760,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         }
 
         String convId = messageMap.getString("convId");
-        final int type = messageMap.getInt("type");
+        final Type type = Type.getType(messageMap.getInt("type"));
         final ReadableMap msgMap = messageMap.getMap("message");
 
         mClient.getConversation(convId, new CallbackListener<Conversation>() {
@@ -823,43 +768,44 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             public void onSuccess(Conversation conversation) {
                 Message message = new Message(type);
                 switch (type) {
-                    case 1:
+                    case TEXT:
+                    case LINK:
                         message = new Message(msgMap.getString("content"));
                         break;
-                    case 2:
+                    case PHOTO:
                         ReadableMap photoMap = msgMap.getMap("photo");
                         message.setFileUrl(photoMap.getString("filePath"));
                         message.setThumbnailUrl(photoMap.getString("thumbnail"));
                         message.setImageRatio((float) photoMap.getDouble("ratio"));
                         break;
-                    case 3:
+                    case VIDEO:
                         ReadableMap videoMap = msgMap.getMap("video");
                         message.setFileUrl(videoMap.getString("filePath"));
                         message.setThumbnailUrl(videoMap.getString("thumbnail"));
                         message.setImageRatio((float) videoMap.getDouble("ratio"));
                         message.setDuration(videoMap.getInt("duration"));
                         break;
-                    case 4:
+                    case AUDIO:
                         ReadableMap audioMap = msgMap.getMap("audio");
                         message.setFileUrl(audioMap.getString("filePath"));
                         message.setDuration(audioMap.getInt("duration"));
                         break;
-                    case 5:
+                    case FILE:
                         ReadableMap fileMap = msgMap.getMap("file");
                         message.setFileUrl(fileMap.getString("filePath"));
                         message.setFileName(fileMap.getString("filename"));
                         message.setFileLength(fileMap.getInt("length"));
                         break;
-                    case 9:
+                    case LOCATION:
                         ReadableMap locationMap = msgMap.getMap("location");
                         message.setLatitude(locationMap.getDouble("lat"));
                         message.setLongitude(locationMap.getDouble("lon"));
                         break;
-                    case 10:
+                    case CONTACT:
                         ReadableMap contactMap = msgMap.getMap("contact");
                         message.setContact(contactMap.getString("vcard"));
                         break;
-                    case 11:
+                    case STICKER:
                         ReadableMap stickerMap = msgMap.getMap("sticker");
                         message.setStickerCategory(stickerMap.getString("category"));
                         message.setStickerName(stickerMap.getString("name"));
@@ -904,91 +850,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            Message message = messages.get(i);
-                            WritableMap param = Arguments.createMap();
-                            param.putString("id", message.getId());
-                            param.putString("localId", message.getLocalId());
-                            param.putString("conversationId", message.getConversationId());
-                            param.putDouble("createdAt", message.getCreatedAt());
-                            param.putInt("state", message.getState().getValue());
-                            param.putDouble("sequence", message.getSequence());
-                            param.putInt("type", message.getType());
-                            WritableMap contentMap = Arguments.createMap();
-                            switch (message.getType()) {
-                                case 1:
-                                    contentMap.putString("content", message.getText());
-                                    break;
-                                case 2:
-                                    WritableMap photoMap = Arguments.createMap();
-                                    photoMap.putString("filePath", message.getFileUrl());
-                                    photoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    photoMap.putDouble("ratio", message.getImageRatio());
-                                    contentMap.putMap("photo", photoMap);
-                                    break;
-                                case 3:
-                                    WritableMap videoMap = Arguments.createMap();
-                                    videoMap.putString("filePath", message.getFileUrl());
-                                    videoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    videoMap.putDouble("ratio", message.getImageRatio());
-                                    videoMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("video", videoMap);
-                                    break;
-                                case 4:
-                                    WritableMap audioMap = Arguments.createMap();
-                                    audioMap.putString("filePath", message.getFileUrl());
-                                    audioMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("audio", audioMap);
-                                    break;
-                                case 5:
-                                    WritableMap fileMap = Arguments.createMap();
-                                    fileMap.putString("filePath", message.getFileUrl());
-                                    fileMap.putString("filename", message.getFileName());
-                                    fileMap.putDouble("length", message.getFileLength());
-                                    contentMap.putMap("file", fileMap);
-                                    break;
-                                case 7:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-                                case 9:
-                                    WritableMap locationMap = Arguments.createMap();
-                                    locationMap.putDouble("lat", message.getLatitude());
-                                    locationMap.putDouble("lon", message.getLongitude());
-                                    contentMap.putMap("location", locationMap);
-                                    break;
-                                case 10:
-                                    WritableMap contactMap = Arguments.createMap();
-                                    contactMap.putString("vcard", message.getContact());
-                                    contentMap.putMap("contact", contactMap);
-                                    break;
-                                case 11:
-                                    WritableMap stickerMap = Arguments.createMap();
-                                    stickerMap.putString("name", message.getStickerName());
-                                    stickerMap.putString("category", message.getStickerCategory());
-                                    contentMap.putMap("sticker", stickerMap);
-                                    break;
-                                case 100:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-                            }
-                            param.putMap("content", contentMap);
-                            String senderId = message.getSenderId();
-                            User user = mClient.getUser(senderId);
-                            String name = "";
-                            if (user != null) {
-                                name = user.getName();
-                                if (name == null || name.length() == 0) {
-                                    name = user.getUserId();
-                                }
-                            }
-                            param.putString("sender", name);
+                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -1024,91 +886,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            Message message = messages.get(i);
-                            WritableMap param = Arguments.createMap();
-                            param.putString("id", message.getId());
-                            param.putString("localId", message.getLocalId());
-                            param.putString("conversationId", message.getConversationId());
-                            param.putDouble("createdAt", message.getCreatedAt());
-                            param.putInt("state", message.getState().getValue());
-                            param.putDouble("sequence", message.getSequence());
-                            param.putInt("type", message.getType());
-                            WritableMap contentMap = Arguments.createMap();
-                            switch (message.getType()) {
-                                case 1:
-                                    contentMap.putString("content", message.getText());
-                                    break;
-                                case 2:
-                                    WritableMap photoMap = Arguments.createMap();
-                                    photoMap.putString("filePath", message.getFileUrl());
-                                    photoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    photoMap.putDouble("ratio", message.getImageRatio());
-                                    contentMap.putMap("photo", photoMap);
-                                    break;
-                                case 3:
-                                    WritableMap videoMap = Arguments.createMap();
-                                    videoMap.putString("filePath", message.getFileUrl());
-                                    videoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    videoMap.putDouble("ratio", message.getImageRatio());
-                                    videoMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("video", videoMap);
-                                    break;
-                                case 4:
-                                    WritableMap audioMap = Arguments.createMap();
-                                    audioMap.putString("filePath", message.getFileUrl());
-                                    audioMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("audio", audioMap);
-                                    break;
-                                case 5:
-                                    WritableMap fileMap = Arguments.createMap();
-                                    fileMap.putString("filePath", message.getFileUrl());
-                                    fileMap.putString("filename", message.getFileName());
-                                    fileMap.putDouble("length", message.getFileLength());
-                                    contentMap.putMap("file", fileMap);
-                                    break;
-                                case 7:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-                                case 9:
-                                    WritableMap locationMap = Arguments.createMap();
-                                    locationMap.putDouble("lat", message.getLatitude());
-                                    locationMap.putDouble("lon", message.getLongitude());
-                                    contentMap.putMap("location", locationMap);
-                                    break;
-                                case 10:
-                                    WritableMap contactMap = Arguments.createMap();
-                                    contactMap.putString("vcard", message.getContact());
-                                    contentMap.putMap("contact", contactMap);
-                                    break;
-                                case 11:
-                                    WritableMap stickerMap = Arguments.createMap();
-                                    stickerMap.putString("name", message.getStickerName());
-                                    stickerMap.putString("category", message.getStickerCategory());
-                                    contentMap.putMap("sticker", stickerMap);
-                                    break;
-                                case 100:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-                            }
-                            param.putMap("content", contentMap);
-                            String senderId = message.getSenderId();
-                            User user = mClient.getUser(senderId);
-                            String name = "";
-                            if (user != null) {
-                                name = user.getName();
-                                if (name == null || name.length() == 0) {
-                                    name = user.getUserId();
-                                }
-                            }
-                            param.putString("sender", name);
+                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -1145,91 +923,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            Message message = messages.get(i);
-                            WritableMap param = Arguments.createMap();
-                            param.putString("id", message.getId());
-                            param.putString("localId", message.getLocalId());
-                            param.putString("conversationId", message.getConversationId());
-                            param.putDouble("createdAt", message.getCreatedAt());
-                            param.putInt("state", message.getState().getValue());
-                            param.putDouble("sequence", message.getSequence());
-                            param.putInt("type", message.getType());
-                            WritableMap contentMap = Arguments.createMap();
-                            switch (message.getType()) {
-                                case 1:
-                                    contentMap.putString("content", message.getText());
-                                    break;
-                                case 2:
-                                    WritableMap photoMap = Arguments.createMap();
-                                    photoMap.putString("filePath", message.getFileUrl());
-                                    photoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    photoMap.putDouble("ratio", message.getImageRatio());
-                                    contentMap.putMap("photo", photoMap);
-                                    break;
-                                case 3:
-                                    WritableMap videoMap = Arguments.createMap();
-                                    videoMap.putString("filePath", message.getFileUrl());
-                                    videoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    videoMap.putDouble("ratio", message.getImageRatio());
-                                    videoMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("video", videoMap);
-                                    break;
-                                case 4:
-                                    WritableMap audioMap = Arguments.createMap();
-                                    audioMap.putString("filePath", message.getFileUrl());
-                                    audioMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("audio", audioMap);
-                                    break;
-                                case 5:
-                                    WritableMap fileMap = Arguments.createMap();
-                                    fileMap.putString("filePath", message.getFileUrl());
-                                    fileMap.putString("filename", message.getFileName());
-                                    fileMap.putDouble("length", message.getFileLength());
-                                    contentMap.putMap("file", fileMap);
-                                    break;
-                                case 7:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-                                case 9:
-                                    WritableMap locationMap = Arguments.createMap();
-                                    locationMap.putDouble("lat", message.getLatitude());
-                                    locationMap.putDouble("lon", message.getLongitude());
-                                    contentMap.putMap("location", locationMap);
-                                    break;
-                                case 10:
-                                    WritableMap contactMap = Arguments.createMap();
-                                    contactMap.putString("vcard", message.getContact());
-                                    contentMap.putMap("contact", contactMap);
-                                    break;
-                                case 11:
-                                    WritableMap stickerMap = Arguments.createMap();
-                                    stickerMap.putString("name", message.getStickerName());
-                                    stickerMap.putString("category", message.getStickerCategory());
-                                    contentMap.putMap("sticker", stickerMap);
-                                    break;
-                                case 100:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-                            }
-                            param.putMap("content", contentMap);
-                            String senderId = message.getSenderId();
-                            User user = mClient.getUser(senderId);
-                            String name = "";
-                            if (user != null) {
-                                name = user.getName();
-                                if (name == null || name.length() == 0) {
-                                    name = user.getUserId();
-                                }
-                            }
-                            param.putString("sender", name);
+                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -1265,92 +959,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            Message message = messages.get(i);
-                            WritableMap param = Arguments.createMap();
-                            param.putString("id", message.getId());
-                            param.putString("localId", message.getLocalId());
-                            param.putString("conversationId", message.getConversationId());
-                            param.putDouble("createdAt", message.getCreatedAt());
-                            param.putInt("state", message.getState().getValue());
-                            param.putDouble("sequence", message.getSequence());
-                            param.putInt("type", message.getType());
-                            WritableMap contentMap = Arguments.createMap();
-                            switch (message.getType()) {
-                                case 1:
-                                    contentMap.putString("content", message.getText());
-                                    break;
-                                case 2:
-                                    WritableMap photoMap = Arguments.createMap();
-                                    photoMap.putString("filePath", message.getFileUrl());
-                                    photoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    photoMap.putDouble("ratio", message.getImageRatio());
-                                    contentMap.putMap("photo", photoMap);
-                                    break;
-                                case 3:
-                                    WritableMap videoMap = Arguments.createMap();
-                                    videoMap.putString("filePath", message.getFileUrl());
-                                    videoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    videoMap.putDouble("ratio", message.getImageRatio());
-                                    videoMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("video", videoMap);
-                                    break;
-                                case 4:
-                                    WritableMap audioMap = Arguments.createMap();
-                                    audioMap.putString("filePath", message.getFileUrl());
-                                    audioMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("audio", audioMap);
-                                    break;
-                                case 5:
-                                    WritableMap fileMap = Arguments.createMap();
-                                    fileMap.putString("filePath", message.getFileUrl());
-                                    fileMap.putString("filename", message.getFileName());
-                                    fileMap.putDouble("length", message.getFileLength());
-                                    contentMap.putMap("file", fileMap);
-                                    break;
-                                case 7:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-
-                                case 9:
-                                    WritableMap locationMap = Arguments.createMap();
-                                    locationMap.putDouble("lat", message.getLatitude());
-                                    locationMap.putDouble("lon", message.getLongitude());
-                                    contentMap.putMap("location", locationMap);
-                                    break;
-                                case 10:
-                                    WritableMap contactMap = Arguments.createMap();
-                                    contactMap.putString("vcard", message.getContact());
-                                    contentMap.putMap("contact", contactMap);
-                                    break;
-                                case 11:
-                                    WritableMap stickerMap = Arguments.createMap();
-                                    stickerMap.putString("name", message.getStickerName());
-                                    stickerMap.putString("category", message.getStickerCategory());
-                                    contentMap.putMap("sticker", stickerMap);
-                                    break;
-                                case 100:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-                            }
-                            param.putMap("content", contentMap);
-                            String senderId = message.getSenderId();
-                            User user = mClient.getUser(senderId);
-                            String name = "";
-                            if (user != null) {
-                                name = user.getName();
-                                if (name == null || name.length() == 0) {
-                                    name = user.getUserId();
-                                }
-                            }
-                            param.putString("sender", name);
+                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -1439,10 +1048,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
 
         User user = mClient.getUser(userId);
         if (user != null) {
-            WritableMap param = Arguments.createMap();
-            param.putString("userId", user.getUserId());
-            param.putString("name", user.getName());
-            param.putString("avatar", user.getAvatarUrl());
+            WritableMap param = Utils.getUserMap(user);
             callback.invoke(true, 0, "Success", param);
         } else {
             callback.invoke(false, -1, "User does not exist.");
@@ -1523,43 +1129,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         mClient.getConversationByUserId(userId, new CallbackListener<Conversation>() {
             @Override
             public void onSuccess(Conversation conversation) {
-                WritableMap params = Arguments.createMap();
-                params.putString("id", conversation.getId());
-                params.putString("localId", conversation.getLocalId());
-                params.putString("name", conversation.getName());
-                params.putBoolean("isDistinct", conversation.isDistinct());
-                params.putBoolean("isGroup", conversation.isGroup());
-                params.putDouble("updatedAt", conversation.getUpdateAt());
-                params.putString("lastMsgSender", conversation.getLastMsgSender());
-                params.putString("text", conversation.getText());
-                params.putInt("lastMsgType", conversation.getLastMsgType());
-                params.putInt("unreadCount", conversation.getTotalUnread());
-                params.putString("lastMsgId", conversation.getLastMsgId());
-                params.putString("creator", conversation.getCreator());
-                params.putDouble("created", conversation.getCreateAt());
-                params.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                params.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                params.putInt("lastMsgState", conversation.getLastMsgState());
-                if (conversation.getLastMsg() != null) {
-                    try {
-                        Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                        WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                        params.putMap("text", lastMsgMap);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                List<User> participants = conversation.getParticipants();
-                WritableArray participantsMap = Arguments.createArray();
-                for (int i = 0; i < participants.size(); i++) {
-                    User user = participants.get(i);
-                    WritableMap userMap = Arguments.createMap();
-                    userMap.putString("userId", user.getUserId());
-                    userMap.putString("name", user.getName());
-                    userMap.putString("avatar", user.getAvatarUrl());
-                    participantsMap.pushMap(userMap);
-                }
-                params.putArray("participants", participantsMap);
+                WritableMap params = Utils.getConversationMap(conversation);
                 callback.invoke(true, 0, "Success", params);
             }
 
@@ -1604,45 +1174,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             public void onSuccess(List<Conversation> conversations) {
                 WritableArray params = Arguments.createArray();
                 for (int i = 0; i < conversations.size(); i++) {
-                    Conversation conversation = conversations.get(i);
-                    WritableMap param = Arguments.createMap();
-                    param.putString("id", conversation.getId());
-                    param.putString("localId", conversation.getLocalId());
-                    param.putString("name", conversation.getName());
-                    param.putBoolean("isDistinct", conversation.isDistinct());
-                    param.putBoolean("isGroup", conversation.isGroup());
-                    param.putDouble("updatedAt", conversation.getUpdateAt());
-                    param.putString("lastMsgSender", conversation.getLastMsgSender());
-                    param.putString("text", conversation.getText());
-                    param.putInt("lastMsgType", conversation.getLastMsgType());
-                    param.putInt("unreadCount", conversation.getTotalUnread());
-                    param.putString("lastMsgId", conversation.getLastMsgId());
-                    param.putString("creator", conversation.getCreator());
-                    param.putDouble("created", conversation.getCreateAt());
-                    param.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                    param.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                    param.putInt("lastMsgState", conversation.getLastMsgState());
-                    if (conversation.getLastMsg() != null) {
-                        try {
-                            Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                            WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                            param.putMap("text", lastMsgMap);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    List<User> participants = conversation.getParticipants();
-                    WritableArray participantsMap = Arguments.createArray();
-                    for (int j = 0; j < participants.size(); j++) {
-                        User user = participants.get(j);
-                        WritableMap userMap = Arguments.createMap();
-                        userMap.putString("userId", user.getUserId());
-                        userMap.putString("name", user.getName());
-                        userMap.putString("avatar", user.getAvatarUrl());
-                        participantsMap.pushMap(userMap);
-                    }
-                    param.putArray("participants", participantsMap);
-
+                    WritableMap param = Utils.getConversationMap(conversations.get(i));
                     params.pushMap(param);
                 }
                 callback.invoke(true, 0, "Success", params);
@@ -1668,45 +1200,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             public void onSuccess(List<Conversation> conversations) {
                 WritableArray params = Arguments.createArray();
                 for (int i = 0; i < conversations.size(); i++) {
-                    Conversation conversation = conversations.get(i);
-                    WritableMap param = Arguments.createMap();
-                    param.putString("id", conversation.getId());
-                    param.putString("localId", conversation.getLocalId());
-                    param.putString("name", conversation.getName());
-                    param.putBoolean("isDistinct", conversation.isDistinct());
-                    param.putBoolean("isGroup", conversation.isGroup());
-                    param.putDouble("updatedAt", conversation.getUpdateAt());
-                    param.putString("lastMsgSender", conversation.getLastMsgSender());
-                    param.putString("text", conversation.getText());
-                    param.putInt("lastMsgType", conversation.getLastMsgType());
-                    param.putInt("unreadCount", conversation.getTotalUnread());
-                    param.putString("lastMsgId", conversation.getLastMsgId());
-                    param.putString("creator", conversation.getCreator());
-                    param.putDouble("created", conversation.getCreateAt());
-                    param.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                    param.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                    param.putInt("lastMsgState", conversation.getLastMsgState());
-                    if (conversation.getLastMsg() != null) {
-                        try {
-                            Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                            WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                            param.putMap("text", lastMsgMap);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    List<User> participants = conversation.getParticipants();
-                    WritableArray participantsMap = Arguments.createArray();
-                    for (int j = 0; j < participants.size(); j++) {
-                        User user = participants.get(j);
-                        WritableMap userMap = Arguments.createMap();
-                        userMap.putString("userId", user.getUserId());
-                        userMap.putString("name", user.getName());
-                        userMap.putString("avatar", user.getAvatarUrl());
-                        participantsMap.pushMap(userMap);
-                    }
-                    param.putArray("participants", participantsMap);
-
+                    WritableMap param = Utils.getConversationMap(conversations.get(i));
                     params.pushMap(param);
                 }
                 callback.invoke(true, 0, "Success", params);
@@ -1732,45 +1226,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             public void onSuccess(List<Conversation> conversations) {
                 WritableArray params = Arguments.createArray();
                 for (int i = 0; i < conversations.size(); i++) {
-                    Conversation conversation = conversations.get(i);
-                    WritableMap param = Arguments.createMap();
-                    param.putString("id", conversation.getId());
-                    param.putString("localId", conversation.getLocalId());
-                    param.putString("name", conversation.getName());
-                    param.putBoolean("isDistinct", conversation.isDistinct());
-                    param.putBoolean("isGroup", conversation.isGroup());
-                    param.putDouble("updatedAt", conversation.getUpdateAt());
-                    param.putString("lastMsgSender", conversation.getLastMsgSender());
-                    param.putString("text", conversation.getText());
-                    param.putInt("lastMsgType", conversation.getLastMsgType());
-                    param.putInt("unreadCount", conversation.getTotalUnread());
-                    param.putString("lastMsgId", conversation.getLastMsgId());
-                    param.putString("creator", conversation.getCreator());
-                    param.putDouble("created", conversation.getCreateAt());
-                    param.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                    param.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                    param.putInt("lastMsgState", conversation.getLastMsgState());
-                    if (conversation.getLastMsg() != null) {
-                        try {
-                            Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                            WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                            param.putMap("text", lastMsgMap);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    List<User> participants = conversation.getParticipants();
-                    WritableArray participantsMap = Arguments.createArray();
-                    for (int j = 0; j < participants.size(); j++) {
-                        User user = participants.get(j);
-                        WritableMap userMap = Arguments.createMap();
-                        userMap.putString("userId", user.getUserId());
-                        userMap.putString("name", user.getName());
-                        userMap.putString("avatar", user.getAvatarUrl());
-                        participantsMap.pushMap(userMap);
-                    }
-                    param.putArray("participants", participantsMap);
-
+                    WritableMap param = Utils.getConversationMap(conversations.get(i));
                     params.pushMap(param);
                 }
                 callback.invoke(true, 0, "Success", params);
@@ -1796,45 +1252,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             public void onSuccess(List<Conversation> conversations) {
                 WritableArray params = Arguments.createArray();
                 for (int i = 0; i < conversations.size(); i++) {
-                    Conversation conversation = conversations.get(i);
-                    WritableMap param = Arguments.createMap();
-                    param.putString("id", conversation.getId());
-                    param.putString("localId", conversation.getLocalId());
-                    param.putString("name", conversation.getName());
-                    param.putBoolean("isDistinct", conversation.isDistinct());
-                    param.putBoolean("isGroup", conversation.isGroup());
-                    param.putDouble("updatedAt", conversation.getUpdateAt());
-                    param.putString("lastMsgSender", conversation.getLastMsgSender());
-                    param.putString("text", conversation.getText());
-                    param.putInt("lastMsgType", conversation.getLastMsgType());
-                    param.putInt("unreadCount", conversation.getTotalUnread());
-                    param.putString("lastMsgId", conversation.getLastMsgId());
-                    param.putString("creator", conversation.getCreator());
-                    param.putDouble("created", conversation.getCreateAt());
-                    param.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                    param.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                    param.putInt("lastMsgState", conversation.getLastMsgState());
-                    if (conversation.getLastMsg() != null) {
-                        try {
-                            Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                            WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                            param.putMap("text", lastMsgMap);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    List<User> participants = conversation.getParticipants();
-                    WritableArray participantsMap = Arguments.createArray();
-                    for (int j = 0; j < participants.size(); j++) {
-                        User user = participants.get(j);
-                        WritableMap userMap = Arguments.createMap();
-                        userMap.putString("userId", user.getUserId());
-                        userMap.putString("name", user.getName());
-                        userMap.putString("avatar", user.getAvatarUrl());
-                        participantsMap.pushMap(userMap);
-                    }
-                    param.putArray("participants", participantsMap);
-
+                    WritableMap param = Utils.getConversationMap(conversations.get(i));
                     params.pushMap(param);
                 }
                 callback.invoke(true, 0, "Success", params);
@@ -1860,45 +1278,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             public void onSuccess(List<Conversation> conversations) {
                 WritableArray params = Arguments.createArray();
                 for (int i = 0; i < conversations.size(); i++) {
-                    Conversation conversation = conversations.get(i);
-                    WritableMap param = Arguments.createMap();
-                    param.putString("id", conversation.getId());
-                    param.putString("localId", conversation.getLocalId());
-                    param.putString("name", conversation.getName());
-                    param.putBoolean("isDistinct", conversation.isDistinct());
-                    param.putBoolean("isGroup", conversation.isGroup());
-                    param.putDouble("updatedAt", conversation.getUpdateAt());
-                    param.putString("lastMsgSender", conversation.getLastMsgSender());
-                    param.putString("text", conversation.getText());
-                    param.putInt("lastMsgType", conversation.getLastMsgType());
-                    param.putInt("unreadCount", conversation.getTotalUnread());
-                    param.putString("lastMsgId", conversation.getLastMsgId());
-                    param.putString("creator", conversation.getCreator());
-                    param.putDouble("created", conversation.getCreateAt());
-                    param.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                    param.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                    param.putInt("lastMsgState", conversation.getLastMsgState());
-                    if (conversation.getLastMsg() != null) {
-                        try {
-                            Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                            WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                            param.putMap("text", lastMsgMap);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    List<User> participants = conversation.getParticipants();
-                    WritableArray participantsMap = Arguments.createArray();
-                    for (int j = 0; j < participants.size(); j++) {
-                        User user = participants.get(j);
-                        WritableMap userMap = Arguments.createMap();
-                        userMap.putString("userId", user.getUserId());
-                        userMap.putString("name", user.getName());
-                        userMap.putString("avatar", user.getAvatarUrl());
-                        participantsMap.pushMap(userMap);
-                    }
-                    param.putArray("participants", participantsMap);
-
+                    WritableMap param = Utils.getConversationMap(conversations.get(i));
                     params.pushMap(param);
                 }
                 callback.invoke(true, 0, "Success", params);
@@ -1924,45 +1304,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             public void onSuccess(List<Conversation> conversations) {
                 WritableArray params = Arguments.createArray();
                 for (int i = 0; i < conversations.size(); i++) {
-                    Conversation conversation = conversations.get(i);
-                    WritableMap param = Arguments.createMap();
-                    param.putString("id", conversation.getId());
-                    param.putString("localId", conversation.getLocalId());
-                    param.putString("name", conversation.getName());
-                    param.putBoolean("isDistinct", conversation.isDistinct());
-                    param.putBoolean("isGroup", conversation.isGroup());
-                    param.putDouble("updatedAt", conversation.getUpdateAt());
-                    param.putString("lastMsgSender", conversation.getLastMsgSender());
-                    param.putString("text", conversation.getText());
-                    param.putInt("lastMsgType", conversation.getLastMsgType());
-                    param.putInt("unreadCount", conversation.getTotalUnread());
-                    param.putString("lastMsgId", conversation.getLastMsgId());
-                    param.putString("creator", conversation.getCreator());
-                    param.putDouble("created", conversation.getCreateAt());
-                    param.putDouble("lastMsgSeq", conversation.getLastMsgSeqReceived());
-                    param.putDouble("lastMsgCreatedAt", conversation.getLastTimeNewMsg());
-                    param.putInt("lastMsgState", conversation.getLastMsgState());
-                    if (conversation.getLastMsg() != null) {
-                        try {
-                            Bundle bundle = jsonToBundle(conversation.getLastMsg());
-                            WritableMap lastMsgMap = Arguments.fromBundle(bundle);
-                            param.putMap("text", lastMsgMap);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    List<User> participants = conversation.getParticipants();
-                    WritableArray participantsMap = Arguments.createArray();
-                    for (int j = 0; j < participants.size(); j++) {
-                        User user = participants.get(j);
-                        WritableMap userMap = Arguments.createMap();
-                        userMap.putString("userId", user.getUserId());
-                        userMap.putString("name", user.getName());
-                        userMap.putString("avatar", user.getAvatarUrl());
-                        participantsMap.pushMap(userMap);
-                    }
-                    param.putArray("participants", participantsMap);
-
+                    WritableMap param = Utils.getConversationMap(conversations.get(i));
                     params.pushMap(param);
                 }
                 callback.invoke(true, 0, "Success", params);
@@ -1991,91 +1333,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            Message message = messages.get(i);
-                            WritableMap param = Arguments.createMap();
-                            param.putString("id", message.getId());
-                            param.putString("localId", message.getLocalId());
-                            param.putString("conversationId", message.getConversationId());
-                            param.putDouble("createdAt", message.getCreatedAt());
-                            param.putInt("state", message.getState().getValue());
-                            param.putDouble("sequence", message.getSequence());
-                            param.putInt("type", message.getType());
-                            WritableMap contentMap = Arguments.createMap();
-                            switch (message.getType()) {
-                                case 1:
-                                    contentMap.putString("content", message.getText());
-                                    break;
-                                case 2:
-                                    WritableMap photoMap = Arguments.createMap();
-                                    photoMap.putString("filePath", message.getFileUrl());
-                                    photoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    photoMap.putDouble("ratio", message.getImageRatio());
-                                    contentMap.putMap("photo", photoMap);
-                                    break;
-                                case 3:
-                                    WritableMap videoMap = Arguments.createMap();
-                                    videoMap.putString("filePath", message.getFileUrl());
-                                    videoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    videoMap.putDouble("ratio", message.getImageRatio());
-                                    videoMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("video", videoMap);
-                                    break;
-                                case 4:
-                                    WritableMap audioMap = Arguments.createMap();
-                                    audioMap.putString("filePath", message.getFileUrl());
-                                    audioMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("audio", audioMap);
-                                    break;
-                                case 5:
-                                    WritableMap fileMap = Arguments.createMap();
-                                    fileMap.putString("filePath", message.getFileUrl());
-                                    fileMap.putString("filename", message.getFileName());
-                                    fileMap.putDouble("length", message.getFileLength());
-                                    contentMap.putMap("file", fileMap);
-                                    break;
-                                case 7:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-                                case 9:
-                                    WritableMap locationMap = Arguments.createMap();
-                                    locationMap.putDouble("lat", message.getLatitude());
-                                    locationMap.putDouble("lon", message.getLongitude());
-                                    contentMap.putMap("location", locationMap);
-                                    break;
-                                case 10:
-                                    WritableMap contactMap = Arguments.createMap();
-                                    contactMap.putString("vcard", message.getContact());
-                                    contentMap.putMap("contact", contactMap);
-                                    break;
-                                case 11:
-                                    WritableMap stickerMap = Arguments.createMap();
-                                    stickerMap.putString("name", message.getStickerName());
-                                    stickerMap.putString("category", message.getStickerCategory());
-                                    contentMap.putMap("sticker", stickerMap);
-                                    break;
-                                case 100:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-                            }
-                            param.putMap("content", contentMap);
-                            String senderId = message.getSenderId();
-                            User user = mClient.getUser(senderId);
-                            String name = "";
-                            if (user != null) {
-                                name = user.getName();
-                                if (name == null || name.length() == 0) {
-                                    name = user.getUserId();
-                                }
-                            }
-                            param.putString("sender", name);
+                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -2112,91 +1370,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            Message message = messages.get(i);
-                            WritableMap param = Arguments.createMap();
-                            param.putString("id", message.getId());
-                            param.putString("localId", message.getLocalId());
-                            param.putString("conversationId", message.getConversationId());
-                            param.putDouble("createdAt", message.getCreatedAt());
-                            param.putInt("state", message.getState().getValue());
-                            param.putDouble("sequence", message.getSequence());
-                            param.putInt("type", message.getType());
-                            WritableMap contentMap = Arguments.createMap();
-                            switch (message.getType()) {
-                                case 1:
-                                    contentMap.putString("content", message.getText());
-                                    break;
-                                case 2:
-                                    WritableMap photoMap = Arguments.createMap();
-                                    photoMap.putString("filePath", message.getFileUrl());
-                                    photoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    photoMap.putDouble("ratio", message.getImageRatio());
-                                    contentMap.putMap("photo", photoMap);
-                                    break;
-                                case 3:
-                                    WritableMap videoMap = Arguments.createMap();
-                                    videoMap.putString("filePath", message.getFileUrl());
-                                    videoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    videoMap.putDouble("ratio", message.getImageRatio());
-                                    videoMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("video", videoMap);
-                                    break;
-                                case 4:
-                                    WritableMap audioMap = Arguments.createMap();
-                                    audioMap.putString("filePath", message.getFileUrl());
-                                    audioMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("audio", audioMap);
-                                    break;
-                                case 5:
-                                    WritableMap fileMap = Arguments.createMap();
-                                    fileMap.putString("filePath", message.getFileUrl());
-                                    fileMap.putString("filename", message.getFileName());
-                                    fileMap.putDouble("length", message.getFileLength());
-                                    contentMap.putMap("file", fileMap);
-                                    break;
-                                case 7:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-                                case 9:
-                                    WritableMap locationMap = Arguments.createMap();
-                                    locationMap.putDouble("lat", message.getLatitude());
-                                    locationMap.putDouble("lon", message.getLongitude());
-                                    contentMap.putMap("location", locationMap);
-                                    break;
-                                case 10:
-                                    WritableMap contactMap = Arguments.createMap();
-                                    contactMap.putString("vcard", message.getContact());
-                                    contentMap.putMap("contact", contactMap);
-                                    break;
-                                case 11:
-                                    WritableMap stickerMap = Arguments.createMap();
-                                    stickerMap.putString("name", message.getStickerName());
-                                    stickerMap.putString("category", message.getStickerCategory());
-                                    contentMap.putMap("sticker", stickerMap);
-                                    break;
-                                case 100:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-                            }
-                            param.putMap("content", contentMap);
-                            String senderId = message.getSenderId();
-                            User user = mClient.getUser(senderId);
-                            String name = "";
-                            if (user != null) {
-                                name = user.getName();
-                                if (name == null || name.length() == 0) {
-                                    name = user.getUserId();
-                                }
-                            }
-                            param.putString("sender", name);
+                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -2232,92 +1406,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            Message message = messages.get(i);
-                            WritableMap param = Arguments.createMap();
-                            param.putString("id", message.getId());
-                            param.putString("localId", message.getLocalId());
-                            param.putString("conversationId", message.getConversationId());
-                            param.putDouble("createdAt", message.getCreatedAt());
-                            param.putInt("state", message.getState().getValue());
-                            param.putDouble("sequence", message.getSequence());
-                            param.putInt("type", message.getType());
-                            WritableMap contentMap = Arguments.createMap();
-                            switch (message.getType()) {
-                                case 1:
-                                    contentMap.putString("content", message.getText());
-                                    break;
-                                case 2:
-                                    WritableMap photoMap = Arguments.createMap();
-                                    photoMap.putString("filePath", message.getFileUrl());
-                                    photoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    photoMap.putDouble("ratio", message.getImageRatio());
-                                    contentMap.putMap("photo", photoMap);
-                                    break;
-                                case 3:
-                                    WritableMap videoMap = Arguments.createMap();
-                                    videoMap.putString("filePath", message.getFileUrl());
-                                    videoMap.putString("thumbnail", message.getThumbnailUrl());
-                                    videoMap.putDouble("ratio", message.getImageRatio());
-                                    videoMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("video", videoMap);
-                                    break;
-                                case 4:
-                                    WritableMap audioMap = Arguments.createMap();
-                                    audioMap.putString("filePath", message.getFileUrl());
-                                    audioMap.putInt("duration", message.getDuration());
-                                    contentMap.putMap("audio", audioMap);
-                                    break;
-                                case 5:
-                                    WritableMap fileMap = Arguments.createMap();
-                                    fileMap.putString("filePath", message.getFileUrl());
-                                    fileMap.putString("filename", message.getFileName());
-                                    fileMap.putDouble("length", message.getFileLength());
-                                    contentMap.putMap("file", fileMap);
-                                    break;
-                                case 7:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-
-                                case 9:
-                                    WritableMap locationMap = Arguments.createMap();
-                                    locationMap.putDouble("lat", message.getLatitude());
-                                    locationMap.putDouble("lon", message.getLongitude());
-                                    contentMap.putMap("location", locationMap);
-                                    break;
-                                case 10:
-                                    WritableMap contactMap = Arguments.createMap();
-                                    contactMap.putString("vcard", message.getContact());
-                                    contentMap.putMap("contact", contactMap);
-                                    break;
-                                case 11:
-                                    WritableMap stickerMap = Arguments.createMap();
-                                    stickerMap.putString("name", message.getStickerName());
-                                    stickerMap.putString("category", message.getStickerCategory());
-                                    contentMap.putMap("sticker", stickerMap);
-                                    break;
-                                case 100:
-                                    try {
-                                        contentMap = Arguments.fromBundle(jsonToBundle(message.getText()));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-                            }
-                            param.putMap("content", contentMap);
-                            String senderId = message.getSenderId();
-                            User user = mClient.getUser(senderId);
-                            String name = "";
-                            if (user != null) {
-                                name = user.getName();
-                                if (name == null || name.length() == 0) {
-                                    name = user.getUserId();
-                                }
-                            }
-                            param.putString("sender", name);
+                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -2338,103 +1427,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getChatRequests(String instanceId, Callback callback) {
-        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
-        if (mClient == null) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
-            return;
-        }
-
-        mClient.getChatRequests(mClient.getUserId(), new CallbackListener<List<ChatRequest>>() {
-            @Override
-            public void onSuccess(List<ChatRequest> chatRequests) {
-
-            }
-        });
-    }
-
-    @ReactMethod
-    public void acceptChatRequest(String instanceId, String convId, int channelType, Callback callback) {
-        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
-        if (mClient == null) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
-            return;
-        }
-
-        mClient.acceptChatRequest(convId, channelType, new CallbackListener<Conversation>() {
-            @Override
-            public void onSuccess(Conversation conversation) {
-
-            }
-        });
-    }
-
-    @ReactMethod
-    public void rejectChatRequest(String instanceId, String convId, int channelType, Callback callback) {
-        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
-        if (mClient == null) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
-            return;
-        }
-
-        mClient.rejectChatRequest(convId, channelType, new CallbackListener<ChatRequest>() {
-            @Override
-            public void onSuccess(ChatRequest chatRequest) {
-
-            }
-        });
-    }
-
-    @ReactMethod
-    public void endChat(String instanceId, String convId, Callback callback) {
-        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
-        if (mClient == null) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
-            return;
-        }
-
-        mClient.endChat(convId, new StatusListener() {
-            @Override
-            public void onSuccess() {
-
-            }
-        });
-    }
-
-    @ReactMethod
-    public void blockUser(String instanceId, String userId, Callback callback) {
-        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
-        if (mClient == null) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
-            return;
-        }
-
-        mClient.blockUser(userId, new StatusListener() {
-            @Override
-            public void onSuccess() {
-
-            }
-        });
-    }
-
-    @ReactMethod
-    public void preventAddingToGroup(String instanceId, String convId, Callback callback) {
-        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
-        if (mClient == null) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
-            return;
-        }
-
-        mClient.preventAddingToGroup(convId, new StatusListener() {
-            @Override
-            public void onSuccess() {
-
-            }
-        });
-    }
-
-    @ReactMethod
-    public void getChatProfile(String instanceId, String widgetKey, Callback callback) {
+    public void getChatProfile(String instanceId, String widgetKey, final Callback callback) {
         StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
         if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected");
@@ -2444,13 +1437,20 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         mClient.getChatProfile(widgetKey, new CallbackListener<ChatProfile>() {
             @Override
             public void onSuccess(ChatProfile chatProfile) {
+                WritableMap params = Utils.getChatProfileMap(chatProfile);
+                callback.invoke(true, 0, "Success", params);
+            }
 
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
             }
         });
     }
 
     @ReactMethod
-    public void getLiveChatToken(String instanceId, String widgetKey, String name, String email, Callback callback) {
+    public void getLiveChatToken(String instanceId, String widgetKey, String name, String email, final Callback callback) {
         StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
         if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected");
@@ -2459,8 +1459,36 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
 
         mClient.getLiveChatToken(widgetKey, name, email, new CallbackListener<String>() {
             @Override
-            public void onSuccess(String s) {
+            public void onSuccess(String token) {
+                callback.invoke(true, 0, "Success", token);
+            }
 
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+            }
+        });
+    }
+
+    @ReactMethod
+    public void updateUserInfo(String instanceId, String name, String email, String avatar, final Callback callback) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
+            return;
+        }
+
+        mClient.updateUser(name, email, avatar, new StatusListener() {
+            @Override
+            public void onSuccess() {
+                callback.invoke(true, 0, "Success");
+            }
+
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
             }
         });
     }
@@ -2476,13 +1504,64 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         mClient.startLiveChat(queueId, new CallbackListener<Conversation>() {
             @Override
             public void onSuccess(Conversation conversation) {
+                WritableMap params = Utils.getConversationMap(conversation);
+                callback.invoke(true, 0, "Success", params);
+            }
 
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
             }
         });
     }
 
     @ReactMethod
-    public void createLiveChatTicket(String instanceId, String widgetKey, String name, String email, String note, Callback callback) {
+    public void sendChatTranscript(String instanceId, String email, String convId, String domain, Callback callback) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
+            return;
+        }
+
+        mClient.sendChatTranscript(convId, email, domain, new StatusListener() {
+            @Override
+            public void onSuccess() {
+                callback.invoke(true, 0, "Success");
+            }
+
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+            }
+        });
+    }
+
+    @ReactMethod
+    public void endChat(String instanceId, String convId, Callback callback) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
+            return;
+        }
+
+        mClient.endChat(convId, new StatusListener() {
+            @Override
+            public void onSuccess() {
+                callback.invoke(true, 0, "Success");
+            }
+
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+            }
+        });
+    }
+
+    @ReactMethod
+    public void createTicketForMissedChat(String instanceId, String widgetKey, String name, String email, String note, Callback callback) {
         StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
         if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected");
@@ -2492,62 +1571,65 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         mClient.createLiveChatTicket(widgetKey, name, email, note, new StatusListener() {
             @Override
             public void onSuccess() {
+                callback.invoke(true, 0, "Success");
+            }
 
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
             }
         });
     }
 
     @ReactMethod
-    public void updateUser(String instanceId, String name, String email, String avatar, Callback callback) {
+    public void acceptChatRequest(String instanceId, String convId, int channelType, Callback callback) {
         StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
         if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected");
             return;
         }
 
-        mClient.updateUser(name, email, avatar, new StatusListener() {
+        mClient.acceptChatRequest(convId, ChannelType.getType(channelType), new CallbackListener<Conversation>() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(Conversation conversation) {
+                WritableMap params = Utils.getConversationMap(conversation);
+                callback.invoke(true, 0, "Success", params);
+            }
 
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
             }
         });
     }
 
     @ReactMethod
-    public void revokeMessages(String instanceId, String convId, String msgId, boolean deleted, Callback callback) {
-        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
-        if (mClient == null) {
-            callback.invoke(false, -1, "StringeeClient is not initialized or connected");
-            return;
-        }
-        JSONArray messageIds = new JSONArray();
-        messageIds.put(msgId);
-        mClient.revokeMessages(convId, messageIds, deleted, new StatusListener() {
-            @Override
-            public void onSuccess() {
-
-            }
-        });
-    }
-
-    @ReactMethod
-    public void getLiveChat(String instanceId, boolean ended, Callback callback) {
+    public void rejectChatRequest(String instanceId, String convId, int channelType, Callback callback) {
         StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
         if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected");
             return;
         }
 
-        mClient.getLiveChat(mClient.getUserId(), ended, new CallbackListener<List<Conversation>>() {
+        mClient.rejectChatRequest(convId, ChannelType.getType(channelType), new CallbackListener<ChatRequest>() {
             @Override
-            public void onSuccess(List<Conversation> conversations) {
+            public void onSuccess(ChatRequest chatRequest) {
+                WritableMap params = Utils.getChatRequestMap(chatRequest);
+                callback.invoke(true, 0, "Success", params);
+            }
 
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
             }
         });
     }
 
     @ReactMethod
-    public void acceptChatTransfer(String instanceId, String convId, Callback callback) {
+    public void acceptTransferChatRequest(String instanceId, String convId, Callback callback) {
         StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
         if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected");
@@ -2559,11 +1641,17 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             public void onSuccess() {
 
             }
+
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+            }
         });
     }
 
     @ReactMethod
-    public void rejectChatTransfer(String instanceId, String convId, Callback callback) {
+    public void rejectTransferChatRequest(String instanceId, String convId, Callback callback) {
         StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
         if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized or connected");
@@ -2575,20 +1663,15 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             public void onSuccess() {
 
             }
+
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+            }
         });
     }
 
-    private Bundle jsonToBundle(String text) throws JSONException {
-        JSONObject jsonObject = new JSONObject(text);
-        Bundle bundle = new Bundle();
-        Iterator iter = jsonObject.keys();
-        while (iter.hasNext()) {
-            String key = (String) iter.next();
-            String value = jsonObject.getString(key);
-            bundle.putString(key, value);
-        }
-        return bundle;
-    }
 
     private void sendEvent(ReactContext reactContext, String eventName, @Nullable WritableMap eventData) {
         reactContext
