@@ -19,6 +19,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.stringee.StringeeClient;
 import com.stringee.call.StringeeCall;
 import com.stringee.call.StringeeCall2;
+import com.stringee.common.SocketAddress;
 import com.stringee.exception.StringeeError;
 import com.stringee.listener.StatusListener;
 import com.stringee.listener.StringeeConnectionListener;
@@ -59,10 +60,25 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createClientWrapper(String instanceId) {
+    public void createClientWrapper(String instanceId, String baseUrl, ReadableArray addressArray ) {
         StringeeClient mClient = mStringeeManager.getClientsMap().get(instanceId);
         if (mClient == null) {
             mClient = new StringeeClient(getReactApplicationContext());
+
+            if (baseUrl != null) {
+                mClient.setBaseAPIUrl(baseUrl);
+            }
+            if (addressArray != null){
+                List<SocketAddress> socketAddresses = new ArrayList<>();
+                if (socketAddresses.size()>0) {
+                    for (int i = 0; i < addressArray.size(); i++) {
+                        ReadableMap addressMap = addressArray.getMap(i);
+                        SocketAddress socketAddress = new SocketAddress(addressMap.getString("host"), addressMap.getInt("port"));
+                        socketAddresses.add(socketAddress);
+                    }
+                    mClient.setHost(socketAddresses);
+                }
+            }
             StringeeClient finalClient = mClient;
             mClient.setConnectionListener(new StringeeConnectionListener() {
                 @Override
