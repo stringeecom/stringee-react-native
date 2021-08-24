@@ -46,13 +46,23 @@ RCT_EXPORT_METHOD(removeNativeEvent:(NSString *)uuid event:(NSString *)event) {
     [clientWrapper removeNativeEvent:event];
 }
 
-RCT_EXPORT_METHOD(createClientWrapper:(NSString *)uuid) {
+RCT_EXPORT_METHOD(createClientWrapper:(NSString *)uuid baseUrl:(NSString *)baseUrl addresses:(NSArray *)addresses) {
     RNClientWrapper *clientWrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
     if (clientWrapper != nil) {
         return;
     }
     
-    RNClientWrapper *newClientWrapper = [[RNClientWrapper alloc] initWithIdentifier:uuid];
+    NSMutableArray<StringeeServerAddress *> *addrs = [NSMutableArray new];
+    if (addresses != nil && addresses.count > 0) {
+        for (NSDictionary *dic in addresses) {
+            NSString *host = dic[@"host"];
+            int port = [(NSNumber *)dic[@"port"] intValue];
+            StringeeServerAddress *addr = [[StringeeServerAddress alloc] initWithHost:host port:port];
+            [addrs addObject:addr];
+        }
+    }
+    
+    RNClientWrapper *newClientWrapper = [[RNClientWrapper alloc] initWithIdentifier:uuid baseUrl:baseUrl serverAddresses:addrs];
     [RNStringeeInstanceManager.instance.clientWrappers setObject:newClientWrapper forKey:uuid];
 }
 

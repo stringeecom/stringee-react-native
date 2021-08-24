@@ -12,15 +12,19 @@
 
 @implementation RNClientWrapper {
     NSMutableArray<NSString *> *jsEvents;
+    NSArray<StringeeServerAddress *> *_serverAddresses;
+    NSString *_baseUrl;
 }
 
-- (instancetype)initWithIdentifier:(NSString *)identifier
+- (instancetype)initWithIdentifier:(NSString *)identifier baseUrl:(NSString *)baseUrl serverAddresses:(NSArray<StringeeServerAddress *> *)serverAddresses
 {
     self = [super init];
     if (self) {
         self.identifier = identifier;
         jsEvents = [[NSMutableArray alloc] init];
         _messages = [[NSMutableDictionary alloc] init];
+        _serverAddresses = serverAddresses;
+        _baseUrl = baseUrl;
     }
     return self;
 }
@@ -46,8 +50,19 @@
 
 - (void)createClientIfNeed {
     if (!_client) {
-        _client = [[StringeeClient alloc] initWithConnectionDelegate:self];
+        if (_serverAddresses != nil && _serverAddresses.count > 0) {
+            _client = [[StringeeClient alloc] initWithServerAddress:_serverAddresses];
+        } else {
+            _client = [[StringeeClient alloc] init];
+        }
+        _client.connectionDelegate = self;
         _client.incomingCallDelegate = self;
+        
+        if (_baseUrl != nil && _baseUrl.length > 0) {
+            [_client setRestBaseUrl:_baseUrl completionHandler:^(BOOL status, int code, NSString *message) {
+                            
+            }];
+        }
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleObjectChangeNotification:) name:StringeeClientObjectsDidChangeNotification object:_client];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessageNotification:) name:StringeeClientNewMessageNotification object:_client];

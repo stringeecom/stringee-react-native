@@ -15,7 +15,7 @@ export default class extends Component {
     static propTypes = {
         eventHandlers: PropTypes.object,
         baseUrl: PropTypes.string,
-        addresses: PropTypes.array
+        serverAddresses: PropTypes.array
     };
 
     constructor(props) {
@@ -26,7 +26,7 @@ export default class extends Component {
 
         // Sinh uuid va tao wrapper object trong native
         this.uuid = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        RNStringeeClient.createClientWrapper(this.uuid, this.props.baseUrl, this.props.addresses);
+        RNStringeeClient.createClientWrapper(this.uuid, this.props.baseUrl, this.props.serverAddresses);
 
         this.getId = this.getId.bind(this);
         this.connect = this.connect.bind(this);

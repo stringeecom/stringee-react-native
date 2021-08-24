@@ -15,7 +15,7 @@
 @property (assign, nonatomic) BOOL isConnecting; // client dang thuc hien connect toi Stringee Server
 @property (nonatomic) NSMutableDictionary *messages;
 
-- (instancetype)initWithIdentifier:(NSString *)identifier;
+- (instancetype)initWithIdentifier:(NSString *)identifier baseUrl:(NSString *)baseUrl serverAddresses:(NSArray<StringeeServerAddress *> *)serverAddresses;
 
 - (void)setNativeEvent:(NSString *)event;
 

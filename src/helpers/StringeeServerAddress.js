@@ -1,7 +1,7 @@
 class StringeeServerAddress {
-    constructor(props) {
-        this.host = props.host;
-        this.port = props.port;
+    constructor(host: string, port: number) {
+        this.host = host;
+        this.port = Number.isInteger(port) ? port : 0;
     }
 }
 
