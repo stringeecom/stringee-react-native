@@ -33,15 +33,15 @@
             [[RNStringeeInstanceManager instance].rnCall2 addRenderToView:self callId:_callId isLocal:_local];
             hasDisplayed = YES;
         } else {
-            if (_local) {
-                [[RNStringeeInstanceManager instance].rnRoom addRenderToView:self streamId:_streamId isLocal:_local];
-                hasDisplayed = YES;
-            } else {
-                if (_streamId.length) {
-                    [[RNStringeeInstanceManager instance].rnRoom addRenderToView:self streamId:_streamId isLocal:_local];
-                    hasDisplayed = YES;
-                }
-            }
+//            if (_local) {
+//                [[RNStringeeInstanceManager instance].rnRoom addRenderToView:self streamId:_streamId isLocal:_local];
+//                hasDisplayed = YES;
+//            } else {
+//                if (_streamId.length) {
+//                    [[RNStringeeInstanceManager instance].rnRoom addRenderToView:self streamId:_streamId isLocal:_local];
+//                    hasDisplayed = YES;
+//                }
+//            }
         }
     }
 }
