@@ -13,7 +13,9 @@ const iOS = Platform.OS === "ios" ? true : false;
 
 export default class extends Component {
     static propTypes = {
-        eventHandlers: PropTypes.object
+        eventHandlers: PropTypes.object,
+        baseUrl: PropTypes.string,
+        addresses: PropTypes.array
     };
 
     constructor(props) {
@@ -24,7 +26,7 @@ export default class extends Component {
 
         // Sinh uuid va tao wrapper object trong native
         this.uuid = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        RNStringeeClient.createClientWrapper(this.uuid);
+        RNStringeeClient.createClientWrapper(this.uuid, this.props.baseUrl, this.props.addresses);
 
         this.getId = this.getId.bind(this);
         this.connect = this.connect.bind(this);
