@@ -60,7 +60,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createClientWrapper(String instanceId, String baseUrl, ReadableArray addressArray ) {
+    public void createClientWrapper(String instanceId, String baseUrl, ReadableArray addressArray) {
         StringeeClient mClient = mStringeeManager.getClientsMap().get(instanceId);
         if (mClient == null) {
             mClient = new StringeeClient(getReactApplicationContext());
@@ -68,9 +68,9 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             if (baseUrl != null) {
                 mClient.setBaseAPIUrl(baseUrl);
             }
-            if (addressArray != null){
+            if (addressArray != null) {
                 List<SocketAddress> socketAddresses = new ArrayList<>();
-                if (socketAddresses.size()>0) {
+                if (addressArray.size() > 0) {
                     for (int i = 0; i < addressArray.size(); i++) {
                         ReadableMap addressMap = addressArray.getMap(i);
                         SocketAddress socketAddress = new SocketAddress(addressMap.getString("host"), addressMap.getInt("port"));
