@@ -2,8 +2,6 @@ package com.stringeereactnative;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 
 import androidx.annotation.Nullable;
 
@@ -21,6 +19,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.stringee.StringeeClient;
 import com.stringee.call.StringeeCall;
 import com.stringee.call.StringeeCall2;
+import com.stringee.common.SocketAddress;
 import com.stringee.exception.StringeeError;
 import com.stringee.listener.StatusListener;
 import com.stringee.listener.StringeeConnectionListener;
@@ -54,12 +53,10 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
     private Map<String, ArrayList<String>> eventsMap = new HashMap<>();
     private Context mContext;
 
-
     public RNStringeeClientModule(ReactApplicationContext context) {
         super(context);
         mContext = context;
         mStringeeManager = StringeeManager.getInstance();
-
     }
 
     @Override
@@ -68,194 +65,164 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createClientWrapper(String instanceId) {
+    public void createClientWrapper(String instanceId, String baseUrl, ReadableArray addressArray) {
         StringeeClient mClient = mStringeeManager.getClientsMap().get(instanceId);
         if (mClient == null) {
             mClient = new StringeeClient(getReactApplicationContext());
-            Handler handler = new Handler(Looper.getMainLooper());
+
+            if (baseUrl != null) {
+                mClient.setBaseAPIUrl(baseUrl);
+            }
+            if (addressArray != null) {
+                List<SocketAddress> socketAddresses = new ArrayList<>();
+                if (addressArray.size() > 0) {
+                    for (int i = 0; i < addressArray.size(); i++) {
+                        ReadableMap addressMap = addressArray.getMap(i);
+                        SocketAddress socketAddress = new SocketAddress(addressMap.getString("host"), addressMap.getInt("port"));
+                        socketAddresses.add(socketAddress);
+                    }
+                    mClient.setHost(socketAddresses);
+                }
+            }
+            StringeeClient finalClient = mClient;
             mClient.setConnectionListener(new StringeeConnectionListener() {
                 @Override
                 public void onConnectionConnected(StringeeClient stringeeClient, boolean b) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ArrayList<String> jsEvents = eventsMap.get(instanceId);
-                            if (jsEvents != null && contains(jsEvents, "onConnectionConnected")) {
-                                WritableMap data = Arguments.createMap();
-                                data.putString("userId", stringeeClient.getUserId());
-                                data.putInt("projectId", stringeeClient.getProjectId());
-                                data.putBoolean("isReconnecting", b);
-                                WritableMap params = Arguments.createMap();
-                                params.putString("uuid", instanceId);
-                                params.putMap("data", data);
-                                sendEvent(getReactApplicationContext(), "onConnectionConnected", params);
-                            }
-                        }
-                    });
+                    ArrayList<String> jsEvents = eventsMap.get(instanceId);
+                    if (jsEvents != null && contains(jsEvents, "onConnectionConnected")) {
+                        WritableMap data = Arguments.createMap();
+                        data.putString("userId", stringeeClient.getUserId());
+                        data.putInt("projectId", stringeeClient.getProjectId());
+                        data.putBoolean("isReconnecting", b);
+                        WritableMap params = Arguments.createMap();
+                        params.putString("uuid", instanceId);
+                        params.putMap("data", data);
+                        sendEvent(getReactApplicationContext(), "onConnectionConnected", params);
+                    }
                 }
 
                 @Override
                 public void onConnectionDisconnected(StringeeClient stringeeClient, boolean b) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ArrayList<String> jsEvents = eventsMap.get(instanceId);
-                            if (jsEvents != null && contains(jsEvents, "onConnectionDisconnected")) {
-                                WritableMap data = Arguments.createMap();
-                                data.putString("userId", stringeeClient.getUserId());
-                                data.putInt("projectId", stringeeClient.getProjectId());
-                                data.putBoolean("isReconnecting", b);
-                                WritableMap params = Arguments.createMap();
-                                params.putString("uuid", instanceId);
-                                params.putMap("data", data);
-                                sendEvent(getReactApplicationContext(), "onConnectionDisconnected", params);
-                            }
-                        }
-                    });
+                    ArrayList<String> jsEvents = eventsMap.get(instanceId);
+                    if (jsEvents != null && contains(jsEvents, "onConnectionDisconnected")) {
+                        WritableMap data = Arguments.createMap();
+                        data.putString("userId", stringeeClient.getUserId());
+                        data.putInt("projectId", stringeeClient.getProjectId());
+                        data.putBoolean("isReconnecting", b);
+                        WritableMap params = Arguments.createMap();
+                        params.putString("uuid", instanceId);
+                        params.putMap("data", data);
+                        sendEvent(getReactApplicationContext(), "onConnectionDisconnected", params);
+                    }
                 }
 
                 @Override
                 public void onIncomingCall(StringeeCall stringeeCall) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ArrayList<String> jsEvents = eventsMap.get(instanceId);
-                            if (jsEvents != null && contains(jsEvents, "onIncomingCall")) {
-                                StringeeManager.getInstance().getCallsMap().put(stringeeCall.getCallId(), stringeeCall);
-                                WritableMap data = Arguments.createMap();
-                                StringeeClient mClient = mStringeeManager.getClientsMap().get(instanceId);
-                                data.putString("userId", mClient.getUserId());
-                                data.putString("callId", stringeeCall.getCallId());
-                                data.putString("from", stringeeCall.getFrom());
-                                data.putString("to", stringeeCall.getTo());
-                                data.putString("fromAlias", stringeeCall.getFromAlias());
-                                data.putString("toAlias", stringeeCall.getToAlias());
-                                int callType = 1;
-                                if (stringeeCall.isPhoneToAppCall()) {
-                                    callType = 3;
-                                }
-                                data.putInt("callType", callType);
-                                data.putBoolean("isVideoCall", stringeeCall.isVideoCall());
-                                data.putString("customDataFromYourServer", stringeeCall.getCustomDataFromYourServer());
-
-                                WritableMap params = Arguments.createMap();
-                                params.putString("uuid", instanceId);
-                                params.putMap("data", data);
-                                sendEvent(getReactApplicationContext(), "onIncomingCall", params);
-                            }
+                    ArrayList<String> jsEvents = eventsMap.get(instanceId);
+                    if (jsEvents != null && contains(jsEvents, "onIncomingCall")) {
+                        StringeeManager.getInstance().getCallsMap().put(stringeeCall.getCallId(), stringeeCall);
+                        WritableMap data = Arguments.createMap();
+                        data.putString("userId", finalClient.getUserId());
+                        data.putString("callId", stringeeCall.getCallId());
+                        data.putString("from", stringeeCall.getFrom());
+                        data.putString("to", stringeeCall.getTo());
+                        data.putString("fromAlias", stringeeCall.getFromAlias());
+                        data.putString("toAlias", stringeeCall.getToAlias());
+                        int callType = 1;
+                        if (stringeeCall.isPhoneToAppCall()) {
+                            callType = 3;
                         }
-                    });
+                        data.putInt("callType", callType);
+                        data.putBoolean("isVideoCall", stringeeCall.isVideoCall());
+                        data.putString("customDataFromYourServer", stringeeCall.getCustomDataFromYourServer());
+
+                        WritableMap params = Arguments.createMap();
+                        params.putString("uuid", instanceId);
+                        params.putMap("data", data);
+                        sendEvent(getReactApplicationContext(), "onIncomingCall", params);
+                    }
                 }
 
                 @Override
                 public void onIncomingCall2(StringeeCall2 stringeeCall2) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            StringeeClient mClient = mStringeeManager.getClientsMap().get(instanceId);
-                            ArrayList<String> jsEvents = eventsMap.get(instanceId);
-                            if (jsEvents != null && contains(jsEvents, "onIncomingCall2")) {
-                                StringeeManager.getInstance().getCalls2Map().put(stringeeCall2.getCallId(), stringeeCall2);
-                                WritableMap data = Arguments.createMap();
-                                data.putString("userId", mClient.getUserId());
-                                data.putString("callId", stringeeCall2.getCallId());
-                                data.putString("from", stringeeCall2.getFrom());
-                                data.putString("to", stringeeCall2.getTo());
-                                data.putString("fromAlias", stringeeCall2.getFromAlias());
-                                data.putString("toAlias", stringeeCall2.getToAlias());
-                                int callType = 2;
-                                data.putInt("callType", callType);
-                                data.putBoolean("isVideoCall", stringeeCall2.isVideoCall());
-                                data.putString("customDataFromYourServer", stringeeCall2.getCustomDataFromYourServer());
+                    ArrayList<String> jsEvents = eventsMap.get(instanceId);
+                    if (jsEvents != null && contains(jsEvents, "onIncomingCall2")) {
+                        StringeeManager.getInstance().getCalls2Map().put(stringeeCall2.getCallId(), stringeeCall2);
+                        WritableMap data = Arguments.createMap();
+                        data.putString("userId", finalClient.getUserId());
+                        data.putString("callId", stringeeCall2.getCallId());
+                        data.putString("from", stringeeCall2.getFrom());
+                        data.putString("to", stringeeCall2.getTo());
+                        data.putString("fromAlias", stringeeCall2.getFromAlias());
+                        data.putString("toAlias", stringeeCall2.getToAlias());
+                        int callType = 2;
+                        data.putInt("callType", callType);
+                        data.putBoolean("isVideoCall", stringeeCall2.isVideoCall());
+                        data.putString("customDataFromYourServer", stringeeCall2.getCustomDataFromYourServer());
 
-                                WritableMap params = Arguments.createMap();
-                                params.putString("uuid", instanceId);
-                                params.putMap("data", data);
-                                sendEvent(getReactApplicationContext(), "onIncomingCall2", params);
-                            }
-                        }
-                    });
+                        WritableMap params = Arguments.createMap();
+                        params.putString("uuid", instanceId);
+                        params.putMap("data", data);
+                        sendEvent(getReactApplicationContext(), "onIncomingCall2", params);
+                    }
                 }
 
                 @Override
                 public void onConnectionError(StringeeClient stringeeClient, StringeeError stringeeError) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ArrayList<String> jsEvents = eventsMap.get(instanceId);
-                            if (jsEvents != null && contains(jsEvents, "onConnectionError")) {
-                                WritableMap data = Arguments.createMap();
-                                data.putInt("code", stringeeError.getCode());
-                                data.putString("message", stringeeError.getMessage());
+                    ArrayList<String> jsEvents = eventsMap.get(instanceId);
+                    if (jsEvents != null && contains(jsEvents, "onConnectionError")) {
+                        WritableMap data = Arguments.createMap();
+                        data.putInt("code", stringeeError.getCode());
+                        data.putString("message", stringeeError.getMessage());
 
-                                WritableMap params = Arguments.createMap();
-                                params.putString("uuid", instanceId);
-                                params.putMap("data", data);
-                                sendEvent(getReactApplicationContext(), "onConnectionError", params);
-                            }
-                        }
-                    });
+                        WritableMap params = Arguments.createMap();
+                        params.putString("uuid", instanceId);
+                        params.putMap("data", data);
+                        sendEvent(getReactApplicationContext(), "onConnectionError", params);
+                    }
                 }
 
                 @Override
                 public void onRequestNewToken(StringeeClient stringeeClient) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ArrayList<String> jsEvents = eventsMap.get(instanceId);
-                            if (jsEvents != null && contains(jsEvents, "onRequestNewToken")) {
-                                sendEvent(getReactApplicationContext(), "onRequestNewToken", null);
-                            }
-                        }
-                    });
+                    ArrayList<String> jsEvents = eventsMap.get(instanceId);
+                    if (jsEvents != null && contains(jsEvents, "onRequestNewToken")) {
+                        sendEvent(getReactApplicationContext(), "onRequestNewToken", null);
+                    }
                 }
 
                 @Override
                 public void onCustomMessage(String s, JSONObject jsonObject) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ArrayList<String> jsEvents = eventsMap.get(instanceId);
-                            if (jsEvents != null && contains(jsEvents, "onCustomMessage")) {
-                                WritableMap data = Arguments.createMap();
-                                data.putString("from", s);
-                                data.putString("data", jsonObject.toString());
+                    ArrayList<String> jsEvents = eventsMap.get(instanceId);
+                    if (jsEvents != null && contains(jsEvents, "onCustomMessage")) {
+                        WritableMap data = Arguments.createMap();
+                        data.putString("from", s);
+                        data.putString("data", jsonObject.toString());
 
-                                WritableMap params = Arguments.createMap();
-                                params.putString("uuid", instanceId);
-                                params.putMap("data", data);
-                                sendEvent(getReactApplicationContext(), "onCustomMessage", params);
-                            }
-                        }
-                    });
+                        WritableMap params = Arguments.createMap();
+                        params.putString("uuid", instanceId);
+                        params.putMap("data", data);
+                        sendEvent(getReactApplicationContext(), "onCustomMessage", params);
+                    }
                 }
 
                 @Override
                 public void onTopicMessage(String s, JSONObject jsonObject) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ArrayList<String> jsEvents = eventsMap.get(instanceId);
-                            if (jsEvents != null && contains(jsEvents, "onTopicMessage")) {
-                                WritableMap data = Arguments.createMap();
-                                data.putString("from", s);
-                                data.putString("data", jsonObject.toString());
+                    ArrayList<String> jsEvents = eventsMap.get(instanceId);
+                    if (jsEvents != null && contains(jsEvents, "onTopicMessage")) {
+                        WritableMap data = Arguments.createMap();
+                        data.putString("from", s);
+                        data.putString("data", jsonObject.toString());
 
-                                WritableMap params = Arguments.createMap();
-                                params.putString("uuid", instanceId);
-                                params.putMap("data", data);
-                                sendEvent(getReactApplicationContext(), "onTopicMessage", params);
-                            }
-                        }
-                    });
+                        WritableMap params = Arguments.createMap();
+                        params.putString("uuid", instanceId);
+                        params.putMap("data", data);
+                        sendEvent(getReactApplicationContext(), "onTopicMessage", params);
+                    }
                 }
             });
             mClient.setChangeEventListenter(new ChangeEventListenter() {
                 @Override
                 public void onChangeEvent(StringeeChange stringeeChange) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
                             StringeeClient mClient = mStringeeManager.getClientsMap().get(instanceId);
                             ArrayList<String> jsEvents = eventsMap.get(instanceId);
                             StringeeObject.Type objectType = stringeeChange.getObjectType();
@@ -346,8 +313,6 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                                     }
                                     break;
                             }
-                        }
-                    });
                 }
             });
             mStringeeManager.getClientsMap().put(instanceId, mClient);

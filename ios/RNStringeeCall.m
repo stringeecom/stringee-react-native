@@ -391,7 +391,7 @@ RCT_EXPORT_METHOD(enableVideo:(NSString *)callId enableVideo:(BOOL)enableVideo c
 - (void)didChangeSignalingState:(StringeeCall *)stringeeCall signalingState:(SignalingState)signalingState reason:(NSString *)reason sipCode:(int)sipCode sipReason:(NSString *)sipReason {
     
     if ([jsEvents containsObject:didChangeSignalingState]) {
-        [self sendEventWithName:didChangeSignalingState body:@{ @"callId" : stringeeCall.callId, @"code" : @(signalingState), @"reason" : reason, @"sipCode" : @(sipCode), @"sipReason" : sipReason }];
+        [self sendEventWithName:didChangeSignalingState body:@{ @"callId" : stringeeCall.callId, @"code" : @(signalingState), @"reason" : reason, @"sipCode" : @(sipCode), @"sipReason" : sipReason, @"serial": @(stringeeCall.serial) }];
     }
 }
 

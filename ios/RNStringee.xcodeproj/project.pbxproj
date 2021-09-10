@@ -11,7 +11,6 @@
 		51491993208EE2DA00EF9B47 /* RNStringeeVideoViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 51491990208EE2D900EF9B47 /* RNStringeeVideoViewManager.m */; };
 		51491994208EE2DA00EF9B47 /* RNStringeeVideoView.m in Sources */ = {isa = PBXBuildFile; fileRef = 51491991208EE2D900EF9B47 /* RNStringeeVideoView.m */; };
 		51540543208C66DF00914AE1 /* RNStringeeClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 51540538208C66DE00914AE1 /* RNStringeeClient.m */; };
-		51540544208C66DF00914AE1 /* RNStringeeRoom.m in Sources */ = {isa = PBXBuildFile; fileRef = 51540539208C66DE00914AE1 /* RNStringeeRoom.m */; };
 		51540547208C66DF00914AE1 /* RNStringeeCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 5154053D208C66DF00914AE1 /* RNStringeeCall.m */; };
 		5154054A208C66DF00914AE1 /* RNStringeeInstanceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 51540542208C66DF00914AE1 /* RNStringeeInstanceManager.m */; };
 		51C19815254A6C4B006610F4 /* RCTConvert+StringeeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 51C19812254A6C4B006610F4 /* RCTConvert+StringeeHelper.m */; };
@@ -40,9 +39,7 @@
 		51491992208EE2D900EF9B47 /* RNStringeeVideoView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNStringeeVideoView.h; sourceTree = "<group>"; };
 		51540534208C66DE00914AE1 /* RNStringeeClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNStringeeClient.h; sourceTree = "<group>"; };
 		51540535208C66DE00914AE1 /* RNStringeeInstanceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNStringeeInstanceManager.h; sourceTree = "<group>"; };
-		51540537208C66DE00914AE1 /* RNStringeeRoom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNStringeeRoom.h; sourceTree = "<group>"; };
 		51540538208C66DE00914AE1 /* RNStringeeClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNStringeeClient.m; sourceTree = "<group>"; };
-		51540539208C66DE00914AE1 /* RNStringeeRoom.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNStringeeRoom.m; sourceTree = "<group>"; };
 		5154053D208C66DF00914AE1 /* RNStringeeCall.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNStringeeCall.m; sourceTree = "<group>"; };
 		51540541208C66DF00914AE1 /* RNStringeeCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNStringeeCall.h; sourceTree = "<group>"; };
 		51540542208C66DF00914AE1 /* RNStringeeInstanceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNStringeeInstanceManager.m; sourceTree = "<group>"; };
@@ -86,8 +83,6 @@
 				5154053D208C66DF00914AE1 /* RNStringeeCall.m */,
 				511CA581254803D200A697B9 /* RNStringeeCall2.h */,
 				511CA580254803D200A697B9 /* RNStringeeCall2.m */,
-				51540537208C66DE00914AE1 /* RNStringeeRoom.h */,
-				51540539208C66DE00914AE1 /* RNStringeeRoom.m */,
 				51491992208EE2D900EF9B47 /* RNStringeeVideoView.h */,
 				51491991208EE2D900EF9B47 /* RNStringeeVideoView.m */,
 				5149198F208EE2D900EF9B47 /* RNStringeeVideoViewManager.h */,
@@ -159,7 +154,6 @@
 				511CA582254803D200A697B9 /* RNStringeeCall2.m in Sources */,
 				51540547208C66DF00914AE1 /* RNStringeeCall.m in Sources */,
 				51C19815254A6C4B006610F4 /* RCTConvert+StringeeHelper.m in Sources */,
-				51540544208C66DF00914AE1 /* RNStringeeRoom.m in Sources */,
 				5154054A208C66DF00914AE1 /* RNStringeeInstanceManager.m in Sources */,
 				51491993208EE2DA00EF9B47 /* RNStringeeVideoViewManager.m in Sources */,
 			);
