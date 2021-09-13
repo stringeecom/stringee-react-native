@@ -92,19 +92,6 @@ public class RNStringeeVideoLayout extends FrameLayout {
                     }
                 }
             }
-        } else if (streamId != null) {
-            stringeeStream = StringeeManager.getInstance().getStreamsMap().get(streamId);
-            if (stringeeStream != null && setOverlay) {
-                if (mViewContainer.getChildCount() > 0) {
-                    mViewContainer.removeAllViews();
-                }
-                View v = stringeeStream.getView();
-                if (v.getParent() != null) {
-                    ((ViewGroup) v.getParent()).removeView(v);
-                }
-                mViewContainer.addView(stringeeStream.getView());
-                stringeeStream.renderView(isOverlay);
-            }
         }
 
         invalidate();

@@ -16,8 +16,6 @@ public class StringeeManager {
     private Map<String, StringeeClient> clientsMap = new HashMap<>();
     private Map<String, StringeeCall> callsMap = new HashMap<>();
     private Map<String, StringeeCall2> calls2Map = new HashMap<>();
-    private Map<String, StringeeStream> streamsMap = new HashMap<>();
-    private Map<Integer, StringeeRoom> roomsMap = new HashMap<>();
 
     public static synchronized StringeeManager getInstance() {
         if (stringeeManager == null) {
@@ -37,14 +35,6 @@ public class StringeeManager {
 
     public Map<String, StringeeCall2> getCalls2Map() {
         return calls2Map;
-    }
-
-    public Map<String, StringeeStream> getStreamsMap() {
-        return streamsMap;
-    }
-
-    public Map<Integer, StringeeRoom> getRoomsMap() {
-        return roomsMap;
     }
 
     public StringeeAudioManager getAudioManager() {

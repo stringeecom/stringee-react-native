@@ -165,10 +165,9 @@ public class Utils {
 
     public static WritableMap getChatRequestMap(ChatRequest chatRequest) {
         WritableMap chatRequestMap = Arguments.createMap();
-        chatRequestMap.putString("id", chatRequest.getId());
+        chatRequestMap.putString("convId", chatRequest.getConvId());
         chatRequestMap.putInt("channelType", chatRequest.getChannelType().getValue());
         chatRequestMap.putInt("type", chatRequest.getRequestType().getValue());
-        chatRequestMap.putString("convId", chatRequest.getConversationId());
         chatRequestMap.putString("customerId", chatRequest.getCustomerId());
         chatRequestMap.putString("customerName", chatRequest.getName());
         return chatRequestMap;
@@ -177,15 +176,15 @@ public class Utils {
     public static WritableMap getChatProfileMap(ChatProfile chatProfile) {
         WritableMap conversationMap = Arguments.createMap();
         conversationMap.putString("id", chatProfile.getId());
-        conversationMap.putBoolean("autoCreateTicket", chatProfile.isAutoCreateTicket());
         conversationMap.putString("background", chatProfile.getBackground());
-        conversationMap.putBoolean("enabled", chatProfile.isEnabledBusinessHour());
-        conversationMap.putBoolean("facebookAsLivechat", chatProfile.isFacebookAsLivechat());
         conversationMap.putString("hour", chatProfile.getBusinessHour());
         conversationMap.putString("language", chatProfile.getLanguage());
         conversationMap.putString("logoUrl", chatProfile.getLogoUrl());
         conversationMap.putString("popupAnswerUrl", chatProfile.getPopupAnswerUrl());
         conversationMap.putString("portal", chatProfile.getPortalId());
+        conversationMap.putBoolean("autoCreateTicket", chatProfile.isAutoCreateTicket());
+        conversationMap.putBoolean("enabled", chatProfile.isEnabledBusinessHour());
+        conversationMap.putBoolean("facebookAsLivechat", chatProfile.isFacebookAsLivechat());
         conversationMap.putInt("projectId", chatProfile.getProjectId());
         conversationMap.putBoolean("zaloAsLivechat", chatProfile.isZaloAsLivechat());
 

@@ -20,6 +20,7 @@ import com.stringee.common.StringeeAudioManager;
 import com.stringee.common.StringeeAudioManager.AudioDevice;
 import com.stringee.common.StringeeAudioManager.AudioManagerEvents;
 import com.stringee.listener.StatusListener;
+import com.stringee.video.StringeeVideoTrack;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -440,6 +441,16 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
             params.putMap("body", bodyParams);
             sendEvent(getReactApplicationContext(), "onRemoteStream", params);
         }
+    }
+
+    @Override
+    public void onVideoTrackAdded(StringeeVideoTrack stringeeVideoTrack) {
+
+    }
+
+    @Override
+    public void onVideoTrackRemoved(StringeeVideoTrack stringeeVideoTrack) {
+
     }
 
     @Override
