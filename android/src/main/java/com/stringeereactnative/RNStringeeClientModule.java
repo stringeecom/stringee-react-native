@@ -1702,8 +1702,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                         chatRequest.accept(mClient, new CallbackListener<Conversation>() {
                             @Override
                             public void onSuccess(Conversation conversation) {
-                                WritableMap params = Utils.getConversationMap(conversation);
-                                callback.invoke(true, 0, "Success", params);
+                                callback.invoke(true, 0, "Success");
                             }
 
                             @Override
