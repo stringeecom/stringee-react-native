@@ -226,7 +226,7 @@ export default class extends Component {
   }
 
   getConversationById(convId: string, callback: RNStringeeEventCallback) {
-    RNStringeeClient.getConversationById(this.uuid, conversationId, (status, code, message, conversation) => {
+    RNStringeeClient.getConversationById(this.uuid, convId, (status, code, message, conversation) => {
       var returnConversation;
       if (status) {
         returnConversation = new Conversation(conversation);
@@ -439,11 +439,11 @@ export default class extends Component {
   }
 
   deleteConversation(convId: string, callback: RNStringeeEventCallback) {
-    RNStringeeClient.deleteConversation(this.uuid, conversationId, callback);
+    RNStringeeClient.deleteConversation(this.uuid, convId, callback);
   }
 
   addParticipants(convId: string, userIds, callback: RNStringeeEventCallback) {
-    RNStringeeClient.addParticipants(this.uuid, conversationId, userIds, (status, code, message, users) => {
+    RNStringeeClient.addParticipants(this.uuid, convId, userIds, (status, code, message, users) => {
       var returnUsers = [];
       if (status) {
         users.map((user) => {
@@ -455,7 +455,7 @@ export default class extends Component {
   }
 
   removeParticipants(convId: string, userIds, callback: RNStringeeEventCallback) {
-    RNStringeeClient.removeParticipants(this.uuid, conversationId, userIds, (status, code, message, users) => {
+    RNStringeeClient.removeParticipants(this.uuid, convId, userIds, (status, code, message, users) => {
       var returnUsers = [];
       if (status) {
         users.map((user) => {
@@ -467,11 +467,11 @@ export default class extends Component {
   }
 
   updateConversation(convId: string, params, callback: RNStringeeEventCallback) {
-    RNStringeeClient.updateConversation(this.uuid, conversationId, params, callback);
+    RNStringeeClient.updateConversation(this.uuid, convId, params, callback);
   }
 
   markConversationAsRead(convId: string, callback: RNStringeeEventCallback) {
-    RNStringeeClient.markConversationAsRead(this.uuid, conversationId, callback);
+    RNStringeeClient.markConversationAsRead(this.uuid, convId, callback);
   }
 
   getConversationWithUser(userId: string, callback: RNStringeeEventCallback) {
@@ -501,11 +501,11 @@ export default class extends Component {
   }
 
   deleteMessage(convId: string, messageId: string, callback: RNStringeeEventCallback) {
-    RNStringeeClient.deleteMessage(this.uuid, conversationId, messageId, callback);
+    RNStringeeClient.deleteMessage(this.uuid, convId, messageId, callback);
   }
 
   getLocalMessages(convId: string, count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
-    RNStringeeClient.getLocalMessages(this.uuid, conversationId, count, (status, code, message, messages) => {
+    RNStringeeClient.getLocalMessages(this.uuid, convId, count, (status, code, message, messages) => {
       var returnMessages = [];
       if (status) {
         if (isAscending) {
@@ -523,7 +523,7 @@ export default class extends Component {
   }
 
   getLastMessages(convId: string, count: number, isAscending: boolean, loadDeletedMessage: boolean, loadDeletedMessageContent: boolean, callback: RNStringeeEventCallback) {
-    RNStringeeClient.getLastMessages(this.uuid, conversationId, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
+    RNStringeeClient.getLastMessages(this.uuid, convId, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
       var returnMessages = [];
       if (status) {
         if (isAscending) {
@@ -541,7 +541,7 @@ export default class extends Component {
   }
 
   getAllLastMessages(convId: string, count: number, isAscending: boolean, loadDeletedMessage: boolean, loadDeletedMessageContent: boolean, callback: RNStringeeEventCallback) {
-    RNStringeeClient.getAllLastMessages(this.uuid, conversationId, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
+    RNStringeeClient.getAllLastMessages(this.uuid, convId, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
       var returnMessages = [];
       if (status) {
         if (isAscending) {
@@ -559,7 +559,7 @@ export default class extends Component {
   }
 
   getMessagesAfter(convId: string, sequence: number, count: number, isAscending: boolean, loadDeletedMessage: boolean, loadDeletedMessageContent: boolean, callback: RNStringeeEventCallback) {
-    RNStringeeClient.getMessagesAfter(this.uuid, conversationId, sequence, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
+    RNStringeeClient.getMessagesAfter(this.uuid, convId, sequence, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
       var returnMessages = [];
       if (status) {
         if (isAscending) {
@@ -577,7 +577,7 @@ export default class extends Component {
   }
 
   getAllMessagesAfter(convId: string, sequence: number, count: number, isAscending: boolean, loadDeletedMessage: boolean, loadDeletedMessageContent: boolean, callback: RNStringeeEventCallback) {
-    RNStringeeClient.getAllMessagesAfter(this.uuid, conversationId, sequence, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
+    RNStringeeClient.getAllMessagesAfter(this.uuid, convId, sequence, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
       var returnMessages = [];
       if (status) {
         if (isAscending) {
@@ -595,7 +595,7 @@ export default class extends Component {
   }
 
   getMessagesBefore(convId: string, sequence: number, count: number, isAscending: boolean, loadDeletedMessage: boolean, loadDeletedMessageContent: boolean, callback: RNStringeeEventCallback) {
-    RNStringeeClient.getMessagesBefore(this.uuid, conversationId, sequence, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
+    RNStringeeClient.getMessagesBefore(this.uuid, convId, sequence, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
       var returnMessages = [];
       if (status) {
         if (isAscending) {
@@ -613,7 +613,7 @@ export default class extends Component {
   }
 
   getAllMessagesBefore(convId: string, sequence: number, count: number, isAscending: boolean, loadDeletedMessage: boolean, loadDeletedMessageContent: boolean, callback: RNStringeeEventCallback) {
-    RNStringeeClient.getAllMessagesBefore(this.uuid, conversationId, sequence, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
+    RNStringeeClient.getAllMessagesBefore(this.uuid, convId, sequence, count, loadDeletedMessage, loadDeletedMessageContent, (status, code, message, messages) => {
       var returnMessages = [];
       if (status) {
         if (isAscending) {

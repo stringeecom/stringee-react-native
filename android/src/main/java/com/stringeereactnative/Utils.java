@@ -200,7 +200,7 @@ public class Utils {
 
     public static WritableMap getQueueMap(Queue queue) {
         WritableMap queueMap = Arguments.createMap();
-        queueMap.putString("userId", queue.getId());
+        queueMap.putString("id", queue.getId());
         queueMap.putString("name", queue.getName());
         return queueMap;
     }
