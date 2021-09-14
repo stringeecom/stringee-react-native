@@ -14,6 +14,7 @@
     NSMutableArray<NSString *> *jsEvents;
     NSArray<StringeeServerAddress *> *_serverAddresses;
     NSString *_baseUrl;
+    BOOL _firstConnectTime;
 }
 
 - (instancetype)initWithIdentifier:(NSString *)identifier baseUrl:(NSString *)baseUrl serverAddresses:(NSArray<StringeeServerAddress *> *)serverAddresses
@@ -25,6 +26,10 @@
         _messages = [[NSMutableDictionary alloc] init];
         _serverAddresses = serverAddresses;
         _baseUrl = baseUrl;
+        
+        // Fix cho phan live-chat
+        _firstConnectTime = true;
+        _client = [[StringeeClient alloc] init];
     }
     return self;
 }
@@ -49,7 +54,7 @@
 }
 
 - (void)createClientIfNeed {
-    if (!_client) {
+    if (!_client || _firstConnectTime) {
         if (_serverAddresses != nil && _serverAddresses.count > 0) {
             _client = [[StringeeClient alloc] initWithServerAddress:_serverAddresses];
         } else {
@@ -67,6 +72,8 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleObjectChangeNotification:) name:StringeeClientObjectsDidChangeNotification object:_client];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessageNotification:) name:StringeeClientNewMessageNotification object:_client];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleUserTypingNotification:) name:StringeeChatUserTypingNotification object:_client];
+        
+        _firstConnectTime = false;
     }
 }
 
@@ -131,7 +138,7 @@
 - (void)timeoutInQueue:(StringeeClient *)stringeeClient info:(NSDictionary *)info {
     if ([jsEvents containsObject:timeoutInQueue]) {
         id rInfo = info != nil ? info : [NSNull null];
-        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:timeoutInQueue body: @{ @"uuid" : _identifier, @"data" : @{ @"info" : rInfo }}];
+        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:timeoutInQueue body: @{ @"uuid" : _identifier, @"data" : info}];
     }
 }
 
@@ -139,7 +146,7 @@
 - (void)conversationEnded:(StringeeClient *)stringeeClient info:(NSDictionary *)info {
     if ([jsEvents containsObject:conversationEnded]) {
         id rInfo = info != nil ? info : [NSNull null];
-        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:conversationEnded body: @{ @"uuid" : _identifier, @"data" : @{ @"info" : rInfo }}];
+        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:conversationEnded body: @{ @"uuid" : _identifier, @"data" : info}];
     }
 }
 
@@ -311,7 +318,7 @@
     
     
     NSString *eventName = begin ? userBeginTyping : userEndTyping;
-    [RNStringeeInstanceManager.instance.rnClient sendEventWithName:eventName body: @{ @"uuid" : _identifier, @"data" : @{ @"info" : infos }}];
+    [RNStringeeInstanceManager.instance.rnClient sendEventWithName:eventName body: @{ @"uuid" : _identifier, @"data" : infos}];
 }
 
 @end

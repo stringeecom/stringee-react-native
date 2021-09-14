@@ -1267,7 +1267,7 @@ RCT_EXPORT_METHOD(updateUserInfo:(NSString *)uuid name:(NSString *)name email:(N
     }];
 }
 
-RCT_EXPORT_METHOD(startLiveChat:(NSString *)uuid queueId:(NSString *)queueId callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(createLiveChatConversation:(NSString *)uuid queueId:(NSString *)queueId callback:(RCTResponseSenderBlock)callback) {
     RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
     if (wrapper == nil) {
         callback(@[@(NO), @(-1), @"Wrapper is not found"]);
