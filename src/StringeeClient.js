@@ -678,7 +678,7 @@ export default class extends Component {
   // ===== ALL-SIDE =====
 
   sendChatTranscript(email: string, convId: string, domain: string, callback: RNStringeeEventCallback) {
-    RNStringeeClient.sendChatTranscript(this.uuid, convId, email, domain, callback);
+    RNStringeeClient.sendChatTranscript(this.uuid, email, convId, domain, callback);
   }
 
   endChat(convId: string, callback: RNStringeeEventCallback) {

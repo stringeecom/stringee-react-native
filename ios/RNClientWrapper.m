@@ -66,6 +66,7 @@
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleObjectChangeNotification:) name:StringeeClientObjectsDidChangeNotification object:_client];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessageNotification:) name:StringeeClientNewMessageNotification object:_client];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleUserTypingNotification:) name:StringeeChatUserTypingNotification object:_client];
     }
 }
 
@@ -115,24 +116,35 @@
     }
 }
 
-- (void)didReceiveTransferChatRequest:(StringeeClient *)stringeeClient request:(StringeeChatRequest *)request fromUser:(StringeeIdentity *)user {
+- (void)didReceiveTransferChatRequest:(StringeeClient *)stringeeClient request:(StringeeChatRequest *)request {
     if ([jsEvents containsObject:didReceiveTransferChatRequest]) {
-        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:didReceiveTransferChatRequest body: @{ @"uuid" : _identifier, @"data" : @{ @"request" : [RCTConvert StringeeChatRequest:request], @"fromUser" : [RCTConvert StringeeIdentity:user] }}];
+        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:didReceiveTransferChatRequest body: @{ @"uuid" : _identifier, @"data" : @{ @"request" : [RCTConvert StringeeChatRequest:request] }}];
     }
 }
 
-- (void)chatRequestTimeout:(StringeeClient *)stringeeClient request:(StringeeChatRequest *)request {
-    if ([jsEvents containsObject:chatRequestTimeout]) {
-        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:chatRequestTimeout body: @{ @"uuid" : _identifier, @"data" : @{ @"request" : [RCTConvert StringeeChatRequest:request] }}];
+- (void)timeoutAnswerChat:(StringeeClient *)stringeeClient request:(StringeeChatRequest *)request {
+    if ([jsEvents containsObject:timeoutAnswerChat]) {
+        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:timeoutAnswerChat body: @{ @"uuid" : _identifier, @"data" : @{ @"request" : [RCTConvert StringeeChatRequest:request] }}];
     }
 }
 
-- (void)didEndChatSupport:(StringeeClient *)stringeeClient infos:(NSDictionary *)infos {
-    if ([jsEvents containsObject:didEndChatSupport]) {
-        id info = infos != nil ? infos : [NSNull null];
-        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:didEndChatSupport body: @{ @"uuid" : _identifier, @"data" : @{ @"info" : info }}];
+- (void)timeoutInQueue:(StringeeClient *)stringeeClient info:(NSDictionary *)info {
+    if ([jsEvents containsObject:timeoutInQueue]) {
+        id rInfo = info != nil ? info : [NSNull null];
+        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:timeoutInQueue body: @{ @"uuid" : _identifier, @"data" : @{ @"info" : rInfo }}];
     }
 }
+
+
+- (void)conversationEnded:(StringeeClient *)stringeeClient info:(NSDictionary *)info {
+    if ([jsEvents containsObject:conversationEnded]) {
+        id rInfo = info != nil ? info : [NSNull null];
+        [RNStringeeInstanceManager.instance.rnClient sendEventWithName:conversationEnded body: @{ @"uuid" : _identifier, @"data" : @{ @"info" : rInfo }}];
+    }
+}
+
+
+
 
 
 #pragma mark Call Delelgate
@@ -278,6 +290,28 @@
         RNClientWrapper *strongSelf = weakSelf;
         [RNStringeeInstanceManager.instance.rnClient sendEventWithName:objectChangeNotification body: @{ @"uuid" : strongSelf.identifier, @"data" : @{ @"objectType" : @(0), @"objects" : @[[RCTConvert StringeeConversation:conversation]], @"changeType" : @(StringeeObjectChangeTypeCreate) }}];
     }];
+}
+
+- (void)handleUserTypingNotification:(NSNotification *)notification {
+    if (![jsEvents containsObject:userBeginTyping] && ![jsEvents containsObject:userEndTyping]) return;
+
+    NSDictionary *userInfo = [notification userInfo];
+    if (!userInfo) return;
+    
+    NSString *convId = [userInfo objectForKey:@"convId"] != nil ? [userInfo objectForKey:@"convId"] : @"";
+    NSString *userId = [userInfo objectForKey:@"userId"] != nil ? [userInfo objectForKey:@"userId"] : @"";
+    NSString *displayName = [userInfo objectForKey:@"displayName"] != nil ? [userInfo objectForKey:@"displayName"] : @"";
+    BOOL begin = [[userInfo objectForKey:@"begin"] boolValue];
+
+    NSDictionary *infos = @{
+                            @"convId" : convId,
+                            @"userId" : userId,
+                            @"displayName" : displayName
+                            };
+    
+    
+    NSString *eventName = begin ? userBeginTyping : userEndTyping;
+    [RNStringeeInstanceManager.instance.rnClient sendEventWithName:eventName body: @{ @"uuid" : _identifier, @"data" : @{ @"info" : infos }}];
 }
 
 @end

@@ -300,7 +300,7 @@
     return response;
 }
 
-+ (NSDictionary *)SXChatProfile:(SXChatProfile *)profile {
++ (NSDictionary *)SXChatProfile:(StringeeChatProfile *)profile {
     if (!profile) return RCTNullIfNil(nil);
 
     NSString *identifier = profile.identifier ? profile.identifier : @"";
@@ -329,7 +329,7 @@
              };
 }
 
-+ (NSDictionary *)SXQueue:(SXQueue *)queue {
++ (NSDictionary *)SXQueue:(StringeeQueue *)queue {
     if (!queue) return RCTNullIfNil(nil);
 
     NSString *identifier = queue.identifier ? queue.identifier : @"";
@@ -341,12 +341,12 @@
              };
 }
 
-+ (NSArray *)SXQueues:(NSArray<SXQueue *> *)queues {
++ (NSArray *)SXQueues:(NSArray<StringeeQueue *> *)queues {
     if (!queues) {
         return RCTNullIfNil(nil);
     }
     NSMutableArray *response = [NSMutableArray array];
-    for (SXQueue *queue in queues) {
+    for (StringeeQueue *queue in queues) {
         [response addObject:[self SXQueue:queue]];
     }
     return response;
@@ -358,15 +358,12 @@
     NSString *convId = request.convId ? request.convId : @"";
     NSString *customerId = request.customerId ? request.customerId : @"";
     NSString *customerName = request.customerName ? request.customerName : @"";
-    NSString *identifier = request.identifier ? request.identifier : @"";
 
     return @{
-             @"id": identifier,
              @"convId": convId,
              @"customerId": customerId,
              @"customerName": customerName,
              @"channelType": @(request.channelType),
-             @"requestTimeout": @(request.requestTimeout),
              @"type": @(request.type)
              };
 }

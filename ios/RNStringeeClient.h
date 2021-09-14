@@ -33,8 +33,11 @@ static NSString *objectChangeNotification   = @"objectChangeNotification";
 // Live-chat
 static NSString *didReceiveChatRequest          = @"didReceiveChatRequest";
 static NSString *didReceiveTransferChatRequest  = @"didReceiveTransferChatRequest";
-static NSString *chatRequestTimeout             = @"chatRequestTimeout";
-static NSString *didEndChatSupport              = @"didEndChatSupport";
+static NSString *timeoutAnswerChat              = @"timeoutAnswerChat";
+static NSString *timeoutInQueue                 = @"timeoutInQueue";
+static NSString *conversationEnded              = @"conversationEnded";
+static NSString *userBeginTyping                = @"userBeginTyping";
+static NSString *userEndTyping                  = @"userEndTyping";
 
 @interface RNStringeeClient : RCTEventEmitter <RCTBridgeModule, StringeeConnectionDelegate, StringeeIncomingCallDelegate>
 

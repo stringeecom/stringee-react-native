@@ -23,7 +23,7 @@
 
 + (NSArray *)StringeeMessages:(NSArray<StringeeMessage *> *)messages;
 
-+ (NSDictionary *)SXChatProfile:(SXChatProfile *)profile;
++ (NSDictionary *)SXChatProfile:(StringeeChatProfile *)profile;
 
 + (NSDictionary *)StringeeChatRequest:(StringeeChatRequest *)request;
 
