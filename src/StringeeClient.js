@@ -184,12 +184,7 @@ export default class extends Component {
     RNStringeeClient.disconnect(this.uuid);
   }
 
-  registerPush(
-    deviceToken: string,
-    isProduction: boolean,
-    isVoip: boolean,
-    callback: RNStringeeEventCallback
-  ) {
+  registerPush(deviceToken: string, isProduction: boolean, isVoip: boolean, callback: RNStringeeEventCallback) {
     if (iOS) {
       RNStringeeClient.registerPushForDeviceToken(
         this.uuid,
@@ -207,11 +202,7 @@ export default class extends Component {
     RNStringeeClient.unregisterPushToken(this.uuid, deviceToken, callback);
   }
 
-  sendCustomMessage(
-    toUserId: string,
-    message: string,
-    callback: RNStringeeEventCallback
-  ) {
+  sendCustomMessage(toUserId: string, message: string, callback: RNStringeeEventCallback) {
     RNStringeeClient.sendCustomMessage(this.uuid, toUserId, message, callback);
   }
 
@@ -484,7 +475,7 @@ export default class extends Component {
     });
   }
 
-  getUnreadConversationCount(convId: string, callback: RNStringeeEventCallback) {
+  getUnreadConversationCount(callback: RNStringeeEventCallback) {
     RNStringeeClient.getUnreadConversationCount(this.uuid, callback);
   }
 
