@@ -1769,7 +1769,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createTicketForMissedChat(final String instanceId, final String widgetKey, final String name, final String email, final String note, final Callback callback) {
+    public void createLiveChatTicket(final String instanceId, final String widgetKey, final String name, final String email, final String note, final Callback callback) {
         StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
         if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized");
