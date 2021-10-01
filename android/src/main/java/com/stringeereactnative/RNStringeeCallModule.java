@@ -401,7 +401,6 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             params.putString("reason", reason);
             params.putInt("sipCode", sipCode);
             params.putString("sipReason", sipReason);
-            params.putMap("body", bodyParams);
 
             sendEvent(getReactApplicationContext(), "onSignalingStateChange", params);
         }
