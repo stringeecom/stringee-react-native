@@ -8,6 +8,9 @@ static NSString *didChangeMediaState        = @"didChangeMediaState";
 static NSString *didReceiveLocalStream      = @"didReceiveLocalStream";
 static NSString *didReceiveRemoteStream     = @"didReceiveRemoteStream";
 
+static NSString *didReceiveDtmfDigit        = @"didReceiveDtmfDigit";
+static NSString *didReceiveCallInfo         = @"didReceiveCallInfo";
+
 static NSString *didHandleOnAnotherDevice   = @"didHandleOnAnotherDevice";
 
 
@@ -33,6 +36,8 @@ RCT_EXPORT_MODULE();
              didChangeMediaState,
              didReceiveLocalStream,
              didReceiveRemoteStream,
+             didReceiveDtmfDigit,
+             didReceiveCallInfo,
              didHandleOnAnotherDevice
              ];
 }
@@ -328,6 +333,16 @@ RCT_EXPORT_METHOD(sendCallInfo:(NSString *)callId callInfo:(NSString *)callInfo 
 - (void)didHandleOnAnotherDevice2:(StringeeCall2 *)stringeeCall2 signalingState:(SignalingState)signalingState reason:(NSString *)reason sipCode:(int)sipCode sipReason:(NSString *)sipReason {
     if ([jsEvents containsObject:didHandleOnAnotherDevice]) {
         [self sendEventWithName:didHandleOnAnotherDevice body:@{ @"callId" : stringeeCall2.callId, @"code" : @(signalingState), @"description" : reason }];
+    }
+}
+
+- (void)didReceiveCallInfo2:(StringeeCall2 *)stringeeCall2 info:(NSDictionary *)info {
+    if ([jsEvents containsObject:didReceiveCallInfo]) {
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:info
+                                            options:NSJSONWritingPrettyPrinted
+                                            error:nil];
+        NSString *jsonString = [[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] stringByReplacingOccurrencesOfString:@" " withString:@""];
+        [self sendEventWithName:didReceiveCallInfo body:@{ @"callId" : stringeeCall2.callId, @"data" : jsonString }];
     }
 }
 
