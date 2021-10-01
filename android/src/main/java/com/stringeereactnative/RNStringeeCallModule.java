@@ -396,13 +396,11 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             }
 
             WritableMap params = Arguments.createMap();
-            params.putString("eventType", "StringeeCall");
-            WritableMap bodyParams = Arguments.createMap();
-            bodyParams.putString("callId", stringeeCall.getCallId());
-            bodyParams.putInt("code", signalingState.getValue());
-            bodyParams.putString("reason", reason);
-            bodyParams.putInt("sipCode", sipCode);
-            bodyParams.putString("sipReason", sipReason);
+            params.putString("callId", stringeeCall.getCallId());
+            params.putInt("code", signalingState.getValue());
+            params.putString("reason", reason);
+            params.putInt("sipCode", sipCode);
+            params.putString("sipReason", sipReason);
             params.putMap("body", bodyParams);
 
             sendEvent(getReactApplicationContext(), "onSignalingStateChange", params);
@@ -418,12 +416,9 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
     public void onHandledOnAnotherDevice(StringeeCall stringeeCall, StringeeCall.SignalingState signalingState, String s) {
         if (contains(jsEvents, "onHandledOnAnotherDevice")) {
             WritableMap params = Arguments.createMap();
-            params.putString("eventType", "StringeeCall");
-            WritableMap bodyParams = Arguments.createMap();
-            bodyParams.putString("callId", stringeeCall.getCallId());
-            bodyParams.putInt("code", signalingState.getValue());
-            bodyParams.putString("description", s);
-            params.putMap("body", bodyParams);
+            params.putString("callId", stringeeCall.getCallId());
+            params.putInt("code", signalingState.getValue());
+            params.putString("description", s);
             sendEvent(getReactApplicationContext(), "onHandledOnAnotherDevice", params);
         }
     }
@@ -432,9 +427,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
     public void onMediaStateChange(StringeeCall stringeeCall, StringeeCall.MediaState mediaState) {
         if (contains(jsEvents, "onMediaStateChange")) {
             WritableMap params = Arguments.createMap();
-            params.putString("eventType", "StringeeCall");
-            WritableMap bodyParams = Arguments.createMap();
-            bodyParams.putString("callId", stringeeCall.getCallId());
+            params.putString("callId", stringeeCall.getCallId());
             int code = -1;
             String desc = "";
             if (mediaState == StringeeCall.MediaState.CONNECTED) {
@@ -444,10 +437,9 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
                 code = 1;
                 desc = "Disconnected";
             }
-            bodyParams.putInt("code", code);
-            bodyParams.putString("description", desc);
-            bodyParams.putString("eventType", "StringeeCall");
-            params.putMap("body", bodyParams);
+            params.putInt("code", code);
+            params.putString("description", desc);
+            params.putString("eventType", "StringeeCall");
             sendEvent(getReactApplicationContext(), "onMediaStateChange", params);
         }
     }
@@ -456,10 +448,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
     public void onLocalStream(StringeeCall stringeeCall) {
         if (contains(jsEvents, "onLocalStream")) {
             WritableMap params = Arguments.createMap();
-            params.putString("eventType", "StringeeCall");
-            WritableMap bodyParams = Arguments.createMap();
-            bodyParams.putString("callId", stringeeCall.getCallId());
-            params.putMap("body", bodyParams);
+            params.putString("callId", stringeeCall.getCallId());
             sendEvent(getReactApplicationContext(), "onLocalStream", params);
         }
     }
@@ -468,10 +457,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
     public void onRemoteStream(StringeeCall stringeeCall) {
         if (contains(jsEvents, "onRemoteStream")) {
             WritableMap params = Arguments.createMap();
-            params.putString("eventType", "StringeeCall");
-            WritableMap bodyParams = Arguments.createMap();
-            bodyParams.putString("callId", stringeeCall.getCallId());
-            params.putMap("body", bodyParams);
+            params.putString("callId", stringeeCall.getCallId());
             sendEvent(getReactApplicationContext(), "onRemoteStream", params);
         }
     }
@@ -480,11 +466,8 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
     public void onCallInfo(StringeeCall stringeeCall, JSONObject jsonObject) {
         if (contains(jsEvents, "onCallInfo")) {
             WritableMap params = Arguments.createMap();
-            params.putString("eventType", "StringeeCall");
-            WritableMap bodyParams = Arguments.createMap();
-            bodyParams.putString("callId", stringeeCall.getCallId());
-            bodyParams.putString("data", jsonObject.toString());
-            params.putMap("body", bodyParams);
+            params.putString("callId", stringeeCall.getCallId());
+            params.putString("data", jsonObject.toString());
             sendEvent(getReactApplicationContext(), "onCallInfo", params);
         }
     }
@@ -500,11 +483,8 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
 
         if (contains(jsEvents, "onAudioDeviceChange")) {
             WritableMap params = Arguments.createMap();
-            params.putString("eventType", "StringeeCall");
-            WritableMap bodyParams = Arguments.createMap();
-            bodyParams.putString("selectedAudioDevice", audioDevice.name());
-            bodyParams.putArray("availableAudioDevices", availableDevicesMap);
-            params.putMap("body", bodyParams);
+            params.putString("selectedAudioDevice", audioDevice.name());
+            params.putArray("availableAudioDevices", availableDevicesMap);
             sendEvent(getReactApplicationContext(), "onAudioDeviceChange", params);
         }
     }

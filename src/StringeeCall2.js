@@ -57,7 +57,7 @@ export default class extends Component {
             if (handler !== undefined) {
               // const eventType = data.eventType;
               // if (eventType === 'StringeeCall2') {
-                handler(data.body);
+                handler(data);
               // }
             }
           })
