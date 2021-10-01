@@ -55,10 +55,10 @@ export default class extends Component {
         this._subscriptions.push(
           this._eventEmitter.addListener(eventName, data => {
             if (handler !== undefined) {
-              const eventType = data.eventType;
-              if (data.eventType === 'StringeeCall') {
+              // const eventType = data.eventType;
+              // if (data.eventType === 'StringeeCall') {
                 handler(data.body);
-              }
+              // }
             }
           })
         );
