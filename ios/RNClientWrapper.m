@@ -14,10 +14,11 @@
     NSMutableArray<NSString *> *jsEvents;
     NSArray<StringeeServerAddress *> *_serverAddresses;
     NSString *_baseUrl;
+    NSString *_stringeexBaseUrl;
     BOOL _firstConnectTime;
 }
 
-- (instancetype)initWithIdentifier:(NSString *)identifier baseUrl:(NSString *)baseUrl serverAddresses:(NSArray<StringeeServerAddress *> *)serverAddresses
+- (instancetype)initWithIdentifier:(NSString *)identifier baseUrl:(NSString *)baseUrl serverAddresses:(NSArray<StringeeServerAddress *> *)serverAddresses stringeeXBaseUrl:(NSString *)stringeeXBaseUrl
 {
     self = [super init];
     if (self) {
@@ -26,6 +27,7 @@
         _messages = [[NSMutableDictionary alloc] init];
         _serverAddresses = serverAddresses;
         _baseUrl = baseUrl;
+        _stringeexBaseUrl = stringeeXBaseUrl;
         
         // Fix cho phan live-chat
         _firstConnectTime = true;
@@ -66,6 +68,12 @@
         if (_baseUrl != nil && _baseUrl.length > 0) {
             [_client setRestBaseUrl:_baseUrl completionHandler:^(BOOL status, int code, NSString *message) {
                             
+            }];
+        }
+        
+        if (_stringeexBaseUrl != nil && _stringeexBaseUrl.length > 0) {
+            [_client setStringeeXBaseUrl:_stringeexBaseUrl completionHandler:^(BOOL status, int code, NSString *message) {
+                
             }];
         }
         
