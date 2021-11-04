@@ -76,4 +76,5 @@
       compile project(':stringee-react-native')
   	```
 
-  
+## Version
+- 1.4.10: Allow change base stringeeXUrl.

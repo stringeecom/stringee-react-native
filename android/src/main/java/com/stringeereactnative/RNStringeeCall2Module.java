@@ -14,8 +14,14 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
 import com.stringee.StringeeClient;
 import com.stringee.call.StringeeCall2;
+import com.stringee.call.StringeeCall2.CallStatsListener;
+import com.stringee.call.StringeeCall2.MediaState;
+import com.stringee.call.StringeeCall2.SignalingState;
+import com.stringee.call.StringeeCall2.StringeeCallListener;
+import com.stringee.call.StringeeCall2.StringeeCallStats;
 import com.stringee.common.StringeeAudioManager;
 import com.stringee.common.StringeeAudioManager.AudioDevice;
 import com.stringee.common.StringeeAudioManager.AudioManagerEvents;
@@ -29,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements StringeeCall2.StringeeCallListener, AudioManagerEvents {
+public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements StringeeCallListener, AudioManagerEvents {
 
     private Callback mCallback;
     private ArrayList<String> jsEvents = new ArrayList<String>();
@@ -276,9 +282,9 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
             return;
         }
 
-        call.getStats(new StringeeCall2.CallStatsListener() {
+        call.getStats(new CallStatsListener() {
             @Override
-            public void onCallStats(StringeeCall2.StringeeCallStats stringeeCallStats) {
+            public void onCallStats(StringeeCallStats stringeeCallStats) {
                 JSONObject jsonObject = new JSONObject();
                 try {
                     jsonObject.put("bytesReceived", stringeeCallStats.callBytesReceived);
@@ -357,9 +363,9 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
     }
 
     @Override
-    public void onSignalingStateChange(StringeeCall2 stringeeCall, StringeeCall2.SignalingState signalingState, String reason, int sipCode, String sipReason) {
+    public void onSignalingStateChange(StringeeCall2 stringeeCall, SignalingState signalingState, String reason, int sipCode, String sipReason) {
         if (contains(jsEvents, "onSignalingStateChange")) {
-            if (signalingState == StringeeCall2.SignalingState.CALLING) {
+            if (signalingState == SignalingState.CALLING) {
                 StringeeManager.getInstance().getCalls2Map().put(stringeeCall.getCallId(), stringeeCall);
                 mCallback.invoke(true, 0, "Success", stringeeCall.getCallId(), stringeeCall.getCustomDataFromYourServer());
             }
@@ -380,7 +386,7 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
     }
 
     @Override
-    public void onHandledOnAnotherDevice(StringeeCall2 stringeeCall, StringeeCall2.SignalingState signalingState, String s) {
+    public void onHandledOnAnotherDevice(StringeeCall2 stringeeCall, SignalingState signalingState, String s) {
         if (contains(jsEvents, "onHandledOnAnotherDevice")) {
             WritableMap params = Arguments.createMap();
             params.putString("callId", stringeeCall.getCallId());
@@ -391,16 +397,16 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
     }
 
     @Override
-    public void onMediaStateChange(StringeeCall2 stringeeCall, StringeeCall2.MediaState mediaState) {
+    public void onMediaStateChange(StringeeCall2 stringeeCall, MediaState mediaState) {
         if (contains(jsEvents, "onMediaStateChange")) {
             WritableMap params = Arguments.createMap();
             params.putString("callId", stringeeCall.getCallId());
             int code = -1;
             String desc = "";
-            if (mediaState == StringeeCall2.MediaState.CONNECTED) {
+            if (mediaState == MediaState.CONNECTED) {
                 code = 0;
                 desc = "Connected";
-            } else if (mediaState == StringeeCall2.MediaState.DISCONNECTED) {
+            } else if (mediaState == MediaState.DISCONNECTED) {
                 code = 1;
                 desc = "Disconnected";
             }
@@ -467,7 +473,7 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
 
     private void sendEvent(ReactContext reactContext, String eventName, @Nullable WritableMap eventData) {
         reactContext
-                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .getJSModule(RCTDeviceEventEmitter.class)
                 .emit(eventName, eventData);
     }
 

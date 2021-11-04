@@ -16,7 +16,7 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
 import com.stringee.StringeeClient;
 import com.stringee.call.StringeeCall;
 import com.stringee.call.StringeeCall2;
@@ -35,8 +35,8 @@ import com.stringee.messaging.StringeeChange;
 import com.stringee.messaging.StringeeObject;
 import com.stringee.messaging.User;
 import com.stringee.messaging.listeners.CallbackListener;
-import com.stringee.messaging.listeners.ChangeEventListenter;
-import com.stringee.messaging.listeners.LiveChatEventListerner;
+import com.stringee.messaging.listeners.ChangeEventListener;
+import com.stringee.messaging.listeners.LiveChatEventListener;
 import com.stringee.messaging.listeners.UserTypingEventListener;
 
 import org.json.JSONArray;
@@ -66,13 +66,16 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createClientWrapper(String instanceId, String baseUrl, ReadableArray addressArray) {
+    public void createClientWrapper(String instanceId, String baseUrl, ReadableArray addressArray, String stringeeXBaseUrl) {
         StringeeClient mClient = mStringeeManager.getClientsMap().get(instanceId);
         if (mClient == null) {
             mClient = new StringeeClient(getReactApplicationContext());
 
             if (baseUrl != null) {
                 mClient.setBaseAPIUrl(baseUrl);
+            }
+            if(stringeeXBaseUrl!= null){
+                mClient.setStringeeXBaseUrl(stringeeXBaseUrl);
             }
             if (addressArray != null) {
                 List<SocketAddress> socketAddresses = new ArrayList<>();
@@ -221,7 +224,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     }
                 }
             });
-            mClient.setChangeEventListenter(new ChangeEventListenter() {
+            mClient.setChangeEventListener(new ChangeEventListener() {
                 @Override
                 public void onChangeEvent(StringeeChange stringeeChange) {
                     StringeeClient mClient = mStringeeManager.getClientsMap().get(instanceId);
@@ -237,7 +240,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     switch (objectType) {
                         case MESSAGE:
                             Message message = (Message) stringeeChange.getObject();
-                            if (message.getType() == com.stringee.messaging.Message.Type.NOTIFICATION) {
+                            if (message.getType() == Message.Type.NOTIFICATION) {
                                 try {
                                     Bundle msg = Utils.jsonToBundle(message.getText());
                                     if (msg.getInt("type") == 4) {
@@ -285,7 +288,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     }
                 }
             });
-            mClient.setLiveChatEventListerner(new LiveChatEventListerner() {
+            mClient.setLiveChatEventListener(new LiveChatEventListener() {
                 @Override
                 public void onReceiveChatRequest(ChatRequest chatRequest) {
                     WritableMap params = Arguments.createMap();
@@ -1949,7 +1952,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
 
     private void sendEvent(ReactContext reactContext, String eventName, @Nullable WritableMap eventData) {
         reactContext
-                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .getJSModule(RCTDeviceEventEmitter.class)
                 .emit(eventName, eventData);
     }
 
