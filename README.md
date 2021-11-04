@@ -85,4 +85,4 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     <uses-permission android:name="android.permission.CAMERA" />
     ```
 ## Version
-- 1.4.10: Allow change base stringeeXUrl.
+- 1.4.10: Allow stringeeXUrl base change.
