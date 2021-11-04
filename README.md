@@ -3,9 +3,9 @@
 
 ## Getting started
 
-`$ npm install stringee-react-native --save`
-
 ### Installation
+
+`$ npm install stringee-react-native --save`
 
 #### iOS
 
@@ -61,20 +61,28 @@
 
 #### Android
 
-##### Manual installation
+##### Proguard
+Open up `android/app/proguard-rules.pro` and add following lines: 
+```
+-dontwarn org.webrtc.**
+-keep class org.webrtc.** { *; }
+-keep class com.stringee.** { *; }
+```
 
-1. Open up `android/app/src/main/java/[...]/MainApplication.java`
-  - Add `import com.stringeereactnative.RNStringeeReactPackage;` to the imports at the top of the file
-  - Add `new RNStringeeReactPackage()` to the list returned by the `getPackages()` method
-2. Append the following lines to `android/settings.gradle`:
-  	```
-  	include ':stringee-react-native'
-	project(':stringee-react-native').projectDir = new File(rootProject.projectDir, '../node_modules/stringee-react-native/android')
-  	```
-3. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
-  	```
-      compile project(':stringee-react-native')
-  	```
-
+##### Permissions
+The Stringee Android SDK requires some permissions from your AndroidManifest
+1. Open up `android/app/src/main/AndroidManifest.xml`
+2. Add the following lines:
+    ```
+    // for internet access
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    // for audio access
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    // for camera access
+    <uses-permission android:name="android.permission.CAMERA" />
+    ```
 ## Version
 - 1.4.10: Allow change base stringeeXUrl.
