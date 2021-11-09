@@ -190,7 +190,9 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                 public void onRequestNewToken(StringeeClient stringeeClient) {
                     ArrayList<String> jsEvents = eventsMap.get(instanceId);
                     if (jsEvents != null && contains(jsEvents, "onRequestNewToken")) {
-                        sendEvent(getReactApplicationContext(), "onRequestNewToken", null);
+                        WritableMap params = Arguments.createMap();
+                        params.putString("uuid", instanceId);
+                        sendEvent(getReactApplicationContext(), "onRequestNewToken", params);
                     }
                 }
 
