@@ -167,6 +167,7 @@ RCT_EXPORT_METHOD(hangup:(NSString *)callId callback:(RCTResponseSenderBlock)cal
         } else {
             callback(@[@(NO), @(-3), @"Hangup call failed. The call is not found."]);
         }
+        
     } else {
         callback(@[@(NO), @(-2), @"Hangup call failed. The callId is invalid."]);
     }
@@ -299,6 +300,11 @@ RCT_EXPORT_METHOD(sendCallInfo:(NSString *)callId callInfo:(NSString *)callInfo 
     if ([jsEvents containsObject:didChangeSignalingState]) {
         [self sendEventWithName:didChangeSignalingState body:@{ @"callId" : stringeeCall2.callId, @"code" : @(signalingState), @"reason" : reason, @"sipCode" : @(sipCode), @"sipReason" : sipReason,  @"serial": @(stringeeCall2.serial) }];
     }
+    
+    // Xoá videoTrack
+    if (signalingState == SignalingStateBusy || signalingState == SignalingStateEnded) {
+        [[RNStringeeInstanceManager instance].call2VideoTracks removeObjectForKey:stringeeCall2.callId];
+    }
 }
 
 - (void)didChangeMediaState2:(StringeeCall2 *)stringeeCall2 mediaState:(MediaState)mediaState {
@@ -330,6 +336,13 @@ RCT_EXPORT_METHOD(sendCallInfo:(NSString *)callId callInfo:(NSString *)callInfo 
     }
 }
 
+- (void)didAddTrack2:(StringeeCall2 *)stringeeCall2 track:(StringeeVideoTrack *)track {
+    [[RNStringeeInstanceManager instance].call2VideoTracks setObject:track forKey:stringeeCall2.callId];
+    if ([jsEvents containsObject:didReceiveRemoteStream]) {
+        [self sendEventWithName:didReceiveRemoteStream body:@{ @"callId" : stringeeCall2.callId }];
+    }
+}
+
 - (void)didHandleOnAnotherDevice2:(StringeeCall2 *)stringeeCall2 signalingState:(SignalingState)signalingState reason:(NSString *)reason sipCode:(int)sipCode sipReason:(NSString *)sipReason {
     if ([jsEvents containsObject:didHandleOnAnotherDevice]) {
         [self sendEventWithName:didHandleOnAnotherDevice body:@{ @"callId" : stringeeCall2.callId, @"code" : @(signalingState), @"description" : reason }];
@@ -354,9 +367,20 @@ RCT_EXPORT_METHOD(sendCallInfo:(NSString *)callId callInfo:(NSString *)callInfo 
                 call.localVideoView.frame = CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height);
                 [view addSubview:call.localVideoView];
             } else {
-                call.remoteVideoView.frame = CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height);
-                call.remoteVideoView.delegate = view;
-                [view addSubview:call.remoteVideoView];
+                StringeeVideoTrack *track = [[RNStringeeInstanceManager instance].call2VideoTracks objectForKey:callId];
+                if (track != nil) {
+                    StringeeVideoView *videoView = [track attachWithVideoContentMode:StringeeVideoContentModeScaleAspectFill];
+                    if (videoView != nil) {
+                        videoView.frame = CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height);
+                        [view addSubview:videoView];
+                    }
+                    
+                    [[RNStringeeInstanceManager instance].call2VideoTracks removeObjectForKey:callId];
+                } else {
+                    call.remoteVideoView.frame = CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height);
+                    call.remoteVideoView.delegate = view;
+                    [view addSubview:call.remoteVideoView];
+                }
             }
         }
     }
