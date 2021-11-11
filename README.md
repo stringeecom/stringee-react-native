@@ -20,12 +20,12 @@
     platform :ios, '8.0'
 
     target '<YourProjectName>' do
-  		node_modules_path = '../node_modules'
+      node_modules_path = '../node_modules'
 
-  		pod 'yoga', path: "#{node_modules_path}/react-native/ReactCommon/yoga/yoga.podspec"
-  		pod 'React', path: "#{node_modules_path}/react-native", :subspecs => ['DevSupport', 'RCTNetwork']
+      pod 'yoga', path: "#{node_modules_path}/react-native/ReactCommon/yoga/yoga.podspec"
+      pod 'React', path: "#{node_modules_path}/react-native", :subspecs => ['DevSupport', 'RCTNetwork']
 
-  		pod 'RNStringee', path: "#{node_modules_path}/stringee-react-native/ios"
+      pod 'RNStringee', path: "#{node_modules_path}/stringee-react-native/ios"
     end
 
     post_install do |installer|
@@ -84,5 +84,14 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     // for camera access
     <uses-permission android:name="android.permission.CAMERA" />
     ```
-## Version
-- 1.4.10: Allow stringeeXUrl base change.
+### Version 1.4.13
+##### Bug fixes:
+- No call waiting video for StringeeCall 2
+
+### Version 1.4.11
+##### Bug fixes:
+- No callback for markMessageAsSeen function.
+    
+### Version 1.4.10
+##### Features:
+- Allow stringeeXUrl base change.
