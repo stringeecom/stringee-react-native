@@ -84,6 +84,15 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     // for camera access
     <uses-permission android:name="android.permission.CAMERA" />
     ```
+
+### Version 1.4.15
+##### Bug fixes:
+- Fail to set stringeeXBaseUrl.
+
+### Version 1.4.14
+##### Bug fixes:
+- No callback for hangup and reject functions.
+
 ### Version 1.4.13
 ##### Bug fixes:
 - No call waiting video for StringeeCall 2
