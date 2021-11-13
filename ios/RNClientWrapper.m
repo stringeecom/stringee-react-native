@@ -32,6 +32,9 @@
         // Fix cho phan live-chat
         _firstConnectTime = true;
         _client = [[StringeeClient alloc] init];
+        [_client setStringeeXBaseUrl:stringeeXBaseUrl completionHandler:^(BOOL status, int code, NSString *message) {
+            
+        }];
     }
     return self;
 }
