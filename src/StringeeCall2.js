@@ -91,6 +91,10 @@ export default class extends Component {
     RNStringeeCall2.reject(callId, callback);
   }
 
+  sendDTMF(callId: string, dtmf: string, callback: RNStringeeEventCallback) {
+    RNStringeeCall2.sendDTMF(callId, dtmf, callback);
+  }
+
   getCallStats(callId: string, callback: RNStringeeEventCallback) {
     RNStringeeCall2.getCallStats(this.props.clientId, callId, callback);
   }

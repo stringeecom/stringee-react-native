@@ -296,6 +296,70 @@ RCT_EXPORT_METHOD(sendCallInfo:(NSString *)callId callInfo:(NSString *)callInfo 
     }
 }
 
+RCT_EXPORT_METHOD(sendDTMF:(NSString *)callId dtmf:(NSString *)dtmf callback:(RCTResponseSenderBlock)callback) {
+    if (callId.length) {
+        StringeeCall *call = [[RNStringeeInstanceManager instance].call2s objectForKey:callId];
+        if (call) {
+            NSArray *DTMF = @[@"0", @"1", @"2", @"3", @"4", @"5", @"6", @"7", @"8", @"9", @"*", @"#"];
+            if ([DTMF containsObject:dtmf]) {
+
+                CallDTMF dtmfParam;
+        
+                if ([dtmf isEqualToString:@"0"]) {
+                    dtmfParam = CallDTMFZero;
+                }
+                else if ([dtmf isEqualToString:@"1"]) {
+                    dtmfParam = CallDTMFOne;
+                }
+                else if ([dtmf isEqualToString:@"2"]) {
+                    dtmfParam = CallDTMFTwo;
+                }
+                else if ([dtmf isEqualToString:@"3"]) {
+                    dtmfParam = CallDTMFThree;
+                }
+                else if ([dtmf isEqualToString:@"4"]) {
+                    dtmfParam = CallDTMFFour;
+                }
+                else if ([dtmf isEqualToString:@"5"]) {
+                    dtmfParam = CallDTMFFive;
+                }
+                else if ([dtmf isEqualToString:@"6"]) {
+                    dtmfParam = CallDTMFSix;
+                }
+                else if ([dtmf isEqualToString:@"7"]) {
+                    dtmfParam = CallDTMFSeven;
+                }
+                else if ([dtmf isEqualToString:@"8"]) {
+                    dtmfParam = CallDTMFEight;
+                }
+                else if ([dtmf isEqualToString:@"9"]) {
+                    dtmfParam = CallDTMFNine;
+                }
+                else if ([dtmf isEqualToString:@"*"]) {
+                    dtmfParam = CallDTMFStar;
+                }
+                else {
+                    dtmfParam = CallDTMFPound;
+                }
+
+                [call sendDTMF:dtmfParam completionHandler:^(BOOL status, int code, NSString *message) {
+                    if (status) {
+                        callback(@[@(YES), @(0), @"Sends successfully"]);
+                    } else {
+                        callback(@[@(NO), @(-1), @"Failed to send. The client is not connected to Stringee Server."]);
+                    }
+                }];
+            } else {
+                callback(@[@(NO), @(-4), @"Failed to send. The dtmf is invalid."]);
+            }
+        } else {
+            callback(@[@(NO), @(-3), @"Failed to send. The call is not found."]);
+        }
+    } else {
+        callback(@[@(NO), @(-2), @"Failed to send. The callId is invalid."]);
+    }
+}
+
 - (void)didChangeSignalingState2:(StringeeCall2 *)stringeeCall2 signalingState:(SignalingState)signalingState reason:(NSString *)reason sipCode:(int)sipCode sipReason:(NSString *)sipReason {
     if ([jsEvents containsObject:didChangeSignalingState]) {
         [self sendEventWithName:didChangeSignalingState body:@{ @"callId" : stringeeCall2.callId, @"code" : @(signalingState), @"reason" : reason, @"sipCode" : @(sipCode), @"sipReason" : sipReason,  @"serial": @(stringeeCall2.serial) }];
