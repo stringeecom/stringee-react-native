@@ -13,7 +13,6 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
 import com.stringee.StringeeClient;
 import com.stringee.call.StringeeCall2;
@@ -25,6 +24,7 @@ import com.stringee.call.StringeeCall2.StringeeCallStats;
 import com.stringee.common.StringeeAudioManager;
 import com.stringee.common.StringeeAudioManager.AudioDevice;
 import com.stringee.common.StringeeAudioManager.AudioManagerEvents;
+import com.stringee.exception.StringeeError;
 import com.stringee.listener.StatusListener;
 import com.stringee.video.StringeeVideoTrack;
 
@@ -260,6 +260,12 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
             public void onSuccess() {
                 callback.invoke(true, 0, "Success");
             }
+
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+            }
         });
     }
 
@@ -356,10 +362,43 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
                 public void onSuccess() {
                     callback.invoke(true, 0, "Success");
                 }
+
+                @Override
+                public void onError(StringeeError stringeeError) {
+                    super.onError(stringeeError);
+                    callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+                }
             });
         } catch (JSONException e) {
             callback.invoke(false, -4, "The call info format is invalid.");
         }
+    }
+
+    @ReactMethod
+    public void sendDTMF(String callId, String dtmf, Callback callback) {
+        if (callId == null || callId.length() == 0) {
+            callback.invoke(false, -2, "The call id is invalid.");
+            return;
+        }
+
+        StringeeCall2 call = StringeeManager.getInstance().getCalls2Map().get(callId);
+        if (call == null) {
+            callback.invoke(false, -3, "The call is not found.");
+            return;
+        }
+
+        call.sendDTMF(dtmf, new StatusListener() {
+            @Override
+            public void onSuccess() {
+                callback.invoke(true, 0, "Success");
+            }
+
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+            }
+        });
     }
 
     @Override
