@@ -1245,7 +1245,7 @@ RCT_EXPORT_METHOD(getLiveChatToken:(NSString *)uuid widgetKey:(NSString *)widget
     }];
 }
 
-RCT_EXPORT_METHOD(updateUserInfo:(NSString *)uuid name:(NSString *)name email:(NSString *)email avatar:(NSString *)avatar callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(updateUserInfo:(NSString *)uuid name:(NSString *)name email:(NSString *)email avatar:(NSString *)avatar phone:(NSString *)phone callback:(RCTResponseSenderBlock)callback) {
     RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
     if (wrapper == nil) {
         callback(@[@(NO), @(-1), @"Wrapper is not found"]);
@@ -1257,14 +1257,20 @@ RCT_EXPORT_METHOD(updateUserInfo:(NSString *)uuid name:(NSString *)name email:(N
         return;
     }
 
-    if (![RCTConvert isValid:avatar] || ![RCTConvert isValid:name] || ![RCTConvert isValid:email] || ![RCTConvert isValidEmail:email]) {
+    if (![RCTConvert isValid:name]) {
         callback(@[@(NO), @(-2), @"Parameters invalid"]);
         return;
     }
     
-    [wrapper.client updateUserInfoWithUsername:name email:email avatar:avatar completion:^(BOOL status, int code, NSString *message) {
-        callback(@[@(status), @(code), message]);
-    }];
+    if (phone != nil && phone.length > 0) {
+        [wrapper.client updateUserInfoWithUsername:name email:email avatar:avatar phone:phone completion:^(BOOL status, int code, NSString *message) {
+            callback(@[@(status), @(code), message]);
+        }];
+    } else {
+        [wrapper.client updateUserInfoWithUsername:name email:email avatar:avatar completion:^(BOOL status, int code, NSString *message) {
+            callback(@[@(status), @(code), message]);
+        }];
+    }
 }
 
 RCT_EXPORT_METHOD(createLiveChatConversation:(NSString *)uuid queueId:(NSString *)queueId callback:(RCTResponseSenderBlock)callback) {
@@ -1333,7 +1339,7 @@ RCT_EXPORT_METHOD(endChat:(NSString *)uuid convId:(NSString *)convId callback:(R
     }];
 }
 
-RCT_EXPORT_METHOD(createTicketForMissedChat:(NSString *)uuid widgetKey:(NSString *)widgetKey name:(NSString *)name email:(NSString *)email note:(NSString *)note callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(createTicketForMissedChat:(NSString *)uuid widgetKey:(NSString *)widgetKey name:(NSString *)name email:(NSString *)email phone:(NSString *)phone note:(NSString *)note callback:(RCTResponseSenderBlock)callback) {
     RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
     if (wrapper == nil) {
         callback(@[@(NO), @(-1), @"Wrapper is not found"]);
@@ -1345,14 +1351,20 @@ RCT_EXPORT_METHOD(createTicketForMissedChat:(NSString *)uuid widgetKey:(NSString
         return;
     }
 
-    if (![RCTConvert isValid:widgetKey] || ![RCTConvert isValid:name] || ![RCTConvert isValid:email] || ![RCTConvert isValid:note] || ![RCTConvert isValidEmail:email]) {
+    if (![RCTConvert isValid:widgetKey] || ![RCTConvert isValid:name]) {
         callback(@[@(NO), @(-2), @"Parameters invalid"]);
         return;
     }
 
-    [wrapper.client createTicketForMissChatWithKey:widgetKey username:name email:email note:note completion:^(BOOL status, int code, NSString *message) {
-        callback(@[@(status), @(code), message]);
-    }];
+    if (phone != nil && phone.length > 0) {
+        [wrapper.client createTicketForMissChatWithKey:widgetKey username:name email:email phone:phone note:note completion:^(BOOL status, int code, NSString *message) {
+            callback(@[@(status), @(code), message]);
+        }];
+    } else {
+        [wrapper.client createTicketForMissChatWithKey:widgetKey username:name email:email note:note completion:^(BOOL status, int code, NSString *message) {
+            callback(@[@(status), @(code), message]);
+        }];
+    }
 }
 
 RCT_EXPORT_METHOD(acceptChatRequest:(NSString *)uuid convId:(NSString *)convId callback:(RCTResponseSenderBlock)callback) {
@@ -1469,7 +1481,7 @@ RCT_EXPORT_METHOD(rejectTransferChatRequest:(NSString *)uuid convId:(NSString *)
     }];
 }
 
-RCT_EXPORT_METHOD(createLiveChatTicket:(NSString *)uuid widgetKey:(NSString *)widgetKey name:(NSString *)name email:(NSString *)email note:(NSString *)note callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(createLiveChatTicket:(NSString *)uuid widgetKey:(NSString *)widgetKey name:(NSString *)name email:(NSString *)email phone:(NSString *)phone note:(NSString *)note callback:(RCTResponseSenderBlock)callback) {
     RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
     if (wrapper == nil) {
         callback(@[@(NO), @(-1), @"Wrapper is not found"]);
@@ -1481,15 +1493,24 @@ RCT_EXPORT_METHOD(createLiveChatTicket:(NSString *)uuid widgetKey:(NSString *)wi
         return;
     }
 
-    if (![RCTConvert isValid:widgetKey] || ![RCTConvert isValid:name] || ![RCTConvert isValid:email] || ![RCTConvert isValidEmail:email]) {
+    if (![RCTConvert isValid:widgetKey] || ![RCTConvert isValid:name]) {
         callback(@[@(NO), @(-2), @"Parameters invalid"]);
         return;
     }
 
     NSString *checkedNote = note != nil ? note : @"";
-    [wrapper.client createTicketForMissChatWithKey:widgetKey username:name email:email note:checkedNote completion:^(BOOL status, int code, NSString *message) {
-        callback(@[@(status), @(code), message]);
-    }];
+    
+    if (phone != nil && phone.length > 0) {
+        [wrapper.client createTicketForMissChatWithKey:widgetKey username:name email:email phone:phone note:checkedNote completion:^(BOOL status, int code, NSString *message) {
+            callback(@[@(status), @(code), message]);
+        }];
+    } else {
+        [wrapper.client createTicketForMissChatWithKey:widgetKey username:name email:email note:checkedNote completion:^(BOOL status, int code, NSString *message) {
+            callback(@[@(status), @(code), message]);
+        }];
+    }
+    
+
     
 }
 
