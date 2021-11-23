@@ -74,7 +74,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             if (baseUrl != null) {
                 mClient.setBaseAPIUrl(baseUrl);
             }
-            if(stringeeXBaseUrl!= null){
+            if (stringeeXBaseUrl != null) {
                 mClient.setStringeeXBaseUrl(stringeeXBaseUrl);
             }
             if (addressArray != null) {
@@ -1636,14 +1636,14 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void updateUserInfo(final String instanceId, final String name, final String email, final String avatar, final Callback callback) {
+    public void updateUserInfo(final String instanceId, final String name, final String email, final String avatar, final String phone, final Callback callback) {
         StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
         if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized");
             return;
         }
 
-        mClient.updateUser(name, email, avatar, new StatusListener() {
+        mClient.updateUser(name, email, avatar, phone, new StatusListener() {
             @Override
             public void onSuccess() {
                 callback.invoke(true, 0, "Success");
@@ -1774,7 +1774,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void createLiveChatTicket(final String instanceId, final String widgetKey, final String name, final String email, final String note, final Callback callback) {
+    public void createLiveChatTicket(final String instanceId, final String widgetKey, final String name, final String email, final String phone, final String note, final Callback callback) {
         StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
         if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized");
@@ -1786,7 +1786,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        mClient.createLiveChatTicket(widgetKey, name, email, note, new StatusListener() {
+        mClient.createLiveChatTicket(widgetKey, name, email, note, phone, new StatusListener() {
             @Override
             public void onSuccess() {
                 callback.invoke(true, 0, "Success");
