@@ -57,6 +57,20 @@ const callEvents = {
   }
 };
 
+export type UserInfoParam = (
+  name: string,
+  email: string,
+  avatar: string,
+  phone: string,
+) => void;
+
+export type LiveChatTicketParam = (
+  name: string,
+  email: string,
+  phone: string,
+  note: string,
+) => void;
+
 export type RNStringeeEventCallback = (
   status: boolean,
   code: number,

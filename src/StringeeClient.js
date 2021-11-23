@@ -7,7 +7,7 @@ import Message from "./chat/Message";
 import User from "./chat/User";
 import ChatRequest from './chat/ChatRequest';
 import {clientEvents} from "./helpers/StringeeHelper";
-import type {RNStringeeEventCallback} from "./helpers/StringeeHelper";
+import type {LiveChatTicketParam, UserInfoParam, RNStringeeEventCallback} from './helpers/StringeeHelper';
 
 const RNStringeeClient = NativeModules.RNStringeeClient;
 
@@ -73,8 +73,10 @@ export default class extends Component {
     this.getChatProfile = this.getChatProfile.bind(this);
     this.getLiveChatToken = this.getLiveChatToken.bind(this);
     this.updateUserInfo = this.updateUserInfo.bind(this);
+    this.updateUserInfoWithParam = this.updateUserInfoWithParam.bind(this);
     this.createLiveChatConversation = this.createLiveChatConversation.bind(this);
     this.createLiveChatTicket = this.createLiveChatTicket.bind(this);
+    this.createLiveChatTicketWithParam = this.createLiveChatTicketWithParam.bind(this);
     this.sendChatTranscript = this.sendChatTranscript.bind(this);
     this.endChat = this.endChat.bind(this);
     this.acceptChatRequest = this.acceptChatRequest.bind(this);
@@ -640,7 +642,11 @@ export default class extends Component {
   }
 
   updateUserInfo(name: string, email: string, avatar: string, callback: RNStringeeEventCallback) {
-    RNStringeeClient.updateUserInfo(this.uuid, name, email, avatar, callback);
+    RNStringeeClient.updateUserInfo(this.uuid, name, email, avatar, '', callback);
+  }
+
+  updateUserInfoWithParam(param: UserInfoParam, callback: RNStringeeEventCallback) {
+    RNStringeeClient.updateUserInfo(this.uuid, param.name, param.email, param.avatar, param.phone, callback);
   }
 
   createLiveChatConversation(queueId: string, callback: RNStringeeEventCallback) {
@@ -664,7 +670,11 @@ export default class extends Component {
   }
 
   createLiveChatTicket(widgetKey: string, name: string, email: string, note: string, callback: RNStringeeEventCallback) {
-    RNStringeeClient.createLiveChatTicket(this.uuid, widgetKey, name, email, note, callback);
+    RNStringeeClient.createLiveChatTicket(this.uuid, widgetKey, name, email, '', note, callback);
+  }
+
+  createLiveChatTicketWithParam(widgetKey: string, param: LiveChatTicketParam, callback: RNStringeeEventCallback) {
+    RNStringeeClient.createLiveChatTicket(this.uuid, widgetKey, param.name, param.email, param.phone, param.note, callback);
   }
 
   // ===== ALL-SIDE =====
