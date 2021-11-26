@@ -85,6 +85,10 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     <uses-permission android:name="android.permission.CAMERA" />
     ```
 
+### Version 1.4.18
+##### Bug fixes:
+- No callback for deleteConversation and removeParticipant functions
+
 ### Version 1.4.15
 ##### Bug fixes:
 - Fail to set stringeeXBaseUrl.
