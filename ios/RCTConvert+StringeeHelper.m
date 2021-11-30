@@ -73,7 +73,8 @@
     id lastMsgContent = [self StringToDictionary:text];
     NSString *creator = conversation.creator ? conversation.creator : @"";
     StringeeMessageStatus lastMsgState = conversation.lastMsgSeqReceived > conversation.lastMsgSeqSeen ? StringeeMessageStatusDelivered : StringeeMessageStatusRead;
-
+    id pinMsgId = conversation.pinMsgId != nil && conversation.pinMsgId.length > 0 ? conversation.pinMsgId : [NSNull null];
+    
     return @{
              @"id": identifier,
              @"name": name,
@@ -89,7 +90,8 @@
              @"created" : @(conversation.created),
              @"lastMsgSeq": @(conversation.lastMsgSeqReceived),
              @"lastMsgCreatedAt": @(conversation.lastTimeNewMsg),
-             @"lastMsgState": @(lastMsgState)
+             @"lastMsgState": @(lastMsgState),
+             @"pinMsgId": pinMsgId
              };
 }
 

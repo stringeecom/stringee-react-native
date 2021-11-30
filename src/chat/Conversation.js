@@ -30,7 +30,7 @@ class Conversation {
     this.lastMessage.type = props.lastMsgType;
     this.lastMessage.content = props.text;
 
-    this.pinMsgId = props.pinMsgId;
+    this.pinMsgId = props.pinMsgId != null ? props.pinMsgId : null;
   }
 }
 
