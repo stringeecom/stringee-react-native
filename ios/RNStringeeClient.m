@@ -968,6 +968,37 @@ RCT_EXPORT_METHOD(deleteMessage:(NSString *)uuid conversationId:(NSString *)conv
     }];
 }
 
+RCT_EXPORT_METHOD(pinMessage:(NSString *)uuid conversationId:(NSString *)conversationId msgId:(NSString *)msgId pin:(BOOL)pin callback:(RCTResponseSenderBlock)callback) {
+
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+
+    if (!wrapper.client || !wrapper.client.hasConnected) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized or connected."]);
+        return;
+    }
+
+    if (!msgId.length) {
+        callback(@[@(NO), @(-2), @"Message's id is invalid."]);
+        return;
+    }
+
+    // Lấy về conversation
+    [wrapper.client getConversationWithConversationId:conversationId completionHandler:^(BOOL status, int code, NSString *message, StringeeConversation *conversation) {
+        if (!conversation) {
+            callback(@[@(NO), @(-3), @"Conversation not found."]);
+            return;
+        }
+
+        [conversation deleteMessageWithMessageIds:@[msgId] withCompletionHandler:^(BOOL status, int code, NSString *message) {
+            callback(@[@(status), @(code), message]);
+        }];
+    }];
+}
+
 RCT_EXPORT_METHOD(getLocalMessages:(NSString *)uuid conversationId:(NSString *)conversationId count:(NSUInteger)count callback:(RCTResponseSenderBlock)callback) {
 
     RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];

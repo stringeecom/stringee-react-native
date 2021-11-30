@@ -498,6 +498,18 @@ export default class extends Component {
     RNStringeeClient.deleteMessage(this.uuid, convId, messageId, callback);
   }
 
+  pinMessage(convId: string, messageId: string, pin: boolean, callback: RNStringeeEventCallback) {
+    RNStringeeClient.pinMessage(this.uuid, convId, messageId, pin, callback);
+  }
+
+  editMessage(convId: string, messageId: string, newContent: string, callback: RNStringeeEventCallback) {
+    RNStringeeClient.editMessage(this.uuid, convId, messageId, newContent, callback);
+  }
+
+  revokeMessage(convId: string, messageId: string, callback: RNStringeeEventCallback) {
+    RNStringeeClient.revokeMessage(this.uuid, convId, messageId, deleting, callback);
+  }
+
   getLocalMessages(convId: string, count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
     RNStringeeClient.getLocalMessages(this.uuid, convId, count, (status, code, message, messages) => {
       var returnMessages = [];

@@ -29,6 +29,8 @@ class Conversation {
     this.lastMessage.sequence = props.lastMsgSeq;
     this.lastMessage.type = props.lastMsgType;
     this.lastMessage.content = props.text;
+
+    this.pinMsgId = props.pinMsgId;
   }
 }
 
