@@ -1,6 +1,7 @@
 package com.stringeereactnative;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableArray;
@@ -66,7 +67,17 @@ public class Utils {
             participantsMap.pushMap(userMap);
         }
         conversationMap.putArray("participants", participantsMap);
-        conversationMap.putString("pinMsgId", conversation.getPinnedMsgId());
+        String pinMsgId = conversation.getPinnedMsgId();
+        if (pinMsgId != null) {
+            if (!TextUtils.isEmpty(pinMsgId)) {
+                conversationMap.putString("pinMsgId", pinMsgId);
+            } else {
+                conversationMap.putString("pinMsgId", null);
+            }
+        } else {
+            conversationMap.putString("pinMsgId", null);
+        }
+
         return conversationMap;
     }
 
