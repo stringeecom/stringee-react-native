@@ -1782,7 +1782,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         }
 
         if (widgetKey == null) {
-            callback.invoke(false, -2, "Widget key is not initialized");
+            callback.invoke(false, -2, "Widget key can not be null");
             return;
         }
 
@@ -1809,7 +1809,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         }
 
         if (convId == null) {
-            callback.invoke(false, -2, "Conversation id is not initialized");
+            callback.invoke(false, -2, "Conversation id can not be null");
             return;
         }
 
@@ -1847,7 +1847,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         }
 
         if (convId == null) {
-            callback.invoke(false, -2, "Conversation id is not initialized");
+            callback.invoke(false, -2, "Conversation id can not be null");
             return;
         }
 
@@ -1885,7 +1885,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         }
 
         if (convId == null) {
-            callback.invoke(false, -2, "Conversation id is not initialized");
+            callback.invoke(false, -2, "Conversation id can not be null");
             return;
         }
 
@@ -1923,7 +1923,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         }
 
         if (convId == null) {
-            callback.invoke(false, -2, "Conversation id is not initialized");
+            callback.invoke(false, -2, "Conversation id can not be null");
             return;
         }
 
@@ -1942,6 +1942,155 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                         callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
                     }
                 });
+            }
+
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+            }
+        });
+    }
+
+    @ReactMethod
+    public void pinMessage(final String instanceId, final String convId, final String msgId, final boolean pinOrUnpin, final Callback callback) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized");
+            return;
+        }
+
+        if (convId == null) {
+            callback.invoke(false, -2, "Conversation id can not be null");
+            return;
+        }
+
+        if (msgId == null) {
+            callback.invoke(false, -2, "Message id can not be null");
+            return;
+        }
+
+        String[] msgIds = new String[1];
+        msgIds[0] = msgId;
+
+        mClient.getConversationFromServer(convId, new CallbackListener<Conversation>() {
+            @Override
+            public void onSuccess(Conversation conversation) {
+                conversation.getMessages(mClient, msgIds, new CallbackListener<List<Message>>() {
+                    @Override
+                    public void onSuccess(List<Message> messages) {
+                        messages.get(0).pinOrUnpin(mClient, pinOrUnpin, new StatusListener() {
+                            @Override
+                            public void onSuccess() {
+                                callback.invoke(true, 0, "Success");
+                            }
+
+                            @Override
+                            public void onError(StringeeError stringeeError) {
+                                super.onError(stringeeError);
+                                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(StringeeError stringeeError) {
+                        super.onError(stringeeError);
+                        callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+                    }
+                });
+            }
+
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+            }
+        });
+    }
+
+    @ReactMethod
+    public void editMessage(final String instanceId, final String convId, final String msgId, final String newContent, final Callback callback) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized");
+            return;
+        }
+
+        if (convId == null) {
+            callback.invoke(false, -2, "Conversation id can not be null");
+            return;
+        }
+
+        if (msgId == null) {
+            callback.invoke(false, -2, "Message id can not be null");
+            return;
+        }
+
+        String[] msgIds = new String[1];
+        msgIds[0] = msgId;
+
+        mClient.getConversationFromServer(convId, new CallbackListener<Conversation>() {
+            @Override
+            public void onSuccess(Conversation conversation) {
+                conversation.getMessages(mClient, msgIds, new CallbackListener<List<Message>>() {
+                    @Override
+                    public void onSuccess(List<Message> messages) {
+                        messages.get(0).edit(mClient, newContent, new StatusListener() {
+                            @Override
+                            public void onSuccess() {
+                                callback.invoke(true, 0, "Success");
+                            }
+
+                            @Override
+                            public void onError(StringeeError stringeeError) {
+                                super.onError(stringeeError);
+                                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(StringeeError stringeeError) {
+                        super.onError(stringeeError);
+                        callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+                    }
+                });
+            }
+
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+            }
+        });
+    }
+
+    @ReactMethod
+    public void revokeMessage(final String instanceId, final String convId, final String msgId, final Callback callback) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized");
+            return;
+        }
+
+        if (convId == null) {
+            callback.invoke(false, -2, "Conversation id is not initialized");
+            return;
+        }
+
+        if (msgId == null) {
+            callback.invoke(false, -2, "Message id can not be null");
+            return;
+        }
+
+        JSONArray msgArray = new JSONArray();
+        msgArray.put(msgId);
+
+        mClient.revokeMessages(convId, msgArray, true, new StatusListener() {
+            @Override
+            public void onSuccess() {
+                callback.invoke(true, 0, "Success");
             }
 
             @Override

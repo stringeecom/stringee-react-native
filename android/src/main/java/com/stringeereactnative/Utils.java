@@ -66,6 +66,7 @@ public class Utils {
             participantsMap.pushMap(userMap);
         }
         conversationMap.putArray("participants", participantsMap);
+        conversationMap.putString("pinMsgId", conversation.getPinnedMsgId());
         return conversationMap;
     }
 
