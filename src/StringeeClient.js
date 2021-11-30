@@ -69,6 +69,10 @@ export default class extends Component {
     this.getAllMessagesBefore = this.getAllMessagesBefore.bind(this);
     this.clearDb = this.clearDb.bind(this);
 
+    this.pinMessage = this.pinMessage.bind(this);
+    this.editMessage = this.editMessage.bind(this);
+    this.revokeMessage = this.revokeMessage.bind(this);
+
     // live-chat
     this.getChatProfile = this.getChatProfile.bind(this);
     this.getLiveChatToken = this.getLiveChatToken.bind(this);
@@ -507,7 +511,7 @@ export default class extends Component {
   }
 
   revokeMessage(convId: string, messageId: string, callback: RNStringeeEventCallback) {
-    RNStringeeClient.revokeMessage(this.uuid, convId, messageId, deleting, callback);
+    RNStringeeClient.revokeMessage(this.uuid, convId, messageId, callback);
   }
 
   getLocalMessages(convId: string, count: number, isAscending: boolean, callback: RNStringeeEventCallback) {
