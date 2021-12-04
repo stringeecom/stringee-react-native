@@ -85,6 +85,10 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     <uses-permission android:name="android.permission.CAMERA" />
     ```
 
+### Version 1.4.20
+##### Bug fixes:
+- Can not render video in background iOS
+
 ### Version 1.4.19
 ##### Features:
 - Allow edit message, revoke message, pin/unpin message.
