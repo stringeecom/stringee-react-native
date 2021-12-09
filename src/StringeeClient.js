@@ -72,6 +72,7 @@ export default class extends Component {
     this.pinMessage = this.pinMessage.bind(this);
     this.editMessage = this.editMessage.bind(this);
     this.revokeMessage = this.revokeMessage.bind(this);
+    this.getMessageById = this.getMessageById.bind(this);
 
     // live-chat
     this.getChatProfile = this.getChatProfile.bind(this);
@@ -638,6 +639,10 @@ export default class extends Component {
       }
       return callback(status, code, message, returnMessages);
     });
+  }
+
+  getMessageById(convId: string, messageId: string, callback: RNStringeeEventCallback) {
+    RNStringeeClient.getMessageById(this.uuid, convId, messageId, callback);
   }
 
   clearDb(callback: RNStringeeEventCallback) {
