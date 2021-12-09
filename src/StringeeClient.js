@@ -642,9 +642,10 @@ export default class extends Component {
   }
 
   getMessageById(convId: string, messageId: string, callback: RNStringeeEventCallback) {
-    RNStringeeClient.getMessageById(this.uuid, convId, messageId, callback);
+    RNStringeeClient.getMessageById(this.uuid, convId, messageId, (status, code, message, msg) => {
+      return callback(status, code, message, new Message(msg));
+    });
   }
-
   clearDb(callback: RNStringeeEventCallback) {
     RNStringeeClient.clearDb(this.uuid, callback);
   }
