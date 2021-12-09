@@ -2101,6 +2101,53 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         });
     }
 
+    @ReactMethod
+    public void getMessageById(final String instanceId, final String convId, final String msgId, final Callback callback) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized");
+            return;
+        }
+
+        if (convId == null) {
+            callback.invoke(false, -2, "Conversation id is not initialized");
+            return;
+        }
+
+        if (msgId == null) {
+            callback.invoke(false, -2, "Message id can not be null");
+            return;
+        }
+
+        String[] msgIds = new String[1];
+        msgIds[0] = msgId;
+
+        mClient.getConversationFromServer(convId, new CallbackListener<Conversation>() {
+            @Override
+            public void onSuccess(Conversation conversation) {
+                conversation.getMessages(mClient, msgIds, new CallbackListener<List<Message>>() {
+                    @Override
+                    public void onSuccess(List<Message> messages) {
+                        if (messages.size() > 0) {
+                            WritableMap param = Utils.getMessageMap(mClient, messages.get(0));
+                            callback.invoke(true, 0, "Success", param);
+                        }
+                    }
+
+                    @Override
+                    public void onError(StringeeError error) {
+                        callback.invoke(false, error.getCode(), error.getMessage());
+                    }
+                });
+            }
+
+            @Override
+            public void onError(StringeeError error) {
+                callback.invoke(false, error.getCode(), error.getMessage());
+            }
+        });
+    }
+
     private void sendEvent(ReactContext reactContext, String eventName, @Nullable WritableMap eventData) {
         reactContext
                 .getJSModule(RCTDeviceEventEmitter.class)
