@@ -85,6 +85,10 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     <uses-permission android:name="android.permission.CAMERA" />
     ```
 
+### Version 1.4.22
+##### Bug fixes:
+- Return wrong data type in callback of function getMessageById
+
 ### Version 1.4.21
 ##### Bug fixes:
 - Add getMessageById function
