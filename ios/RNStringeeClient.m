@@ -1293,6 +1293,38 @@ RCT_EXPORT_METHOD(markConversationAsRead:(NSString *)uuid conversationId:(NSStri
     }];
 }
 
+RCT_EXPORT_METHOD(getMessageById:(NSString *)uuid convId:(NSString *)convId msgId:(NSString *)msgId callback:(RCTResponseSenderBlock)callback) {
+
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+
+    if (!wrapper.client || !wrapper.client.hasConnected) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized or connected."]);
+        return;
+    }
+
+    if (!msgId.length || !convId.length) {
+        callback(@[@(NO), @(-2), @"ConvId or msgId invalid."]);
+        return;
+    }
+
+    // Lấy về conversation
+    [wrapper.client getConversationWithConversationId:convId completionHandler:^(BOOL status, int code, NSString *message, StringeeConversation *conversation) {
+        if (!conversation) {
+            callback(@[@(NO), @(-3), @"Conversation not found."]);
+            return;
+        }
+        
+        // Lấy tin nhắn
+        [conversation getMessageWithId:msgId completion:^(BOOL status, int code, NSString *message, StringeeMessage *msg) {
+            callback(@[@(status), @(code), message, [RCTConvert StringeeMessage:msg]]);
+        }];
+    }];
+}
+
 #pragma mark - ClearData
 
 RCT_EXPORT_METHOD(clearDb:(NSString *)uuid callback:(RCTResponseSenderBlock)callback) {
