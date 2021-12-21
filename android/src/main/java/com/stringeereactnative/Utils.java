@@ -81,7 +81,7 @@ public class Utils {
         return conversationMap;
     }
 
-    public static WritableMap getMessageMap(StringeeClient client, Message message) {
+    public static WritableMap getMessageMap(Message message) {
         WritableMap messageMap = Arguments.createMap();
         messageMap.putString("id", message.getId());
         messageMap.putString("localId", message.getLocalId());
@@ -154,16 +154,7 @@ public class Utils {
                 break;
         }
         messageMap.putMap("content", contentMap);
-        String senderId = message.getSenderId();
-        User user = client.getUser(senderId);
-        String name = "";
-        if (user != null) {
-            name = user.getName();
-            if (name == null || name.length() == 0) {
-                name = user.getUserId();
-            }
-        }
-        messageMap.putString("sender", name);
+        messageMap.putString("sender", message.getSenderId());
         return messageMap;
     }
 

@@ -1,7 +1,6 @@
 package com.stringeereactnative;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
@@ -241,29 +240,12 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
 
                     switch (objectType) {
                         case MESSAGE:
-                            Message message = (Message) stringeeChange.getObject();
-                            if (message.getType() == Message.Type.NOTIFICATION) {
-                                try {
-                                    Bundle msg = Utils.jsonToBundle(message.getText());
-                                    if (msg.getInt("type") == 4) {
-                                        if (jsEvents != null && contains(jsEvents, "onEndChatSupport")) {
-                                            WritableMap msgMap = Arguments.fromBundle(msg);
-                                            data.putMap("info", msgMap);
-                                            params.putMap("data", data);
-                                            sendEvent(getReactApplicationContext(), "onEndChatSupport", params);
-                                            break;
-                                        }
-                                    }
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
                             if (jsEvents != null && contains(jsEvents, "onChangeEvent")) {
                                 data.putInt("objectType", objectType.getValue());
                                 data.putInt("changeType", changeType.getValue());
                                 WritableArray objects = Arguments.createArray();
 
-                                object = Utils.getMessageMap(mClient, message);
+                                object = Utils.getMessageMap((Message) stringeeChange.getObject());
                                 objects.pushMap(object);
                                 data.putArray("objects", objects);
 
@@ -959,7 +941,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
+                            WritableMap param = Utils.getMessageMap(messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -1000,7 +982,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
+                            WritableMap param = Utils.getMessageMap(messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -1042,7 +1024,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
+                            WritableMap param = Utils.getMessageMap(messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -1083,7 +1065,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
+                            WritableMap param = Utils.getMessageMap(messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -1477,7 +1459,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
+                            WritableMap param = Utils.getMessageMap(messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -1519,7 +1501,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
+                            WritableMap param = Utils.getMessageMap(messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -1560,7 +1542,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     public void onSuccess(List<Message> messages) {
                         WritableArray params = Arguments.createArray();
                         for (int i = 0; i < messages.size(); i++) {
-                            WritableMap param = Utils.getMessageMap(mClient, messages.get(i));
+                            WritableMap param = Utils.getMessageMap(messages.get(i));
                             params.pushMap(param);
                         }
                         callback.invoke(true, 0, "Success", params);
@@ -2129,7 +2111,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     @Override
                     public void onSuccess(List<Message> messages) {
                         if (messages.size() > 0) {
-                            WritableMap param = Utils.getMessageMap(mClient, messages.get(0));
+                            WritableMap param = Utils.getMessageMap(messages.get(0));
                             callback.invoke(true, 0, "Success", param);
                         }
                     }
