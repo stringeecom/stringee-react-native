@@ -84,6 +84,9 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     // for camera access
     <uses-permission android:name="android.permission.CAMERA" />
     ```
+### Version 1.4.23
+##### Bug fixes:
+- Return the user's id instead of the user's name in android messages
 
 ### Version 1.4.22
 ##### Bug fixes:
