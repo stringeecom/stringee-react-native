@@ -122,6 +122,23 @@ RCT_EXPORT_METHOD(registerPushForDeviceToken:(NSString *)uuid deviceToken:(NSStr
 
 }
 
+RCT_EXPORT_METHOD(registerPushAndDeleteOthers:(NSString *)uuid deviceToken:(NSString *)deviceToken isProduction:(BOOL)isProduction isVoip:(BOOL)isVoip callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+
+    if (!wrapper.client || !wrapper.client.hasConnected) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized or connected."]);
+        return;
+    }
+
+    [wrapper.client registerPushForDeviceToken:deviceToken isProduction:isProduction isVoip:isVoip deleteOthers:true completionHandler:^(BOOL status, int code, NSString *message) {
+        callback(@[@(status), @(code), message]);
+    }];
+}
+
 RCT_EXPORT_METHOD(unregisterPushToken:(NSString *)uuid deviceToken:(NSString *)deviceToken callback:(RCTResponseSenderBlock)callback) {
     RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
     if (wrapper == nil) {

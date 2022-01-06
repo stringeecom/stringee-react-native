@@ -35,6 +35,7 @@ export default class extends Component {
     this.connect = this.connect.bind(this);
     this.disconnect = this.disconnect.bind(this);
     this.registerPush = this.registerPush.bind(this);
+    this.registerPushAndDeleteOthers = this.registerPushAndDeleteOthers.bind(this);
     this.unregisterPush = this.unregisterPush.bind(this);
     this.sendCustomMessage = this.sendCustomMessage.bind(this);
     this.createConversation = this.createConversation.bind(this);
@@ -200,6 +201,20 @@ export default class extends Component {
         isProduction,
         isVoip,
         callback
+      );
+    } else {
+      RNStringeeClient.registerPushToken(this.uuid, deviceToken, callback);
+    }
+  }
+
+  registerPushAndDeleteOthers(deviceToken: string, isProduction: boolean, isVoip: boolean, callback: RNStringeeEventCallback) {
+    if (iOS) {
+      RNStringeeClient.registerPushAndDeleteOthers(
+          this.uuid,
+          deviceToken,
+          isProduction,
+          isVoip,
+          callback
       );
     } else {
       RNStringeeClient.registerPushToken(this.uuid, deviceToken, callback);
