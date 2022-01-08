@@ -84,6 +84,10 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     // for camera access
     <uses-permission android:name="android.permission.CAMERA" />
     ```
+### Version 1.4.25
+##### Features:
+- Allows deleting tokens on other devices when registerPush.
+   
 ### Version 1.4.24
 ##### Bug fixes:
 - No event when user is removed from conversation
