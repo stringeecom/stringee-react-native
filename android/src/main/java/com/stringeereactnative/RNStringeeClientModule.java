@@ -440,7 +440,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void registerPushToken(final String instanceId, final String token, final Callback callback) {
+    public void registerPushToken(final String instanceId, final String token, final boolean deleteOthers, final Callback callback) {
         StringeeClient mClient = mStringeeManager.getClientsMap().get(instanceId);
         if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized");
@@ -452,7 +452,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        mClient.registerPushToken(token, new StatusListener() {
+        mClient.registerPushToken(token, deleteOthers, new StatusListener() {
             @Override
             public void onSuccess() {
                 callback.invoke(true, 0, "Success");
