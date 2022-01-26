@@ -122,7 +122,7 @@ RCT_EXPORT_METHOD(registerPushForDeviceToken:(NSString *)uuid deviceToken:(NSStr
 
 }
 
-RCT_EXPORT_METHOD(registerPushAndDeleteOthers:(NSString *)uuid deviceToken:(NSString *)deviceToken isProduction:(BOOL)isProduction isVoip:(BOOL)isVoip callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(registerPushAndDeleteOthers:(NSString *)uuid deviceToken:(NSString *)deviceToken isProduction:(BOOL)isProduction isVoip:(BOOL)isVoip packageNames:(NSArray *)packageNames callback:(RCTResponseSenderBlock)callback) {
     RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
     if (wrapper == nil) {
         callback(@[@(NO), @(-1), @"Wrapper is not found"]);
@@ -133,8 +133,17 @@ RCT_EXPORT_METHOD(registerPushAndDeleteOthers:(NSString *)uuid deviceToken:(NSSt
         callback(@[@(NO), @(-1), @"StringeeClient is not initialized or connected."]);
         return;
     }
-
-    [wrapper.client registerPushForDeviceToken:deviceToken isProduction:isProduction isVoip:isVoip deleteOthers:true completionHandler:^(BOOL status, int code, NSString *message) {
+    
+    NSMutableArray<NSString *> *arrPackageNames = [[NSMutableArray alloc] init];
+    if (packageNames != nil && packageNames.count > 0) {
+        for (NSString *name in packageNames) {
+            if ([name isKindOfClass:[NSString class]] && name.length > 0) {
+                [arrPackageNames addObject:name];
+            }
+        }
+    }
+    
+    [wrapper.client registerPushForDeviceToken:deviceToken isProduction:isProduction isVoip:isVoip deleteOthers:true packageNames:arrPackageNames completionHandler:^(BOOL status, int code, NSString *message) {
         callback(@[@(status), @(code), message]);
     }];
 }

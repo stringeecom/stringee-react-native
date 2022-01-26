@@ -249,6 +249,7 @@ export default class extends Component {
     deviceToken: string,
     isProduction: boolean,
     isVoip: boolean,
+    packageNames: Array<string>,
     callback: RNStringeeEventCallback,
   ) {
     if (iOS) {
@@ -257,6 +258,7 @@ export default class extends Component {
         deviceToken,
         isProduction,
         isVoip,
+        packageNames,
         callback,
       );
     } else {
