@@ -30,12 +30,6 @@ public class RNStringeeVideoViewManager extends ViewGroupManager<RNStringeeVideo
         layout.updateView();
     }
 
-    @ReactProp(name = "streamId")
-    public void setStreamId(RNStringeeVideoLayout layout, String streamId) {
-        layout.setStreamId(streamId);
-        layout.updateView();
-    }
-
     @ReactProp(name = "overlay", defaultBoolean = false)
     public void setOverlay(RNStringeeVideoLayout layout, boolean isOverlay) {
         layout.setOverlay(isOverlay);

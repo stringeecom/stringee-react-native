@@ -13,7 +13,6 @@ public class RNStringeeVideoLayout extends FrameLayout {
 
     private StringeeCall stringeeCall;
     private StringeeCall2 stringeeCall2;
-    private StringeeStream stringeeStream;
     private String callId;
     private boolean isLocal;
     private boolean setLocal;

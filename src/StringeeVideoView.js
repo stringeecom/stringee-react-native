@@ -6,7 +6,6 @@ var iface = {
   propTypes: {
     callId: PropTypes.string.isRequired,
     local: PropTypes.bool.isRequired,
-    streamId: PropTypes.string.isRequired,
     overlay: PropTypes.bool.isRequired,
     ...ViewPropTypes
   }

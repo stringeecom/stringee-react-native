@@ -239,7 +239,6 @@ export default class extends Component {
       RNStringeeClient.registerPushToken(
         this.uuid,
         deviceToken,
-        false,
         callback,
       );
     }
@@ -262,10 +261,10 @@ export default class extends Component {
         callback,
       );
     } else {
-      RNStringeeClient.registerPushToken(
+      RNStringeeClient.registerPushAndDeleteOthers(
         this.uuid,
         deviceToken,
-        true,
+        packageNames,
         callback,
       );
     }

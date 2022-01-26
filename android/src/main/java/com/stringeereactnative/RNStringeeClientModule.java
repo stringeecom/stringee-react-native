@@ -228,7 +228,6 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             mClient.setChangeEventListener(new ChangeEventListener() {
                 @Override
                 public void onChangeEvent(StringeeChange stringeeChange) {
-                    StringeeClient mClient = mStringeeManager.getClientsMap().get(instanceId);
                     ArrayList<String> jsEvents = eventsMap.get(instanceId);
                     StringeeObject.Type objectType = stringeeChange.getObjectType();
                     StringeeChange.Type changeType = stringeeChange.getChangeType();
@@ -440,7 +439,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void registerPushToken(final String instanceId, final String token, final boolean deleteOthers, final Callback callback) {
+    public void registerPushToken(final String instanceId, final String token, final Callback callback) {
         StringeeClient mClient = mStringeeManager.getClientsMap().get(instanceId);
         if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized");
@@ -452,15 +451,53 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        mClient.registerPushToken(token, deleteOthers, new StatusListener() {
+        mClient.registerPushToken(token, new StatusListener() {
             @Override
             public void onSuccess() {
                 callback.invoke(true, 0, "Success");
             }
 
             @Override
-            public void onError(StringeeError error) {
-                callback.invoke(false, error.getCode(), error.getMessage());
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+            }
+        });
+    }
+
+    @ReactMethod
+    public void registerPushAndDeleteOthers(final String instanceId, final String token, final ReadableArray packagesArray, final Callback callback) {
+        StringeeClient mClient = mStringeeManager.getClientsMap().get(instanceId);
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized");
+            return;
+        }
+
+        if (token == null) {
+            callback.invoke(false, -2, "token can not be null");
+            return;
+        }
+
+        List<String> packages = null;
+        if (packagesArray != null) {
+            if (packagesArray.size() > 0) {
+                packages = new ArrayList<>();
+                for (int i = 0; i < packagesArray.size(); i++) {
+                    packages.add(packagesArray.getString(i));
+                }
+            }
+        }
+
+        mClient.registerPushTokenAndDeleteOthers(token, packages, new StatusListener() {
+            @Override
+            public void onSuccess() {
+                callback.invoke(true, 0, "Success");
+            }
+
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
             }
         });
     }
@@ -2166,7 +2203,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         // Keep: Required for RN built in Event Emitter Calls.
     }
 
-    private boolean contains(ArrayList array, String value) {
+    private boolean contains(java.util.ArrayList array, String value) {
 
         for (int i = 0; i < array.size(); i++) {
             if (array.get(i).equals(value)) {

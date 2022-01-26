@@ -25,6 +25,7 @@ import com.stringee.common.StringeeAudioManager;
 import com.stringee.common.StringeeAudioManager.AudioDevice;
 import com.stringee.common.StringeeAudioManager.AudioManagerEvents;
 import com.stringee.common.StringeeConstant;
+import com.stringee.exception.StringeeError;
 import com.stringee.listener.StatusListener;
 
 import org.json.JSONException;
@@ -267,6 +268,12 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
                 public void onSuccess() {
                     callback.invoke(true, 0, "Success");
                 }
+
+                @Override
+                public void onError(StringeeError stringeeError) {
+                    super.onError(stringeeError);
+                    callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+                }
             });
         } catch (JSONException e) {
             callback.invoke(false, -4, "The call info format is invalid.");
@@ -292,7 +299,8 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             }
 
             @Override
-            public void onError(com.stringee.exception.StringeeError error) {
+            public void onError(StringeeError error) {
+                super.onError(stringeeError);
                 callback.invoke(false, error.getCode(), error.getMessage());
             }
         });
@@ -314,6 +322,11 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             @Override
             public void onSuccess() {
                 callback.invoke(true, 0, "Success");
+            }
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
             }
         });
     }

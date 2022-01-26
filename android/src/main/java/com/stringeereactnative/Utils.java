@@ -6,7 +6,6 @@ import android.text.TextUtils;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.stringee.StringeeClient;
 import com.stringee.messaging.ChatProfile;
 import com.stringee.messaging.ChatRequest;
 import com.stringee.messaging.Conversation;
