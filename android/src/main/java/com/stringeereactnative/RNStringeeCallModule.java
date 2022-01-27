@@ -300,7 +300,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
 
             @Override
             public void onError(StringeeError error) {
-                super.onError(stringeeError);
+                super.onError(error);
                 callback.invoke(false, error.getCode(), error.getMessage());
             }
         });
