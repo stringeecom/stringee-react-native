@@ -1,4 +1,13 @@
 class Message {
+  localId: string;
+  id: string;
+  conversationId: string;
+  sender: string;
+  createdAt: number;
+  state: number;
+  sequence: number;
+  type: number;
+  content: string;
   constructor(props) {
     this.localId = props.localId;
     this.id = props.id;

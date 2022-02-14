@@ -1,4 +1,10 @@
 class ChatRequest {
+  convId: string;
+  channelType: number;
+  type: number;
+  customerId: string;
+  customerName: string;
+
   constructor(props) {
     // Request info
     this.convId = props.convId;

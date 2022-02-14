@@ -32,49 +32,62 @@ const clientEvents = {
     onConversationEnded: 'onConversationEnded',
     onUserBeginTyping: 'onTyping',
     onUserEndTyping: 'onEndTyping',
-  }
+  },
 };
 
 const callEvents = {
   ios: {
-    onChangeSignalingState: "didChangeSignalingState",
-    onChangeMediaState: "didChangeMediaState",
-    onReceiveLocalStream: "didReceiveLocalStream",
-    onReceiveRemoteStream: "didReceiveRemoteStream",
-    onReceiveDtmfDigit: "didReceiveDtmfDigit",
-    onReceiveCallInfo: "didReceiveCallInfo",
-    onHandleOnAnotherDevice: "didHandleOnAnotherDevice"
+    onChangeSignalingState: 'didChangeSignalingState',
+    onChangeMediaState: 'didChangeMediaState',
+    onReceiveLocalStream: 'didReceiveLocalStream',
+    onReceiveRemoteStream: 'didReceiveRemoteStream',
+    onReceiveDtmfDigit: 'didReceiveDtmfDigit',
+    onReceiveCallInfo: 'didReceiveCallInfo',
+    onHandleOnAnotherDevice: 'didHandleOnAnotherDevice',
   },
   android: {
-    onChangeSignalingState: "onSignalingStateChange",
-    onChangeMediaState: "onMediaStateChange",
-    onReceiveLocalStream: "onLocalStream",
-    onReceiveRemoteStream: "onRemoteStream",
-    onReceiveDtmfDigit: "onDTMF",
-    onReceiveCallInfo: "onCallInfo",
-    onHandleOnAnotherDevice: "onHandledOnAnotherDevice",
-    onAudioDeviceChange: "onAudioDeviceChange" ///only for android
-  }
+    onChangeSignalingState: 'onSignalingStateChange',
+    onChangeMediaState: 'onMediaStateChange',
+    onReceiveLocalStream: 'onLocalStream',
+    onReceiveRemoteStream: 'onRemoteStream',
+    onReceiveDtmfDigit: 'onDTMF',
+    onReceiveCallInfo: 'onCallInfo',
+    onHandleOnAnotherDevice: 'onHandledOnAnotherDevice',
+    onAudioDeviceChange: 'onAudioDeviceChange', ///only for android
+  },
 };
 
-export type UserInfoParam = (
-  name: string,
-  email: string,
-  avatar: string,
-  phone: string,
-) => void;
+const roomEvents = {
+  didJoinRoom: 'didJoinRoom',
+  didLeaveRoom: 'didLeaveRoom',
+  didAddVideoTrack: 'didAddVideoTrack',
+  didRemoveVideoTrack: 'didRemoveVideoTrack',
+  didReceiveRoomMessage: 'didReceiveRoomMessage',
+  trackReadyToPlay: 'trackReadyToPlay',
+};
 
-export type LiveChatTicketParam = (
-  name: string,
-  email: string,
-  phone: string,
-  note: string,
-) => void;
+const StringeeVideoDimensions = {
+  dimensions_1080: '1080',
+  dimensions_720: '720',
+  dimensions_480: '480',
+  dimensions_288: '288',
+};
+
+const ScalingType = {
+  FIT: 'FIT',
+  FILL: 'FILL',
+};
 
 export type RNStringeeEventCallback = (
   status: boolean,
   code: number,
-  message: string
+  message: string,
 ) => void;
 
-export {clientEvents, callEvents};
+export {
+  clientEvents,
+  callEvents,
+  roomEvents,
+  StringeeVideoDimensions,
+  // ScalingType,
+};

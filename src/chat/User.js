@@ -1,4 +1,7 @@
 class User {
+  userId: string;
+  name: string;
+  avatar: string;
   constructor(props) {
     this.userId = props.userId;
     this.name = props.name;

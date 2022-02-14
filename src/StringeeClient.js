@@ -2,29 +2,21 @@ import PropTypes from 'prop-types';
 import {Component} from 'react';
 import {NativeEventEmitter, NativeModules, Platform} from 'react-native';
 import {each} from 'underscore';
-import Conversation from './chat/Conversation';
-import Message from './chat/Message';
-import User from './chat/User';
-import ChatRequest from './chat/ChatRequest';
 import {clientEvents} from './helpers/StringeeHelper';
-import type {
+import {
+  ChatRequest,
+  Conversation,
   LiveChatTicketParam,
+  Message,
+  User,
   UserInfoParam,
-  RNStringeeEventCallback,
-} from './helpers/StringeeHelper';
+} from '../index';
+import type {RNStringeeEventCallback} from './helpers/StringeeHelper';
 
 const RNStringeeClient = NativeModules.RNStringeeClient;
+const RNStringeeVideo = NativeModules.RNStringeeVideo;
 
-const iOS = Platform.OS === 'ios';
-
-export default class extends Component {
-  static propTypes = {
-    eventHandlers: PropTypes.object,
-    baseUrl: PropTypes.string,
-    serverAddresses: PropTypes.array,
-    stringeeXBaseUrl: PropTypes.string,
-  };
-
+class StringeeClient extends Component {
   constructor(props) {
     super(props);
     this._events = [];
@@ -115,7 +107,7 @@ export default class extends Component {
 
   componentWillUnmount() {
     // Keep events for android
-    if (!iOS) {
+    if (!Platform.OS === 'ios') {
       return;
     }
     this._unregisterEvents();
@@ -151,11 +143,11 @@ export default class extends Component {
                 return;
               }
 
-              var objectType = data.objectType;
-              var objects = data.objects;
-              var changeType = data.changeType;
+              let objectType = data.objectType;
+              let objects = data.objects;
+              let changeType = data.changeType;
 
-              var objectChanges = [];
+              let objectChanges = [];
               if (objectType === 0) {
                 objects.map(object => {
                   objectChanges.push(new Conversation(object));
@@ -181,8 +173,8 @@ export default class extends Component {
                 return;
               }
 
-              var requestData = data.request;
-              var request = new ChatRequest(requestData);
+              let requestData = data.request;
+              let request = new ChatRequest(requestData);
 
               if (handler !== undefined) {
                 handler({request});
@@ -227,7 +219,7 @@ export default class extends Component {
     isVoip: boolean,
     callback: RNStringeeEventCallback,
   ) {
-    if (iOS) {
+    if (Platform.OS === 'ios') {
       RNStringeeClient.registerPushForDeviceToken(
         this.uuid,
         deviceToken,
@@ -236,11 +228,7 @@ export default class extends Component {
         callback,
       );
     } else {
-      RNStringeeClient.registerPushToken(
-        this.uuid,
-        deviceToken,
-        callback,
-      );
+      RNStringeeClient.registerPushToken(this.uuid, deviceToken, callback);
     }
   }
 
@@ -251,7 +239,7 @@ export default class extends Component {
     packageNames: Array<string>,
     callback: RNStringeeEventCallback,
   ) {
-    if (iOS) {
+    if (Platform.OS === 'ios') {
       RNStringeeClient.registerPushAndDeleteOthers(
         this.uuid,
         deviceToken,
@@ -292,11 +280,16 @@ export default class extends Component {
       userIds,
       options,
       (status, code, message, conversation) => {
-        var returnConversation;
         if (status) {
-          returnConversation = new Conversation(conversation);
+          return callback(
+            status,
+            code,
+            message,
+            new Conversation(conversation),
+          );
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnConversation);
       },
     );
   }
@@ -306,11 +299,16 @@ export default class extends Component {
       this.uuid,
       convId,
       (status, code, message, conversation) => {
-        var returnConversation;
         if (status) {
-          returnConversation = new Conversation(conversation);
+          return callback(
+            status,
+            code,
+            message,
+            new Conversation(conversation),
+          );
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnConversation);
       },
     );
   }
@@ -321,15 +319,15 @@ export default class extends Component {
     isAscending: boolean,
     callback: RNStringeeEventCallback,
   ) {
-    if (iOS) {
+    if (Platform.OS === 'ios') {
       // iOS su dung ca 2 tham so
       RNStringeeClient.getLocalConversations(
         this.uuid,
         count,
         userId,
         (status, code, message, conversations) => {
-          var returnConversations = [];
           if (status) {
+            let returnConversations = [];
             if (isAscending) {
               conversations.reverse().map(conversation => {
                 returnConversations.push(new Conversation(conversation));
@@ -339,8 +337,10 @@ export default class extends Component {
                 returnConversations.push(new Conversation(conversation));
               });
             }
+            return callback(status, code, message, returnConversations);
+          } else {
+            return callback(status, code, message);
           }
-          return callback(status, code, message, returnConversations);
         },
       );
     } else {
@@ -349,8 +349,8 @@ export default class extends Component {
         this.uuid,
         userId,
         (status, code, message, conversations) => {
-          var returnConversations = [];
           if (status) {
+            let returnConversations = [];
             if (isAscending) {
               conversations.reverse().map(conversation => {
                 returnConversations.push(new Conversation(conversation));
@@ -360,8 +360,10 @@ export default class extends Component {
                 returnConversations.push(new Conversation(conversation));
               });
             }
+            return callback(status, code, message, returnConversations);
+          } else {
+            return callback(status, code, message);
           }
-          return callback(status, code, message, returnConversations);
         },
       );
     }
@@ -376,8 +378,8 @@ export default class extends Component {
       this.uuid,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
         if (status) {
+          let returnConversations = [];
           if (isAscending) {
             // Tăng dần -> Cần đảo mảng
             conversations.reverse().map(conversation => {
@@ -388,8 +390,10 @@ export default class extends Component {
               returnConversations.push(new Conversation(conversation));
             });
           }
+          return callback(status, code, message, returnConversations);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnConversations);
       },
     );
   }
@@ -403,8 +407,8 @@ export default class extends Component {
       this.uuid,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
         if (status) {
+          let returnConversations = [];
           if (isAscending) {
             // Tăng dần -> Cần đảo mảng
             conversations.reverse().map(conversation => {
@@ -415,8 +419,10 @@ export default class extends Component {
               returnConversations.push(new Conversation(conversation));
             });
           }
+          return callback(status, code, message, returnConversations);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnConversations);
       },
     );
   }
@@ -432,8 +438,8 @@ export default class extends Component {
       datetime,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
         if (status) {
+          let returnConversations = [];
           if (isAscending) {
             conversations.reverse().map(conversation => {
               returnConversations.push(new Conversation(conversation));
@@ -443,8 +449,10 @@ export default class extends Component {
               returnConversations.push(new Conversation(conversation));
             });
           }
+          return callback(status, code, message, returnConversations);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnConversations);
       },
     );
   }
@@ -460,8 +468,8 @@ export default class extends Component {
       datetime,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
         if (status) {
+          let returnConversations = [];
           if (isAscending) {
             conversations.reverse().map(conversation => {
               returnConversations.push(new Conversation(conversation));
@@ -471,8 +479,10 @@ export default class extends Component {
               returnConversations.push(new Conversation(conversation));
             });
           }
+          return callback(status, code, message, returnConversations);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnConversations);
       },
     );
   }
@@ -488,8 +498,8 @@ export default class extends Component {
       datetime,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
         if (status) {
+          let returnConversations = [];
           if (isAscending) {
             conversations.reverse().map(conversation => {
               returnConversations.push(new Conversation(conversation));
@@ -499,8 +509,10 @@ export default class extends Component {
               returnConversations.push(new Conversation(conversation));
             });
           }
+          return callback(status, code, message, returnConversations);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnConversations);
       },
     );
   }
@@ -516,8 +528,8 @@ export default class extends Component {
       datetime,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
         if (status) {
+          let returnConversations = [];
           if (isAscending) {
             conversations.reverse().map(conversation => {
               returnConversations.push(new Conversation(conversation));
@@ -527,8 +539,10 @@ export default class extends Component {
               returnConversations.push(new Conversation(conversation));
             });
           }
+          return callback(status, code, message, returnConversations);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnConversations);
       },
     );
   }
@@ -542,8 +556,8 @@ export default class extends Component {
       this.uuid,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
         if (status) {
+          let returnConversations = [];
           if (isAscending) {
             // Tăng dần -> Cần đảo mảng
             conversations.reverse().map(conversation => {
@@ -554,8 +568,10 @@ export default class extends Component {
               returnConversations.push(new Conversation(conversation));
             });
           }
+          return callback(status, code, message, returnConversations);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnConversations);
       },
     );
   }
@@ -571,8 +587,8 @@ export default class extends Component {
       datetime,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
         if (status) {
+          let returnConversations = [];
           if (isAscending) {
             conversations.reverse().map(conversation => {
               returnConversations.push(new Conversation(conversation));
@@ -582,8 +598,10 @@ export default class extends Component {
               returnConversations.push(new Conversation(conversation));
             });
           }
+          return callback(status, code, message, returnConversations);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnConversations);
       },
     );
   }
@@ -599,8 +617,8 @@ export default class extends Component {
       datetime,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
         if (status) {
+          let returnConversations = [];
           if (isAscending) {
             conversations.reverse().map(conversation => {
               returnConversations.push(new Conversation(conversation));
@@ -610,8 +628,10 @@ export default class extends Component {
               returnConversations.push(new Conversation(conversation));
             });
           }
+          return callback(status, code, message, returnConversations);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnConversations);
       },
     );
   }
@@ -626,13 +646,15 @@ export default class extends Component {
       convId,
       userIds,
       (status, code, message, users) => {
-        var returnUsers = [];
         if (status) {
+          let returnUsers = [];
           users.map(user => {
             returnUsers.push(new User(user));
           });
+          return callback(status, code, message, returnUsers);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnUsers);
       },
     );
   }
@@ -647,13 +669,15 @@ export default class extends Component {
       convId,
       userIds,
       (status, code, message, users) => {
-        var returnUsers = [];
         if (status) {
+          let returnUsers = [];
           users.map(user => {
             returnUsers.push(new User(user));
           });
+          return callback(status, code, message, returnUsers);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnUsers);
       },
     );
   }
@@ -675,11 +699,16 @@ export default class extends Component {
       this.uuid,
       userId,
       (status, code, message, conversation) => {
-        var returnConversation;
         if (status) {
-          returnConversation = new Conversation(conversation);
+          return callback(
+            status,
+            code,
+            message,
+            new Conversation(conversation),
+          );
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnConversation);
       },
     );
   }
@@ -751,8 +780,8 @@ export default class extends Component {
       convId,
       count,
       (status, code, message, messages) => {
-        var returnMessages = [];
         if (status) {
+          let returnMessages = [];
           if (isAscending) {
             messages.map(msg => {
               returnMessages.push(new Message(msg));
@@ -762,8 +791,10 @@ export default class extends Component {
               returnMessages.push(new Message(msg));
             });
           }
+          return callback(status, code, message, returnMessages);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnMessages);
       },
     );
   }
@@ -783,8 +814,8 @@ export default class extends Component {
       loadDeletedMessage,
       loadDeletedMessageContent,
       (status, code, message, messages) => {
-        var returnMessages = [];
         if (status) {
+          let returnMessages = [];
           if (isAscending) {
             messages.map(msg => {
               returnMessages.push(new Message(msg));
@@ -794,8 +825,10 @@ export default class extends Component {
               returnMessages.push(new Message(msg));
             });
           }
+          return callback(status, code, message, returnMessages);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnMessages);
       },
     );
   }
@@ -815,8 +848,8 @@ export default class extends Component {
       loadDeletedMessage,
       loadDeletedMessageContent,
       (status, code, message, messages) => {
-        var returnMessages = [];
         if (status) {
+          let returnMessages = [];
           if (isAscending) {
             messages.map(msg => {
               returnMessages.push(new Message(msg));
@@ -826,8 +859,10 @@ export default class extends Component {
               returnMessages.push(new Message(msg));
             });
           }
+          return callback(status, code, message, returnMessages);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnMessages);
       },
     );
   }
@@ -849,8 +884,8 @@ export default class extends Component {
       loadDeletedMessage,
       loadDeletedMessageContent,
       (status, code, message, messages) => {
-        var returnMessages = [];
         if (status) {
+          let returnMessages = [];
           if (isAscending) {
             messages.map(msg => {
               returnMessages.push(new Message(msg));
@@ -860,8 +895,10 @@ export default class extends Component {
               returnMessages.push(new Message(msg));
             });
           }
+          return callback(status, code, message, returnMessages);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnMessages);
       },
     );
   }
@@ -883,8 +920,8 @@ export default class extends Component {
       loadDeletedMessage,
       loadDeletedMessageContent,
       (status, code, message, messages) => {
-        var returnMessages = [];
         if (status) {
+          let returnMessages = [];
           if (isAscending) {
             messages.map(msg => {
               returnMessages.push(new Message(msg));
@@ -894,8 +931,10 @@ export default class extends Component {
               returnMessages.push(new Message(msg));
             });
           }
+          return callback(status, code, message, returnMessages);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnMessages);
       },
     );
   }
@@ -917,8 +956,8 @@ export default class extends Component {
       loadDeletedMessage,
       loadDeletedMessageContent,
       (status, code, message, messages) => {
-        var returnMessages = [];
         if (status) {
+          let returnMessages = [];
           if (isAscending) {
             messages.map(msg => {
               returnMessages.push(new Message(msg));
@@ -928,8 +967,10 @@ export default class extends Component {
               returnMessages.push(new Message(msg));
             });
           }
+          return callback(status, code, message, returnMessages);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnMessages);
       },
     );
   }
@@ -951,8 +992,8 @@ export default class extends Component {
       loadDeletedMessage,
       loadDeletedMessageContent,
       (status, code, message, messages) => {
-        var returnMessages = [];
         if (status) {
+          let returnMessages = [];
           if (isAscending) {
             messages.map(msg => {
               returnMessages.push(new Message(msg));
@@ -962,8 +1003,10 @@ export default class extends Component {
               returnMessages.push(new Message(msg));
             });
           }
+          return callback(status, code, message, returnMessages);
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnMessages);
       },
     );
   }
@@ -1047,11 +1090,11 @@ export default class extends Component {
       this.uuid,
       queueId,
       (status, code, message, data) => {
-        var returnConversation;
         if (status) {
-          returnConversation = new Conversation(data);
+          return callback(status, code, message, new Conversation(data));
+        } else {
+          return callback(status, code, message);
         }
-        return callback(status, code, message, returnConversation);
       },
     );
   }
@@ -1121,3 +1164,12 @@ export default class extends Component {
     RNStringeeClient.endChat(this.uuid, convId, callback);
   }
 }
+
+StringeeClient.propTypes = {
+  eventHandlers: PropTypes.object,
+  baseUrl: PropTypes.string,
+  serverAddresses: PropTypes.array,
+  stringeeXBaseUrl: PropTypes.string,
+};
+
+export {StringeeClient, RNStringeeVideo};

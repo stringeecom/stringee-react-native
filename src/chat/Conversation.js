@@ -2,6 +2,17 @@ import User from './User';
 import Message from './Message';
 
 class Conversation {
+  id: string;
+  name: string;
+  isGroup: boolean;
+  updatedAt: number;
+  creator: string;
+  created: number;
+  unreadCount: number;
+  participants: Array<User>;
+  lastMessage: Message;
+  pinMsgId: string;
+
   constructor(props) {
     this.id = props.id;
     this.name = props.name;
@@ -11,10 +22,9 @@ class Conversation {
     this.created = props.created;
     this.unreadCount = props.unreadCount;
 
-    var parts = [];
-    var tempParts = props.participants;
-    tempParts.map((part) => {
-      var user = new User(part);
+    let parts = [];
+    props.participants.map(part => {
+      let user = new User(part);
       parts.push(user);
     });
     this.participants = parts;

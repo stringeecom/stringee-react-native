@@ -4,6 +4,10 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
+import com.stringeereactnative.call.RNStringeeCall2Module;
+import com.stringeereactnative.call.RNStringeeCallModule;
+import com.stringeereactnative.conference.RNStringeeVideoModule;
+import com.stringeereactnative.view.RNStringeeVideoViewManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +22,7 @@ public class RNStringeeReactPackage implements ReactPackage {
         modules.add(new RNStringeeClientModule(reactContext));
         modules.add(new RNStringeeCallModule(reactContext));
         modules.add(new RNStringeeCall2Module(reactContext));
+        modules.add(new RNStringeeVideoModule(reactContext));
 
         return modules;
     }
