@@ -22,10 +22,11 @@ class StringeeVideoView extends Component {
     this.ref = React.createRef();
     this.callId = props.callId;
     this.trackId = props.trackId;
-    this.local = props.local;
-    this.overlay = props.overlay;
-    this.isMirror = props.isMirror;
-    this.scalingType = props.scalingType;
+    this.local = props.local !== undefined ? props.local : false;
+    this.overlay = props.overlay !== undefined ? props.overlay : false;
+    this.isMirror = props.isMirror !== undefined ? props.isMirror : false;
+    this.scalingType =
+      props.scalingType !== undefined ? props.isMirror : ScalingType.FILL;
   }
 
   componentDidMount() {
