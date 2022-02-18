@@ -31,7 +31,7 @@ class StringeeCall extends Component {
     this.setMirror = this.setMirror.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.sanitizeCallEvents(this.props.eventHandlers);
   }
 

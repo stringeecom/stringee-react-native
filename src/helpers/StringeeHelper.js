@@ -89,5 +89,5 @@ export {
   callEvents,
   roomEvents,
   StringeeVideoDimensions,
-  // ScalingType,
+  ScalingType,
 };

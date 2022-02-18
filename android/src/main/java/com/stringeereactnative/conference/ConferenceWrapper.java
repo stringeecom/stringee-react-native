@@ -32,6 +32,7 @@ import com.stringeereactnative.common.Utils;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 public class ConferenceWrapper implements StringeeRoomListener {
@@ -62,7 +63,7 @@ public class ConferenceWrapper implements StringeeRoomListener {
     public void createCaptureScreenTrack(Callback callback) {
         if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
             String localId = Utils.createLocalId();
-            final int REQUEST_CODE = new java.util.Random().nextInt(65536);
+            final int REQUEST_CODE = new Random().nextInt(65536);
 
             stringeeManager.getCaptureManager().getActivityResult(new BaseActivityEventListener() {
                 @Override
@@ -310,7 +311,7 @@ public class ConferenceWrapper implements StringeeRoomListener {
     @Override
     public void onVideoTrackAdded(StringeeRoom stringeeRoom, StringeeVideoTrack stringeeVideoTrack) {
         if (Utils.contains(stringeeManager.getRoomEvents(), "didAddVideoTrack")) {
-            VideoTrackManager trackManager = new com.stringeereactnative.conference.VideoTrackManager(clientWrapper, stringeeVideoTrack, "", false);
+            VideoTrackManager trackManager = new VideoTrackManager(clientWrapper, stringeeVideoTrack, "", false);
             stringeeManager.getTrackMap().put(stringeeVideoTrack.getId(), trackManager);
             Utils.sendEvent(context, "didAddVideoTrack", Utils.getVideoTrackInfoMap(trackManager, clientWrapper.getClientId()));
         }

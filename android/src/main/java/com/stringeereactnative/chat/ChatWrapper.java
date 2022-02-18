@@ -697,8 +697,8 @@ public class ChatWrapper {
         });
     }
 
-    public void updateUserInfo(String name, String email, String avatar, Callback callback) {
-        clientWrapper.getClient().updateUser(name, email, avatar, new StatusListener() {
+    public void updateUserInfo(String name, String email, String avatar, String phone, Callback callback) {
+        clientWrapper.getClient().updateUser(name, email, avatar, phone, new StatusListener() {
             @Override
             public void onSuccess() {
                 callback.invoke(true, 0, "Success");
@@ -792,8 +792,8 @@ public class ChatWrapper {
         });
     }
 
-    public void createLiveChatTicket(String widgetKey, String name, String email, String note, Callback callback) {
-        clientWrapper.getClient().createLiveChatTicket(widgetKey, name, email, note, new StatusListener() {
+    public void createLiveChatTicket(String widgetKey, String name, String email, String phone, String note, Callback callback) {
+        clientWrapper.getClient().createLiveChatTicket(widgetKey, name, email, phone, note, new StatusListener() {
             @Override
             public void onSuccess() {
                 callback.invoke(true, 0, "Success");
@@ -1008,7 +1008,7 @@ public class ChatWrapper {
                     @Override
                     public void onSuccess(List<Message> messages) {
                         if (messages.size() > 0) {
-                            WritableMap param = com.stringeereactnative.common.Utils.getMessageMap(messages.get(0));
+                            WritableMap param = Utils.getMessageMap(messages.get(0));
                             callback.invoke(true, 0, "Success", param);
                         }
                     }

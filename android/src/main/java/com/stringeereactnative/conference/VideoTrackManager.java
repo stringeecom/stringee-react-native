@@ -4,6 +4,7 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 import com.stringee.video.StringeeVideoTrack;
 import com.stringee.video.StringeeVideoTrack.Listener;
+import com.stringee.video.StringeeVideoTrack.MediaState;
 import com.stringeereactnative.ClientWrapper;
 import com.stringeereactnative.common.StringeeManager;
 import com.stringeereactnative.common.Utils;
@@ -64,7 +65,7 @@ public class VideoTrackManager implements Listener {
     }
 
     @Override
-    public void onMediaStateChange(StringeeVideoTrack.MediaState mediaState) {
+    public void onMediaStateChange(MediaState mediaState) {
 
     }
 }

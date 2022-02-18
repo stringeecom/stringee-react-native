@@ -35,12 +35,12 @@ public class StringeeManager {
     }
 
     public StringeeManager() {
-        this.clientWrapperMap = new HashMap();
-        this.callWrapperMap = new HashMap();
-        this.call2WrapperMap = new HashMap();
-        this.trackMap = new HashMap();
-        this.localViewOption = new HashMap();
-        this.remoteViewOption = new HashMap();
+        this.clientWrapperMap = new HashMap<>();
+        this.callWrapperMap = new HashMap<>();
+        this.call2WrapperMap = new HashMap<>();
+        this.trackMap = new HashMap<>();
+        this.localViewOption = new HashMap<>();
+        this.remoteViewOption = new HashMap<>();
         this.roomMap = new HashMap<>();
 
         this.callEvents = new ArrayList<>();

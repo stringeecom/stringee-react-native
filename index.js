@@ -1,7 +1,7 @@
 import {StringeeClient} from './src/StringeeClient';
 import {StringeeCall} from './src/call/StringeeCall';
 import {StringeeCall2} from './src/call/StringeeCall2';
-import StringeeVideoView from './src/StringeeVideoView';
+import {StringeeVideoView} from './src/StringeeVideoView';
 import StringeeServerAddress from './src/helpers/StringeeServerAddress';
 import Conversation from './src/chat/Conversation';
 import Message from './src/chat/Message';
@@ -14,7 +14,7 @@ import StringeeVideoTrackInfo from './src/conference/StringeeVideoTrackInfo';
 import StringeeRoomUser from './src/conference/StringeeRoomUser';
 import StringeeVideoTrackOption from './src/helpers/StringeeVideoTrackOption';
 import {
-  // ScalingType,
+  ScalingType,
   StringeeVideoDimensions,
 } from './src/helpers/StringeeHelper';
 import UserInfoParam from './src/helpers/UserInfoParam';
@@ -36,7 +36,7 @@ export {
   StringeeVideoTrackInfo,
   StringeeRoomUser,
   StringeeVideoTrackOption,
-  // ScalingType,
+  ScalingType,
   StringeeVideoDimensions,
   UserInfoParam,
   LiveChatTicketParam,

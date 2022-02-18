@@ -709,7 +709,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        clientWrapper.getChatWrapper().updateUserInfo(name, email, avatar, callback);
+        clientWrapper.getChatWrapper().updateUserInfo(name, email, avatar, phone, callback);
     }
 
     @ReactMethod
@@ -773,7 +773,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        clientWrapper.getChatWrapper().createLiveChatTicket(widgetKey, name, email, note, callback);
+        clientWrapper.getChatWrapper().createLiveChatTicket(widgetKey, name, email, phone, note, callback);
     }
 
     @ReactMethod

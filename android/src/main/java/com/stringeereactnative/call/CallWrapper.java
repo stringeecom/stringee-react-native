@@ -26,6 +26,7 @@ import com.stringee.video.StringeeVideo.ScalingType;
 import com.stringeereactnative.common.StringeeManager;
 import com.stringeereactnative.common.Utils;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.SurfaceViewRenderer;
 
@@ -214,7 +215,7 @@ public class CallWrapper implements StringeeCallListener, AudioManagerEvents {
                     jsonObject.put("packetsLost", stringeeCallStats.callPacketsLost);
                     jsonObject.put("packetsReceived", stringeeCallStats.callPacketsReceived);
                     jsonObject.put("timeStamp", stringeeCallStats.timeStamp);
-                } catch (org.json.JSONException e) {
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 callback.invoke(true, 0, "Success", jsonObject.toString());

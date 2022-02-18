@@ -25,6 +25,14 @@ export default class StringeeVideoTrack {
     this.isLocal = props.isLocal;
   }
 
+  getTrackId() {
+    if (this.isLocal) {
+      return this.localId;
+    } else {
+      return this.id;
+    }
+  }
+
   mute(mute: boolean, callback: RNStringeeEventCallback) {
     RNStringeeVideo.mute(this.clientId, this.localId, mute, callback);
   }
@@ -48,20 +56,5 @@ export default class StringeeVideoTrack {
     } else {
       this.switchCamera(callback);
     }
-  }
-
-  attach(
-    overLay: boolean,
-    // scalingType: ScalingType,
-    style?: StyleProp<ViewStyle>,
-  ) {
-    return (
-      <StringeeVideoView
-        style={style}
-        trackId={this.isLocal ? this.localId : this.id}
-        // scalingType={scalingType}
-        overlay={overLay}
-      />
-    );
   }
 }

@@ -1,5 +1,6 @@
 package com.stringeereactnative.common;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 
@@ -278,5 +279,10 @@ public class Utils {
 
     public static String createLocalId() {
         return "android-" + UUID.randomUUID().toString() + "-" + System.currentTimeMillis();
+    }
+
+    public static int dpiToPx(Context context, float dpValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
     }
 }
