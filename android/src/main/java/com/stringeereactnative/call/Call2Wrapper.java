@@ -387,7 +387,7 @@ public class Call2Wrapper implements StringeeCallListener, AudioManagerEvents {
         }
         if (this.mediaState == MediaState.CONNECTED && hasRemoteStream && !remoteStreamShowed && stringeeCall2.isVideoCall()) {
             remoteStreamShowed = true;
-            if (Utils.contains(stringeeManager.getCallEvents(), "onRemoteStream")) {
+            if (Utils.contains(stringeeManager.getCall2Events(), "onRemoteStream")) {
                 WritableMap params = Arguments.createMap();
                 params.putString("callId", stringeeCall2.getCallId());
                 Utils.sendEvent(context, "onRemoteStream", params);
