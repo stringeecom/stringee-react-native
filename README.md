@@ -85,6 +85,10 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     <uses-permission android:name="android.permission.CAMERA" />
     ```
 
+### Version 1.4.29
+##### Bug fixes:
+- Missing listener in android.
+
 ### Version 1.4.28
 ##### Upgrade sdk:
 - Upgrade android sdk.
