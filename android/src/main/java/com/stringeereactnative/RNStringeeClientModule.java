@@ -303,6 +303,11 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                 }
 
                 @Override
+                public void onHandleOnAnotherDevice(ChatRequest chatRequest, ChatRequest.State state) {
+
+                }
+
+                @Override
                 public void onTimeoutAnswerChat(ChatRequest chatRequest) {
                     WritableMap params = Arguments.createMap();
                     WritableMap data = Arguments.createMap();
