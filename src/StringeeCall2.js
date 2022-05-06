@@ -1,16 +1,16 @@
-import {Component} from "react";
-import PropTypes from "prop-types";
-import {NativeModules, NativeEventEmitter, Platform} from "react-native";
-import {callEvents} from "./helpers/StringeeHelper";
-import {each} from "underscore";
-import type {RNStringeeEventCallback} from "./helpers/StringeeHelper";
+import {Component} from 'react';
+import PropTypes from 'prop-types';
+import {NativeModules, NativeEventEmitter, Platform} from 'react-native';
+import {callEvents} from './helpers/StringeeHelper';
+import {each} from 'underscore';
+import type {RNStringeeEventCallback} from './helpers/StringeeHelper';
 
 const RNStringeeCall2 = NativeModules.RNStringeeCall2;
 
 export default class extends Component {
   static propTypes = {
     eventHandlers: PropTypes.object,
-    clientId: PropTypes.string
+    clientId: PropTypes.string,
   };
 
   constructor(props) {
@@ -21,9 +21,22 @@ export default class extends Component {
 
     this.makeCall = this.makeCall.bind(this);
     this.initAnswer = this.initAnswer.bind(this);
+    this.answer = this.answer.bind(this);
+    this.hangup = this.hangup.bind(this);
+    this.reject = this.reject.bind(this);
+    this.sendDTMF = this.sendDTMF.bind(this);
+    this.getCallStats = this.getCallStats.bind(this);
+    this.switchCamera = this.switchCamera.bind(this);
+    this.enableVideo = this.enableVideo.bind(this);
+    this.mute = this.mute.bind(this);
+    this.setSpeakerphoneOn = this.setSpeakerphoneOn.bind(this);
+    this.resumeVideo = this.resumeVideo.bind(this);
+    this.sendCallInfo = this.sendCallInfo.bind(this);
+    this.setAutoSendTrackMediaStateChangeEvent =
+      this.setAutoSendTrackMediaStateChangeEvent.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.sanitizeCallEvents(this.props.eventHandlers);
   }
 
@@ -44,7 +57,7 @@ export default class extends Component {
   }
 
   sanitizeCallEvents(events) {
-    if (typeof events !== "object") {
+    if (typeof events !== 'object') {
       return;
     }
     const platform = Platform.OS;
@@ -57,10 +70,10 @@ export default class extends Component {
             if (handler !== undefined) {
               // const eventType = data.eventType;
               // if (eventType === 'StringeeCall2') {
-                handler(data);
+              handler(data);
               // }
             }
-          })
+          }),
         );
 
         this._events.push(eventName);
@@ -106,7 +119,7 @@ export default class extends Component {
   enableVideo(
     callId: string,
     enabled: boolean,
-    callback: RNStringeeEventCallback
+    callback: RNStringeeEventCallback,
   ) {
     RNStringeeCall2.enableVideo(callId, enabled, callback);
   }
@@ -118,15 +131,12 @@ export default class extends Component {
   setSpeakerphoneOn(
     callId: string,
     on: boolean,
-    callback: RNStringeeEventCallback
+    callback: RNStringeeEventCallback,
   ) {
     RNStringeeCall2.setSpeakerphoneOn(callId, on, callback);
   }
 
-  resumeVideo(
-    callId: string,
-    callback: RNStringeeEventCallback
-  ) {
+  resumeVideo(callId: string, callback: RNStringeeEventCallback) {
     const platform = Platform.OS;
     if (platform === 'ios') {
       console.log('this function only for android');
@@ -138,8 +148,20 @@ export default class extends Component {
   sendCallInfo(
     callId: string,
     callInfo: string,
-    callback: RNStringeeEventCallback
+    callback: RNStringeeEventCallback,
   ) {
     RNStringeeCall2.sendCallInfo(callId, callInfo, callback);
+  }
+
+  setAutoSendTrackMediaStateChangeEvent(
+    callId: string,
+    autoSendTrackMediaStateChangeEvent: boolean,
+    callback: RNStringeeEventCallback,
+  ) {
+    RNStringeeCall2.setAutoSendTrackMediaStateChangeEvent(
+      callId,
+      autoSendTrackMediaStateChangeEvent,
+      callback,
+    );
   }
 }

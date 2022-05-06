@@ -32,29 +32,31 @@ const clientEvents = {
     onConversationEnded: 'onConversationEnded',
     onUserBeginTyping: 'onTyping',
     onUserEndTyping: 'onEndTyping',
-  }
+  },
 };
 
 const callEvents = {
   ios: {
-    onChangeSignalingState: "didChangeSignalingState",
-    onChangeMediaState: "didChangeMediaState",
-    onReceiveLocalStream: "didReceiveLocalStream",
-    onReceiveRemoteStream: "didReceiveRemoteStream",
-    onReceiveDtmfDigit: "didReceiveDtmfDigit",
-    onReceiveCallInfo: "didReceiveCallInfo",
-    onHandleOnAnotherDevice: "didHandleOnAnotherDevice"
+    onChangeSignalingState: 'didChangeSignalingState',
+    onChangeMediaState: 'didChangeMediaState',
+    onReceiveLocalStream: 'didReceiveLocalStream',
+    onReceiveRemoteStream: 'didReceiveRemoteStream',
+    onReceiveDtmfDigit: 'didReceiveDtmfDigit',
+    onReceiveCallInfo: 'didReceiveCallInfo',
+    onHandleOnAnotherDevice: 'didHandleOnAnotherDevice',
+    onTrackMediaStateChange: 'onTrackMediaStateChange',
   },
   android: {
-    onChangeSignalingState: "onSignalingStateChange",
-    onChangeMediaState: "onMediaStateChange",
-    onReceiveLocalStream: "onLocalStream",
-    onReceiveRemoteStream: "onRemoteStream",
-    onReceiveDtmfDigit: "onDTMF",
-    onReceiveCallInfo: "onCallInfo",
-    onHandleOnAnotherDevice: "onHandledOnAnotherDevice",
-    onAudioDeviceChange: "onAudioDeviceChange" ///only for android
-  }
+    onChangeSignalingState: 'onSignalingStateChange',
+    onChangeMediaState: 'onMediaStateChange',
+    onReceiveLocalStream: 'onLocalStream',
+    onReceiveRemoteStream: 'onRemoteStream',
+    onReceiveDtmfDigit: 'onDTMF',
+    onReceiveCallInfo: 'onCallInfo',
+    onHandleOnAnotherDevice: 'onHandledOnAnotherDevice',
+    onAudioDeviceChange: 'onAudioDeviceChange', ///only for android
+    onTrackMediaStateChange: 'onTrackMediaStateChange',
+  },
 };
 
 export type UserInfoParam = (
@@ -74,7 +76,7 @@ export type LiveChatTicketParam = (
 export type RNStringeeEventCallback = (
   status: boolean,
   code: number,
-  message: string
+  message: string,
 ) => void;
 
 export {clientEvents, callEvents};
