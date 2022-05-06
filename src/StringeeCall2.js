@@ -1,7 +1,7 @@
 import {Component} from 'react';
 import PropTypes from 'prop-types';
 import {NativeModules, NativeEventEmitter, Platform} from 'react-native';
-import {callEvents} from './helpers/StringeeHelper';
+import {callEvents, MediaType} from './helpers/StringeeHelper';
 import {each} from 'underscore';
 import type {RNStringeeEventCallback} from './helpers/StringeeHelper';
 
@@ -65,17 +65,32 @@ export default class extends Component {
     each(events, (handler, type) => {
       const eventName = callEvents[platform][type];
       if (eventName !== undefined) {
-        this._subscriptions.push(
-          this._eventEmitter.addListener(eventName, data => {
-            if (handler !== undefined) {
-              // const eventType = data.eventType;
-              // if (eventType === 'StringeeCall2') {
-              handler(data);
-              // }
-            }
-          }),
-        );
-
+        if (type === 'onTrackMediaStateChange') {
+          this._subscriptions.push(
+            this._eventEmitter.addListener(
+              eventName,
+              ({from, mediaType, enable}) => {
+                if (handler !== undefined) {
+                  if (mediaType === 1) {
+                    mediaType = MediaType.AUDIO;
+                  } else if (mediaType === 2) {
+                    mediaType = MediaType.VIDEO;
+                  }
+                  console.log('mediaType - ' + mediaType);
+                  handler({from, mediaType, enable});
+                }
+              },
+            ),
+          );
+        } else {
+          this._subscriptions.push(
+            this._eventEmitter.addListener(eventName, data => {
+              if (handler !== undefined) {
+                handler(data);
+              }
+            }),
+          );
+        }
         this._events.push(eventName);
         RNStringeeCall2.setNativeEvent(eventName);
       } else {

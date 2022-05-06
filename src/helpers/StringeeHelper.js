@@ -73,10 +73,15 @@ export type LiveChatTicketParam = (
   note: string,
 ) => void;
 
+const MediaType = {
+  AUDIO: 'AUDIO',
+  VIDEO: 'VIDEO',
+};
+
 export type RNStringeeEventCallback = (
   status: boolean,
   code: number,
   message: string,
 ) => void;
 
-export {clientEvents, callEvents};
+export {clientEvents, callEvents, MediaType};
