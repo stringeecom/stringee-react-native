@@ -44,7 +44,7 @@ const callEvents = {
     onReceiveDtmfDigit: 'didReceiveDtmfDigit',
     onReceiveCallInfo: 'didReceiveCallInfo',
     onHandleOnAnotherDevice: 'didHandleOnAnotherDevice',
-    onTrackMediaStateChange: 'onTrackMediaStateChange',
+    onTrackMediaStateChange: 'trackMediaStateChange',
   },
   android: {
     onChangeSignalingState: 'onSignalingStateChange',

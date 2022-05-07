@@ -32,8 +32,7 @@ export default class extends Component {
     this.setSpeakerphoneOn = this.setSpeakerphoneOn.bind(this);
     this.resumeVideo = this.resumeVideo.bind(this);
     this.sendCallInfo = this.sendCallInfo.bind(this);
-    this.setAutoSendTrackMediaStateChangeEvent =
-      this.setAutoSendTrackMediaStateChangeEvent.bind(this);
+    this.setAutoSendTrackMediaStateChangeEvent = this.setAutoSendTrackMediaStateChangeEvent.bind(this);
   }
 
   componentDidMount() {

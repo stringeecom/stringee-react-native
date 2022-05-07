@@ -12,6 +12,7 @@ static NSString *didReceiveDtmfDigit        = @"didReceiveDtmfDigit";
 static NSString *didReceiveCallInfo         = @"didReceiveCallInfo";
 
 static NSString *didHandleOnAnotherDevice   = @"didHandleOnAnotherDevice";
+static NSString *trackMediaStateChange      = @"trackMediaStateChange";
 
 
 @implementation RNStringeeCall2 {
@@ -38,7 +39,8 @@ RCT_EXPORT_MODULE();
              didReceiveRemoteStream,
              didReceiveDtmfDigit,
              didReceiveCallInfo,
-             didHandleOnAnotherDevice
+             didHandleOnAnotherDevice,
+             trackMediaStateChange
              ];
 }
 
@@ -296,6 +298,24 @@ RCT_EXPORT_METHOD(sendCallInfo:(NSString *)callId callInfo:(NSString *)callInfo 
     }
 }
 
+RCT_EXPORT_METHOD(setAutoSendTrackMediaStateChangeEvent:(NSString *)callId autoSendTrackMediaStateChangeEvent:(BOOL)autoSendTrackMediaStateChangeEvent callback:(RCTResponseSenderBlock)callback) {
+
+    if (!callId.length) {
+        callback(@[@(NO), @(-2), @"The call id is invalid."]);
+        return;
+    }
+
+    StringeeCall2 *call = [[RNStringeeInstanceManager instance].call2s objectForKey:callId];
+
+    if (!call) {
+        callback(@[@(NO), @(-3), @"The call is not found."]);
+        return;
+    }
+    
+    call.autoSendTrackMediaState = autoSendTrackMediaStateChangeEvent;
+    callback(@[@(YES), @(0), @"Success"]);
+}
+
 RCT_EXPORT_METHOD(sendDTMF:(NSString *)callId dtmf:(NSString *)dtmf callback:(RCTResponseSenderBlock)callback) {
     if (callId.length) {
         StringeeCall *call = [[RNStringeeInstanceManager instance].call2s objectForKey:callId];
@@ -420,6 +440,12 @@ RCT_EXPORT_METHOD(sendDTMF:(NSString *)callId dtmf:(NSString *)dtmf callback:(RC
                                             error:nil];
         NSString *jsonString = [[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] stringByReplacingOccurrencesOfString:@" " withString:@""];
         [self sendEventWithName:didReceiveCallInfo body:@{ @"callId" : stringeeCall2.callId, @"data" : jsonString }];
+    }
+}
+
+- (void)trackMediaStateChange:(StringeeCall2 *)stringeeCall2 mediaType:(StringeeTrackMediaType)mediaType enable:(BOOL)enable from:(NSString *)from {
+    if ([jsEvents containsObject:trackMediaStateChange]) {
+        [self sendEventWithName:trackMediaStateChange body:@{ @"from" : from, @"mediaType" : @(mediaType), @"enable" : @(enable) }];
     }
 }
 
