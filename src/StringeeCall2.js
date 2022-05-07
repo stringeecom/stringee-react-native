@@ -75,7 +75,6 @@ export default class extends Component {
                   } else if (mediaType === 2) {
                     mediaType = MediaType.VIDEO;
                   }
-                  console.log('mediaType - ' + mediaType);
                   handler({from, mediaType, enable});
                 }
               },
