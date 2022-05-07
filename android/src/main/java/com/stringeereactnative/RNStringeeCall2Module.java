@@ -27,6 +27,7 @@ import com.stringee.common.StringeeAudioManager.AudioManagerEvents;
 import com.stringee.exception.StringeeError;
 import com.stringee.listener.StatusListener;
 import com.stringee.video.StringeeVideoTrack;
+import com.stringee.video.StringeeVideoTrack.MediaType;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -401,6 +402,23 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
         });
     }
 
+    @ReactMethod
+    public void setAutoSendTrackMediaStateChangeEvent(String callId, boolean autoSendTrackMediaStateChangeEvent, Callback callback) {
+        if (callId == null || callId.length() == 0) {
+            callback.invoke(false, -2, "The call id is invalid.");
+            return;
+        }
+
+        StringeeCall2 call = StringeeManager.getInstance().getCalls2Map().get(callId);
+        if (call == null) {
+            callback.invoke(false, -3, "The call is not found.");
+            return;
+        }
+
+        call.setAutoSendTrackMediaStateChangeEvent(autoSendTrackMediaStateChangeEvent);
+        callback.invoke(true, 0, "Success");
+    }
+
     @Override
     public void onSignalingStateChange(StringeeCall2 stringeeCall, SignalingState signalingState, String reason, int sipCode, String sipReason) {
         if (contains(jsEvents, "onSignalingStateChange")) {
@@ -490,6 +508,17 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
             params.putString("callId", stringeeCall.getCallId());
             params.putString("data", jsonObject.toString());
             sendEvent(getReactApplicationContext(), "onCallInfo", params);
+        }
+    }
+
+    @Override
+    public void onTrackMediaStateChange(String from, MediaType mediaType, boolean enable) {
+        if (contains(jsEvents, "onTrackMediaStateChange")) {
+            WritableMap params = Arguments.createMap();
+            params.putString("from", from);
+            params.putInt("mediaType", mediaType.getValue());
+            params.putBoolean("enable", enable);
+            sendEvent(getReactApplicationContext(), "onTrackMediaStateChange", params);
         }
     }
 
