@@ -83,5 +83,4 @@ export type RNStringeeEventCallback = (
   code: number,
   message: string,
 ) => void;
-
 export {clientEvents, callEvents, MediaType};

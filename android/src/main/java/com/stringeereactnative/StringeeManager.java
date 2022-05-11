@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StringeeManager {
+
     private static StringeeManager stringeeManager;
     private StringeeAudioManager audioManager;
     private Map<String, StringeeClient> clientsMap = new HashMap<>();

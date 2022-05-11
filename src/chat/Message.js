@@ -1,4 +1,5 @@
 class Message {
+
   constructor(props) {
     this.localId = props.localId;
     this.id = props.id;

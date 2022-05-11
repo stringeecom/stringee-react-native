@@ -1,4 +1,5 @@
 class ChatRequest {
+
   constructor(props) {
     // Request info
     this.convId = props.convId;

@@ -1,4 +1,5 @@
 class User {
+
   constructor(props) {
     this.userId = props.userId;
     this.name = props.name;
