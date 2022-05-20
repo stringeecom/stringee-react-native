@@ -7,7 +7,7 @@
 @property(assign, nonatomic) BOOL local;
 @property(assign, nonatomic) BOOL overlay;
 @property(strong, nonatomic) NSString *callId;
-@property(strong, nonatomic) NSString *streamId;
+@property(strong, nonatomic) NSString *streamId; // removed
 @property(assign, nonatomic) CGSize videoSize;
 
 @end

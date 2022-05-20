@@ -3,6 +3,7 @@
 
 @implementation RNStringeeInstanceManager
 
+// for managing clients
 + (RNStringeeInstanceManager*)instance {
     static RNStringeeInstanceManager *instance = nil;
     static dispatch_once_t onceToken;

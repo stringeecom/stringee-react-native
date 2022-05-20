@@ -19,6 +19,7 @@ RCT_EXPORT_VIEW_PROPERTY(streamId, NSString)
 RCT_EXPORT_VIEW_PROPERTY(callId, NSString)
 
 - (UIView *)view {
+    // Init native View that will be converted to react-native view
     RNStringeeVideoView *videoView = [[RNStringeeVideoView alloc] init];
     return videoView;
 }

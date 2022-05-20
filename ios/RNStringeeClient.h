@@ -41,7 +41,5 @@ static NSString *userEndTyping                  = @"userEndTyping";
 
 @interface RNStringeeClient : RCTEventEmitter <RCTBridgeModule, StringeeConnectionDelegate, StringeeIncomingCallDelegate>
 
-//@property (strong, nonatomic) StringeeClient *client;
-//@property (strong, nonatomic) NSMutableDictionary *messages;
 
 @end

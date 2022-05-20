@@ -14,6 +14,7 @@ static NSString *didHandleOnAnotherDevice   = @"didHandleOnAnotherDevice";
 
 
 @implementation RNStringeeCall {
+    // Events are supported
     NSMutableArray<NSString *> *jsEvents;
 }
 

@@ -16,6 +16,8 @@
 @property(strong, nonatomic) NSMutableDictionary *calls;
 @property(strong, nonatomic) NSMutableDictionary *call2s;
 @property(strong, nonatomic) NSMutableDictionary *call2VideoTracks;
+
+// For multi client
 @property(strong, nonatomic) NSMutableDictionary<NSString *, RNClientWrapper *> *clientWrappers;
 
 @end

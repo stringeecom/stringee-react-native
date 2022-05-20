@@ -11,6 +11,7 @@
 
 @interface RCTConvert (StringeeHelper)
 
+// Convert Stringee objects to react-native
 + (NSDictionary *)StringeeIdentity:(StringeeIdentity *)identity;
 
 + (NSArray *)StringeeIdentities:(NSArray<StringeeIdentity *> *)identities;

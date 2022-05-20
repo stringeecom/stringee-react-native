@@ -12,7 +12,7 @@
 
 @property (nonatomic) NSString *identifier;
 @property (nonatomic) StringeeClient *client;
-@property (assign, nonatomic) BOOL isConnecting; // client dang thuc hien connect toi Stringee Server
+@property (assign, nonatomic) BOOL isConnecting;
 @property (nonatomic) NSMutableDictionary *messages;
 
 - (instancetype)initWithIdentifier:(NSString *)identifier baseUrl:(NSString *)baseUrl serverAddresses:(NSArray<StringeeServerAddress *> *)serverAddresses stringeeXBaseUrl:(NSString *)stringeeXBaseUrl;
