@@ -3,6 +3,8 @@ package com.stringeereactnative;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
@@ -205,5 +207,17 @@ public class Utils {
         queueMap.putString("id", queue.getId());
         queueMap.putString("name", queue.getName());
         return queueMap;
+    }
+
+    public static boolean isTextEmpty(@Nullable String text) {
+        if (text != null) {
+            if (text.equalsIgnoreCase("null")) {
+                return true;
+            } else {
+                return text.trim().length() <= 0;
+            }
+        } else {
+            return true;
+        }
     }
 }

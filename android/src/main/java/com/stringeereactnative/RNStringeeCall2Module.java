@@ -3,6 +3,7 @@ package com.stringeereactnative;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.Arguments;
@@ -21,6 +22,7 @@ import com.stringee.call.StringeeCall2.MediaState;
 import com.stringee.call.StringeeCall2.SignalingState;
 import com.stringee.call.StringeeCall2.StringeeCallListener;
 import com.stringee.call.StringeeCall2.StringeeCallStats;
+import com.stringee.call.StringeeCall2.VideoQuality;
 import com.stringee.common.StringeeAudioManager;
 import com.stringee.common.StringeeAudioManager.AudioDevice;
 import com.stringee.common.StringeeAudioManager.AudioManagerEvents;
@@ -46,6 +48,7 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
         super(reactContext);
     }
 
+    @NonNull
     @Override
     public String getName() {
         return "RNStringeeCall2";
@@ -70,11 +73,19 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
             String to = jsonObject.getString("to");
             boolean isVideoCall = jsonObject.getBoolean("isVideoCall");
             String customData = jsonObject.optString("customData");
+            String resolution = jsonObject.optString("videoResolution");
 
             final StringeeCall2 mStringeeCall = new StringeeCall2(mClient, from, to);
             mStringeeCall.setVideoCall(isVideoCall);
-            if (customData != null) {
+            if (!Utils.isTextEmpty(customData)) {
                 mStringeeCall.setCustom(customData);
+            }
+            if (!Utils.isTextEmpty(resolution)) {
+                if (resolution.equalsIgnoreCase("NORMAL")) {
+                    mStringeeCall.setQuality(VideoQuality.QUALITY_480P);
+                } else if (resolution.equalsIgnoreCase("HD")) {
+                    mStringeeCall.setQuality(VideoQuality.QUALITY_720P);
+                }
             }
 
             mStringeeCall.setCallListener(this);
@@ -89,10 +100,14 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
                 }
             });
 
-            mStringeeCall.makeCall();
+            mStringeeCall.makeCall(new StatusListener() {
+                @Override
+                public void onSuccess() {
+
+                }
+            });
         } catch (JSONException e) {
             callback.invoke(false, -4, "The parameters format is invalid.", "");
-            return;
         }
     }
 
@@ -149,7 +164,12 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
             return;
         }
 
-        call.answer();
+        call.answer(new StatusListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+        });
         callback.invoke(true, 0, "Success");
     }
 
@@ -166,7 +186,12 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
             return;
         }
 
-        call.reject();
+        call.reject(new StatusListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+        });
 
         handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
@@ -195,7 +220,12 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
             return;
         }
 
-        call.hangup();
+        call.hangup(new StatusListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+        });
 
         handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {

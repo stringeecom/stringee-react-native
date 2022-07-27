@@ -3,6 +3,7 @@ package com.stringeereactnative;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.Arguments;
@@ -45,6 +46,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
         super(reactContext);
     }
 
+    @NonNull
     @Override
     public String getName() {
         return "RNStringeeCall";
@@ -74,10 +76,10 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             final StringeeCall mStringeeCall = new StringeeCall(mClient, from, to);
             mStringeeCall.setCallListener(this);
             mStringeeCall.setVideoCall(isVideoCall);
-            if (customData != null) {
+            if (!Utils.isTextEmpty(customData)) {
                 mStringeeCall.setCustom(customData);
             }
-            if (resolution != null) {
+            if (!Utils.isTextEmpty(resolution)) {
                 if (resolution.equalsIgnoreCase("NORMAL")) {
                     mStringeeCall.setQuality(StringeeConstant.QUALITY_NORMAL);
                 } else if (resolution.equalsIgnoreCase("HD")) {
@@ -94,7 +96,12 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
                     StringeeManager.getInstance().setAudioManager(audioManager);
                 }
             });
-            mStringeeCall.makeCall();
+            mStringeeCall.makeCall(new StatusListener() {
+                @Override
+                public void onSuccess() {
+
+                }
+            });
         } catch (JSONException e) {
             callback.invoke(false, -4, "The parameters format is invalid.", "");
             return;
@@ -154,7 +161,12 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             return;
         }
 
-        call.answer();
+        call.answer(new StatusListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+        });
         callback.invoke(true, 0, "Success");
     }
 
@@ -171,7 +183,12 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             return;
         }
 
-        call.reject();
+        call.reject(new StatusListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+        });
 
         handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
@@ -200,7 +217,12 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             return;
         }
 
-        call.hangup();
+        call.hangup(new StatusListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+        });
 
         handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
