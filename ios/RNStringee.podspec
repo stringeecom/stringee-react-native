@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   s.requires_arc = true
 
   s.dependency "React"
-  s.dependency "Stringee", '~> 1.7.19'
+  s.dependency "Stringee", '~> 1.8.4'
 end
 
 

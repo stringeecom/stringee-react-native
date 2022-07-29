@@ -468,7 +468,7 @@ RCT_EXPORT_METHOD(sendDTMF:(NSString *)callId dtmf:(NSString *)dtmf callback:(RC
                     [[RNStringeeInstanceManager instance].call2VideoTracks removeObjectForKey:callId];
                 } else {
                     call.remoteVideoView.frame = CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height);
-                    call.remoteVideoView.delegate = view;
+//                    call.remoteVideoView.delegate = view;
                     [view addSubview:call.remoteVideoView];
                 }
             }
