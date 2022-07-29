@@ -85,6 +85,10 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     <uses-permission android:name="android.permission.CAMERA" />
     ```
 
+### Version 1.4.31
+##### Features:
+- Allow to snapshot screen in eykc.
+
 ### Version 1.4.30
 ##### Features:
 - Allow to send trackMediaStateChangeEvent.
