@@ -59,13 +59,6 @@ const callEvents = {
   },
 };
 
-export type UserInfoParam = (
-  name: string,
-  email: string,
-  avatar: string,
-  phone: string,
-) => void;
-
 export type LiveChatTicketParam = (
   name: string,
   email: string,

@@ -2,16 +2,16 @@ import PropTypes from 'prop-types';
 import {Component} from 'react';
 import {NativeEventEmitter, NativeModules, Platform} from 'react-native';
 import {each} from 'underscore';
-import Conversation from './chat/Conversation';
-import Message from './chat/Message';
-import User from './chat/User';
-import ChatRequest from './chat/ChatRequest';
 import {clientEvents} from './helpers/StringeeHelper';
-import type {
+import type {RNStringeeEventCallback} from './helpers/StringeeHelper';
+import {
+  ChatRequest,
+  Conversation,
   LiveChatTicketParam,
+  Message,
+  User,
   UserInfoParam,
-  RNStringeeEventCallback,
-} from './helpers/StringeeHelper';
+} from '../index';
 
 const RNStringeeClient = NativeModules.RNStringeeClient;
 
@@ -236,11 +236,7 @@ export default class extends Component {
         callback,
       );
     } else {
-      RNStringeeClient.registerPushToken(
-        this.uuid,
-        deviceToken,
-        callback,
-      );
+      RNStringeeClient.registerPushToken(this.uuid, deviceToken, callback);
     }
   }
 
@@ -1029,14 +1025,7 @@ export default class extends Component {
     param: UserInfoParam,
     callback: RNStringeeEventCallback,
   ) {
-    RNStringeeClient.updateUserInfo(
-      this.uuid,
-      param.name,
-      param.email,
-      param.avatar,
-      param.phone,
-      callback,
-    );
+    RNStringeeClient.updateUserInfo2(this.uuid, JSON.stringify(param), callback);
   }
 
   createLiveChatConversation(
