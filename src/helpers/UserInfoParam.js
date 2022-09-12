@@ -2,7 +2,6 @@ class UserInfoParam {
   name: string;
   email: string;
   avatar: string;
-  role: string;
   phone: string;
   location: string;
   browser: string;
