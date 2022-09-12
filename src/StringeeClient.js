@@ -87,6 +87,7 @@ export default class extends Component {
     this.getAllMessagesAfter = this.getAllMessagesAfter.bind(this);
     this.getAllMessagesBefore = this.getAllMessagesBefore.bind(this);
     this.clearDb = this.clearDb.bind(this);
+    this.getUserInfo = this.getUserInfo.bind(this);
 
     this.pinMessage = this.pinMessage.bind(this);
     this.editMessage = this.editMessage.bind(this);
@@ -978,8 +979,25 @@ export default class extends Component {
       },
     );
   }
+
   clearDb(callback: RNStringeeEventCallback) {
     RNStringeeClient.clearDb(this.uuid, callback);
+  }
+
+  getUserInfo(userIds: Array<string>, callback: RNStringeeEventCallback) {
+    RNStringeeClient.getUserInfo(
+      this.uuid,
+      userIds,
+      (status, code, message, users) => {
+        var returnUsers = [];
+        if (status) {
+          users.map(user => {
+            returnUsers.push(new User(user));
+          });
+        }
+        return callback(status, code, message, returnUsers);
+      },
+    );
   }
 
   // ============================== LIVE-CHAT ================================
@@ -1025,7 +1043,11 @@ export default class extends Component {
     param: UserInfoParam,
     callback: RNStringeeEventCallback,
   ) {
-    RNStringeeClient.updateUserInfo2(this.uuid, JSON.stringify(param), callback);
+    RNStringeeClient.updateUserInfo2(
+      this.uuid,
+      JSON.stringify(param),
+      callback,
+    );
   }
 
   createLiveChatConversation(
