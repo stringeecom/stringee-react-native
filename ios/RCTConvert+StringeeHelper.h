@@ -32,5 +32,7 @@
 
 + (BOOL)isValidEmail:(NSString *)emailTxt;
 
++ (id)StringToDictionary:(NSString *)str;
+
 @end
 

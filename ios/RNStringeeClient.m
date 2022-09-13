@@ -1448,6 +1448,54 @@ RCT_EXPORT_METHOD(updateUserInfo:(NSString *)uuid name:(NSString *)name email:(N
     }
 }
 
+RCT_EXPORT_METHOD(updateUserInfo2:(NSString *)uuid param:(NSString *)param callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+
+    if (!wrapper.client) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized"]);
+        return;
+    }
+    
+    id idParam = [RCTConvert StringToDictionary:param];
+    if (idParam == [NSNull null]) {
+        callback(@[@(NO), @(-2), @"Parameters invalid"]);
+        return;
+    }
+    NSDictionary *dicParam = (NSDictionary *)idParam;
+    NSString *name = [dicParam[@"name"] stringValue];
+    NSString *email = [dicParam[@"email"] stringValue];
+    NSString *avatar = [dicParam[@"avatar"] stringValue];
+    NSString *phone = [dicParam[@"phone"] stringValue];
+    NSString *location = [dicParam[@"location"] stringValue];
+    NSString *browser = [dicParam[@"browser"] stringValue];
+    NSString *platform = [dicParam[@"platform"] stringValue];
+    NSString *device = [dicParam[@"device"] stringValue];
+    NSString *ipAddress = [dicParam[@"ipAddress"] stringValue];
+    NSString *hostName = [dicParam[@"hostName"] stringValue];
+    NSString *userAgent = [dicParam[@"userAgent"] stringValue];
+    
+    StringeeIdentity *newUserInfo = [StringeeIdentity new];
+    newUserInfo.displayName = name;
+    newUserInfo.email = email;
+    newUserInfo.avatarUrl = avatar;
+    newUserInfo.phone = phone;
+    newUserInfo.location = location;
+    newUserInfo.browser = browser;
+    newUserInfo.platform = platform;
+    newUserInfo.device = device;
+    newUserInfo.ipaddress = ipAddress;
+    newUserInfo.hostname = hostName;
+    newUserInfo.useragent = userAgent;
+    
+    [wrapper.client updateUserInfo:newUserInfo completion:^(BOOL status, int code, NSString *message) {
+        callback(@[@(status), @(code), message]);
+    }];
+}
+
 RCT_EXPORT_METHOD(createLiveChatConversation:(NSString *)uuid queueId:(NSString *)queueId callback:(RCTResponseSenderBlock)callback) {
     RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
     if (wrapper == nil) {
