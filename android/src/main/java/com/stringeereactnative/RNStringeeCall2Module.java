@@ -1,8 +1,5 @@
 package com.stringeereactnative;
 
-import android.os.Handler;
-import android.os.Looper;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -42,7 +39,6 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
 
     private Callback mCallback;
     private ArrayList<String> jsEvents = new ArrayList<String>();
-    private Handler handler;
 
     public RNStringeeCall2Module(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -77,10 +73,10 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
 
             final StringeeCall2 mStringeeCall = new StringeeCall2(mClient, from, to);
             mStringeeCall.setVideoCall(isVideoCall);
-            if (!Utils.isTextEmpty(customData)) {
+            if (!Utils.isStringEmpty(customData)) {
                 mStringeeCall.setCustom(customData);
             }
-            if (!Utils.isTextEmpty(resolution)) {
+            if (!Utils.isStringEmpty(resolution)) {
                 if (resolution.equalsIgnoreCase("NORMAL")) {
                     mStringeeCall.setQuality(VideoQuality.QUALITY_480P);
                 } else if (resolution.equalsIgnoreCase("HD")) {
@@ -90,8 +86,7 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
 
             mStringeeCall.setCallListener(this);
 
-            handler = new Handler(Looper.getMainLooper());
-            handler.post(new Runnable() {
+            Utils.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     StringeeAudioManager audioManager = StringeeAudioManager.create(getReactApplicationContext());
@@ -138,16 +133,6 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
             }
         });
 
-        handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                StringeeAudioManager audioManager = StringeeAudioManager.create(getReactApplicationContext());
-                audioManager.start(RNStringeeCall2Module.this);
-                StringeeManager.getInstance().setAudioManager(audioManager);
-            }
-        });
-
         callback.invoke(true, 0, "Success");
     }
 
@@ -170,6 +155,16 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
 
             }
         });
+
+        Utils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                StringeeAudioManager audioManager = StringeeAudioManager.create(getReactApplicationContext());
+                audioManager.start(RNStringeeCall2Module.this);
+                StringeeManager.getInstance().setAudioManager(audioManager);
+            }
+        });
+
         callback.invoke(true, 0, "Success");
     }
 
@@ -193,8 +188,7 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
             }
         });
 
-        handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
+        Utils.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 StringeeAudioManager audioManager = StringeeManager.getInstance().getAudioManager();
@@ -227,8 +221,7 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
             }
         });
 
-        handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
+        Utils.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 StringeeAudioManager audioManager = StringeeManager.getInstance().getAudioManager();
@@ -343,8 +336,7 @@ public class RNStringeeCall2Module extends ReactContextBaseJavaModule implements
             return;
         }
 
-        handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
+        Utils.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 StringeeAudioManager audioManager = StringeeManager.getInstance().getAudioManager();

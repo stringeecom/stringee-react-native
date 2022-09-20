@@ -70,22 +70,20 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         if (mClient == null) {
             mClient = new StringeeClient(getReactApplicationContext());
 
-            if (baseUrl != null) {
+            if (!Utils.isStringEmpty(baseUrl)) {
                 mClient.setBaseAPIUrl(baseUrl);
             }
-            if (stringeeXBaseUrl != null) {
+            if (!Utils.isStringEmpty(stringeeXBaseUrl)) {
                 mClient.setStringeeXBaseUrl(stringeeXBaseUrl);
             }
-            if (addressArray != null) {
+            if (!Utils.isListEmpty(addressArray)) {
                 List<SocketAddress> socketAddresses = new ArrayList<>();
-                if (addressArray.size() > 0) {
-                    for (int i = 0; i < addressArray.size(); i++) {
-                        ReadableMap addressMap = addressArray.getMap(i);
-                        SocketAddress socketAddress = new SocketAddress(addressMap.getString("host"), addressMap.getInt("port"));
-                        socketAddresses.add(socketAddress);
-                    }
-                    mClient.setHost(socketAddresses);
+                for (int i = 0; i < addressArray.size(); i++) {
+                    ReadableMap addressMap = addressArray.getMap(i);
+                    SocketAddress socketAddress = new SocketAddress(addressMap.getString("host"), addressMap.getInt("port"));
+                    socketAddresses.add(socketAddress);
                 }
+                mClient.setHost(socketAddresses);
             }
             StringeeClient finalClient = mClient;
             mClient.setConnectionListener(new StringeeConnectionListener() {
@@ -451,8 +449,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (token == null) {
-            callback.invoke(false, -2, "token can not be null");
+        if (Utils.isStringEmpty(token)) {
+            callback.invoke(false, -2, "token is unidentified or empty");
             return;
         }
 
@@ -478,8 +476,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (token == null) {
-            callback.invoke(false, -2, "token can not be null");
+        if (Utils.isStringEmpty(token)) {
+            callback.invoke(false, -2, "token is unidentified or empty");
             return;
         }
 
@@ -515,8 +513,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (token == null) {
-            callback.invoke(false, -2, "token can not be null");
+        if (Utils.isStringEmpty(token)) {
+            callback.invoke(false, -2, "token is unidentified or empty");
             return;
         }
 
@@ -541,8 +539,13 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (toUser == null) {
-            callback.invoke(false, -2, "toUserId can not be null");
+        if (Utils.isStringEmpty(toUser)) {
+            callback.invoke(false, -2, "toUserId is unidentified or empty");
+            return;
+        }
+
+        if (Utils.isStringEmpty(msg)) {
+            callback.invoke(false, -2, "message is unidentified or empty");
             return;
         }
 
@@ -561,7 +564,7 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             });
         } catch (JSONException e) {
             e.printStackTrace();
-            callback.invoke(false, -2, "Message is not not in JSON format");
+            callback.invoke(false, -2, "message is not in JSON format");
         }
     }
 
@@ -570,6 +573,11 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
         if (mClient == null) {
             callback.invoke(false, -1, "StringeeClient is not initialized");
+            return;
+        }
+
+        if (Utils.isListEmpty(usersArray)) {
+            callback.invoke(false, -2, "userIds is unidentified or empty");
             return;
         }
 
@@ -615,8 +623,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -642,8 +650,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (userId == null) {
-            callback.invoke(false, -2, "User id can not be null");
+        if (Utils.isStringEmpty(userId)) {
+            callback.invoke(false, -2, "userId is unidentified or empty");
             return;
         }
 
@@ -751,8 +759,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -793,8 +801,13 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
+            return;
+        }
+
+        if (Utils.isListEmpty(usersArray)) {
+            callback.invoke(false, -2, "userIds is unidentified or empty");
             return;
         }
 
@@ -840,8 +853,13 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
+            return;
+        }
+
+        if (Utils.isListEmpty(usersArray)) {
+            callback.invoke(false, -2, "userIds is unidentified or empty");
             return;
         }
 
@@ -887,9 +905,25 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
+        if (messageMap == null) {
+            callback.invoke(false, -2, "message is unidentified or empty");
+            return;
+        }
+
         String convId = messageMap.getString("convId");
+
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
+            return;
+        }
+
         final Type type = Type.getType(messageMap.getInt("type"));
         final ReadableMap msgMap = messageMap.getMap("message");
+
+        if (msgMap == null) {
+            callback.invoke(false, -2, "message is unidentified or empty");
+            return;
+        }
 
         mClient.getConversationFromServer(convId, new CallbackListener<Conversation>() {
             @Override
@@ -902,12 +936,20 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                         break;
                     case PHOTO:
                         ReadableMap photoMap = msgMap.getMap("photo");
+                        if (photoMap == null) {
+                            callback.invoke(false, -2, "message photo is unidentified or empty");
+                            return;
+                        }
                         message.setFileUrl(photoMap.getString("filePath"));
                         message.setThumbnailUrl(photoMap.getString("thumbnail"));
                         message.setImageRatio((float) photoMap.getDouble("ratio"));
                         break;
                     case VIDEO:
                         ReadableMap videoMap = msgMap.getMap("video");
+                        if (videoMap == null) {
+                            callback.invoke(false, -2, "message video is unidentified or empty");
+                            return;
+                        }
                         message.setFileUrl(videoMap.getString("filePath"));
                         message.setThumbnailUrl(videoMap.getString("thumbnail"));
                         message.setImageRatio((float) videoMap.getDouble("ratio"));
@@ -915,33 +957,52 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                         break;
                     case AUDIO:
                         ReadableMap audioMap = msgMap.getMap("audio");
+                        if (audioMap == null) {
+                            callback.invoke(false, -2, "message audio is unidentified or empty");
+                            return;
+                        }
                         message.setFileUrl(audioMap.getString("filePath"));
                         message.setDuration(audioMap.getInt("duration"));
                         break;
                     case FILE:
                         ReadableMap fileMap = msgMap.getMap("file");
+                        if (fileMap == null) {
+                            callback.invoke(false, -2, "message file is unidentified or empty");
+                            return;
+                        }
                         message.setFileUrl(fileMap.getString("filePath"));
                         message.setFileName(fileMap.getString("filename"));
                         message.setFileLength(fileMap.getInt("length"));
                         break;
                     case LOCATION:
                         ReadableMap locationMap = msgMap.getMap("location");
+                        if (locationMap == null) {
+                            callback.invoke(false, -2, "message location is unidentified or empty");
+                            return;
+                        }
                         message.setLatitude(locationMap.getDouble("lat"));
                         message.setLongitude(locationMap.getDouble("lon"));
                         break;
                     case CONTACT:
                         ReadableMap contactMap = msgMap.getMap("contact");
+                        if (contactMap == null) {
+                            callback.invoke(false, -2, "message contact is unidentified or empty");
+                            return;
+                        }
                         message.setContact(contactMap.getString("vcard"));
                         break;
                     case STICKER:
                         ReadableMap stickerMap = msgMap.getMap("sticker");
+                        if (stickerMap == null) {
+                            callback.invoke(false, -2, "message sticker is unidentified or empty");
+                            return;
+                        }
                         message.setStickerCategory(stickerMap.getString("category"));
                         message.setStickerName(stickerMap.getString("name"));
                         break;
                     default:
                         break;
                 }
-
                 conversation.sendMessage(mClient, message, new StatusListener() {
                     @Override
                     public void onSuccess() {
@@ -1011,8 +1072,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -1053,8 +1114,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -1094,8 +1155,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -1135,8 +1196,13 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
+            return;
+        }
+
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "messageId is unidentified or empty");
             return;
         }
 
@@ -1163,8 +1229,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -1197,28 +1263,6 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getUser(final String instanceId, final String userId, final Callback callback) {
-        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
-        if (mClient == null) {
-            callback.invoke(false, -1, "StringeeClient is not initialized");
-            return;
-        }
-
-        if (userId == null) {
-            callback.invoke(false, -2, "User id can not be null");
-            return;
-        }
-
-        User user = mClient.getUser(userId);
-        if (user != null) {
-            WritableMap param = Utils.getUserMap(user);
-            callback.invoke(true, 0, "Success", param);
-        } else {
-            callback.invoke(false, -1, "User does not exist.");
-        }
-    }
-
-    @ReactMethod
     public void clearDb(final String instanceId, final Callback callback) {
         StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
         if (mClient == null) {
@@ -1237,26 +1281,28 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
-        String name = "";
-        if (convMap.hasKey("name")) {
-            name = convMap.getString("name");
-        }
-        String avatar = "";
-        if (convMap.hasKey("avatar")) {
-            avatar = convMap.getString("avatar");
+        if (convMap == null) {
+            callback.invoke(false, -2, "conversation info is unidentified or empty");
+            return;
         }
 
-        final String finalAvatar = avatar;
-        final String finalName = name;
         mClient.getConversationFromServer(convId, new CallbackListener<Conversation>() {
             @Override
             public void onSuccess(Conversation conversation) {
-                conversation.updateConversation(mClient, finalName, finalAvatar, new StatusListener() {
+                String name = "";
+                if (convMap.hasKey("name")) {
+                    name = convMap.getString("name");
+                }
+                String avatar = "";
+                if (convMap.hasKey("avatar")) {
+                    avatar = convMap.getString("avatar");
+                }
+                conversation.updateConversation(mClient, name, avatar, new StatusListener() {
                     @Override
                     public void onSuccess() {
                         callback.invoke(true, 0, "Success");
@@ -1284,8 +1330,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (userId == null) {
-            callback.invoke(false, -2, "User id can not be null");
+        if (Utils.isStringEmpty(userId)) {
+            callback.invoke(false, -2, "userId is unidentified or empty");
             return;
         }
 
@@ -1488,8 +1534,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -1530,8 +1576,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -1571,8 +1617,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -1612,8 +1658,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (widgetKey == null) {
-            callback.invoke(false, -2, "Widget key can not be null");
+        if (Utils.isStringEmpty(widgetKey)) {
+            callback.invoke(false, -2, "widgetKey is unidentified or empty");
             return;
         }
 
@@ -1640,8 +1686,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (widgetKey == null) {
-            callback.invoke(false, -2, "Widget key can not be null");
+        if (Utils.isStringEmpty(widgetKey)) {
+            callback.invoke(false, -2, "widgetKey is unidentified or empty");
             return;
         }
 
@@ -1682,6 +1728,88 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void updateUserInfo2(final String instanceId, final String userInfo, final Callback callback) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized");
+            return;
+        }
+
+        if (Utils.isStringEmpty(userInfo)) {
+            callback.invoke(false, -2, "userInfo is unidentified or empty");
+            return;
+        }
+
+        try {
+            JSONObject userObject = new JSONObject(userInfo);
+            User user = new User();
+            user.setName(userObject.optString("name", ""));
+            user.setAvatarUrl(userObject.optString("avatar", ""));
+            user.setEmail(userObject.optString("email", ""));
+            user.setPhone(userObject.optString("phone", ""));
+            user.setLocation(userObject.optString("location", ""));
+            user.setBrowser(userObject.optString("browser", ""));
+            user.setPlatform(userObject.optString("platform", ""));
+            user.setDevice(userObject.optString("device", ""));
+            user.setIpAddress(userObject.optString("ipAddress", ""));
+            user.setHostName(userObject.optString("hostName", ""));
+            user.setUserAgent(userObject.optString("userAgent", ""));
+
+            mClient.updateUser(user, new StatusListener() {
+                @Override
+                public void onSuccess() {
+                    callback.invoke(true, 0, "Success");
+                }
+
+                @Override
+                public void onError(StringeeError stringeeError) {
+                    super.onError(stringeeError);
+                    callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+                }
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+            callback.invoke(false, -2, "userInfo not in JSON format");
+        }
+    }
+
+    @ReactMethod
+    public void getUserInfo(final String instanceId, final ReadableArray userIds, final Callback callback) {
+        StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
+        if (mClient == null) {
+            callback.invoke(false, -1, "StringeeClient is not initialized");
+            return;
+        }
+
+        if (Utils.isListEmpty(userIds)) {
+            callback.invoke(false, -2, "userIds is unidentified or empty");
+            return;
+        }
+
+        List<String> userIdList = new ArrayList<>();
+        for (int i = 0; i < userIds.size(); i++) {
+            userIdList.add(userIds.getString(i));
+        }
+        mClient.getUserInfo(userIdList, new CallbackListener<List<User>>() {
+            @Override
+            public void onSuccess(List<User> users) {
+                WritableArray params = Arguments.createArray();
+                for (int i = 0; i < users.size(); i++) {
+                    WritableMap param = Utils.getUserMap(users.get(i));
+                    params.pushMap(param);
+                }
+                callback.invoke(true, 0, "Success", params);
+            }
+
+            @Override
+            public void onError(StringeeError stringeeError) {
+                super.onError(stringeeError);
+                callback.invoke(false, stringeeError.getCode(), stringeeError.getMessage());
+            }
+        });
+    }
+
+    @ReactMethod
     public void createLiveChatConversation(final String instanceId, final String queueId, final Callback callback) {
         StringeeClient mClient = StringeeManager.getInstance().getClientsMap().get(instanceId);
         if (mClient == null) {
@@ -1689,8 +1817,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (queueId == null) {
-            callback.invoke(false, -2, "Queue id can not be null");
+        if (Utils.isStringEmpty(queueId)) {
+            callback.invoke(false, -2, "queueId is unidentified or empty");
             return;
         }
 
@@ -1717,8 +1845,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -1761,8 +1889,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -1805,8 +1933,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (widgetKey == null) {
-            callback.invoke(false, -2, "Widget key can not be null");
+        if (Utils.isStringEmpty(widgetKey)) {
+            callback.invoke(false, -2, "widgetKey is unidentified or empty");
             return;
         }
 
@@ -1832,8 +1960,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -1870,8 +1998,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -1908,8 +2036,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -1946,8 +2074,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
@@ -1984,13 +2112,13 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
-        if (msgId == null) {
-            callback.invoke(false, -2, "Message id can not be null");
+        if (Utils.isStringEmpty(msgId)) {
+            callback.invoke(false, -2, "messageId is unidentified or empty");
             return;
         }
 
@@ -2041,13 +2169,13 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id can not be null");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
-        if (msgId == null) {
-            callback.invoke(false, -2, "Message id can not be null");
+        if (Utils.isStringEmpty(msgId)) {
+            callback.invoke(false, -2, "messageId is unidentified or empty");
             return;
         }
 
@@ -2098,13 +2226,13 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id is not initialized");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
-        if (msgId == null) {
-            callback.invoke(false, -2, "Message id can not be null");
+        if (Utils.isStringEmpty(msgId)) {
+            callback.invoke(false, -2, "messageId is unidentified or empty");
             return;
         }
 
@@ -2133,13 +2261,13 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
             return;
         }
 
-        if (convId == null) {
-            callback.invoke(false, -2, "Conversation id is not initialized");
+        if (Utils.isStringEmpty(convId)) {
+            callback.invoke(false, -2, "convId is unidentified or empty");
             return;
         }
 
-        if (msgId == null) {
-            callback.invoke(false, -2, "Message id can not be null");
+        if (Utils.isStringEmpty(msgId)) {
+            callback.invoke(false, -2, "messageId is unidentified or empty");
             return;
         }
 

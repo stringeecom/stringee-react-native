@@ -1,11 +1,14 @@
 package com.stringeereactnative;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.stringee.messaging.ChatProfile;
@@ -164,6 +167,16 @@ public class Utils {
         userMap.putString("userId", user.getUserId());
         userMap.putString("name", user.getName());
         userMap.putString("avatar", user.getAvatarUrl());
+        userMap.putString("role", user.getRole().getValue());
+        userMap.putString("email", user.getEmail());
+        userMap.putString("phone", user.getPhone());
+        userMap.putString("location", user.getLocation());
+        userMap.putString("browser", user.getBrowser());
+        userMap.putString("platform", user.getPlatform());
+        userMap.putString("device", user.getDevice());
+        userMap.putString("ipAddress", user.getIpAddress());
+        userMap.putString("hostName", user.getHostName());
+        userMap.putString("userAgent", user.getUserAgent());
         return userMap;
     }
 
@@ -209,15 +222,28 @@ public class Utils {
         return queueMap;
     }
 
-    public static boolean isTextEmpty(@Nullable String text) {
+    public static boolean isStringEmpty(@Nullable CharSequence text) {
         if (text != null) {
-            if (text.equalsIgnoreCase("null")) {
+            if (text.toString().equalsIgnoreCase("null")) {
                 return true;
             } else {
-                return text.trim().length() <= 0;
+                return text.toString().trim().length() <= 0;
             }
         } else {
             return true;
         }
+    }
+
+    public static boolean isListEmpty(@Nullable ReadableArray list) {
+        if (list != null) {
+            return list.size() == 0;
+        } else {
+            return true;
+        }
+    }
+
+    public static void runOnUiThread(Runnable runnable) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(runnable);
     }
 }
