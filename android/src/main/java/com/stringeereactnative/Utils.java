@@ -1,5 +1,6 @@
 package com.stringeereactnative;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,6 +12,8 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.stringee.common.StringeeAudioManager;
+import com.stringee.common.StringeeAudioManager.AudioManagerEvents;
 import com.stringee.messaging.ChatProfile;
 import com.stringee.messaging.ChatRequest;
 import com.stringee.messaging.Conversation;
@@ -245,5 +248,41 @@ public class Utils {
     public static void runOnUiThread(Runnable runnable) {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(runnable);
+    }
+
+    public static void startAudioManager(Context context, AudioManagerEvents events) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                StringeeAudioManager audioManager = StringeeAudioManager.create(context);
+                audioManager.start(events);
+                StringeeManager.getInstance().setAudioManager(audioManager);
+            }
+        });
+    }
+
+    public static void stopAudioManager() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                StringeeAudioManager audioManager = StringeeManager.getInstance().getAudioManager();
+                if (audioManager != null) {
+                    audioManager.stop();
+                    StringeeManager.getInstance().setAudioManager(null);
+                }
+            }
+        });
+    }
+
+    public static void setSpeakerPhone(boolean on) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                StringeeAudioManager audioManager = StringeeManager.getInstance().getAudioManager();
+                if (audioManager != null) {
+                    audioManager.setSpeakerphoneOn(on);
+                }
+            }
+        });
     }
 }

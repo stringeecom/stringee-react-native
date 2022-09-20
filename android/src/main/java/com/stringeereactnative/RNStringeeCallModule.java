@@ -19,7 +19,6 @@ import com.stringee.call.StringeeCall.MediaState;
 import com.stringee.call.StringeeCall.SignalingState;
 import com.stringee.call.StringeeCall.StringeeCallListener;
 import com.stringee.call.StringeeCall.StringeeCallStats;
-import com.stringee.common.StringeeAudioManager;
 import com.stringee.common.StringeeAudioManager.AudioDevice;
 import com.stringee.common.StringeeAudioManager.AudioManagerEvents;
 import com.stringee.common.StringeeConstant;
@@ -83,14 +82,8 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
                 }
             }
 
-            Utils.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    StringeeAudioManager audioManager = StringeeAudioManager.create(getReactApplicationContext());
-                    audioManager.start(RNStringeeCallModule.this);
-                    StringeeManager.getInstance().setAudioManager(audioManager);
-                }
-            });
+            Utils.startAudioManager(getReactApplicationContext(), this);
+
             mStringeeCall.makeCall(new StatusListener() {
                 @Override
                 public void onSuccess() {
@@ -153,14 +146,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             }
         });
 
-        Utils.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                StringeeAudioManager audioManager = StringeeAudioManager.create(getReactApplicationContext());
-                audioManager.start(RNStringeeCallModule.this);
-                StringeeManager.getInstance().setAudioManager(audioManager);
-            }
-        });
+        Utils.startAudioManager(getReactApplicationContext(), this);
 
         callback.invoke(true, 0, "Success");
     }
@@ -185,16 +171,8 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             }
         });
 
-        Utils.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                StringeeAudioManager audioManager = StringeeManager.getInstance().getAudioManager();
-                if (audioManager != null) {
-                    audioManager.stop();
-                    audioManager = null;
-                }
-            }
-        });
+        Utils.stopAudioManager();
+
         callback.invoke(true, 0, "Success");
     }
 
@@ -218,16 +196,8 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             }
         });
 
-        Utils.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                StringeeAudioManager audioManager = StringeeManager.getInstance().getAudioManager();
-                if (audioManager != null) {
-                    audioManager.stop();
-                    audioManager = null;
-                }
-            }
-        });
+        Utils.stopAudioManager();
+
         callback.invoke(true, 0, "Success");
     }
 
@@ -390,15 +360,7 @@ public class RNStringeeCallModule extends ReactContextBaseJavaModule implements 
             return;
         }
 
-        Utils.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                StringeeAudioManager audioManager = StringeeManager.getInstance().getAudioManager();
-                if (audioManager != null) {
-                    audioManager.setSpeakerphoneOn(on);
-                }
-            }
-        });
+        Utils.setSpeakerPhone(on);
 
         callback.invoke(true, 0, "Success");
     }
