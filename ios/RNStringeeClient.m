@@ -1496,6 +1496,29 @@ RCT_EXPORT_METHOD(updateUserInfo2:(NSString *)uuid param:(NSString *)param callb
     }];
 }
 
+RCT_EXPORT_METHOD(getUserInfo:(NSString *)uuid userIds:(NSArray *)userIds callback:(RCTResponseSenderBlock)callback) {
+    RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
+    if (wrapper == nil) {
+        callback(@[@(NO), @(-1), @"Wrapper is not found"]);
+        return;
+    }
+
+    if (!wrapper.client) {
+        callback(@[@(NO), @(-1), @"StringeeClient is not initialized"]);
+        return;
+    }
+    
+    if (userIds == nil || userIds.count == 0 || ![userIds.firstObject isKindOfClass:[NSString class]]) {
+        callback(@[@(NO), @(-2), @"Parameters invalid"]);
+        return;
+    }
+
+    
+    [wrapper.client getUserInfosByUserIds:userIds completion:^(BOOL status, int code, NSString *message, NSArray<StringeeIdentity *> *users) {
+        callback(@[@(status), @(code), message, [RCTConvert StringeeIdentities:users]]);
+    }];
+}
+
 RCT_EXPORT_METHOD(createLiveChatConversation:(NSString *)uuid queueId:(NSString *)queueId callback:(RCTResponseSenderBlock)callback) {
     RNClientWrapper *wrapper = [RNStringeeInstanceManager.instance.clientWrappers objectForKey:uuid];
     if (wrapper == nil) {

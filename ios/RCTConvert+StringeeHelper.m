@@ -38,11 +38,31 @@
     NSString *userId = identity.userId.length ? identity.userId : @"";
     NSString *name = identity.displayName.length ? identity.displayName : @"";
     NSString *avatar = identity.avatarUrl.length ? identity.avatarUrl : @"";
+    NSString *role = identity.role == StringeeRoleAdmin ? @"admin" : @"member";
+    NSString *email = identity.email.length ? identity.email : @"";
+    NSString *phone = identity.phone.length ? identity.phone : @"";
+    NSString *location = identity.location.length ? identity.location : @"";
+    NSString *browser = identity.browser.length ? identity.browser : @"";
+    NSString *platform = identity.platform.length ? identity.platform : @"";
+    NSString *device = identity.device.length ? identity.device : @"";
+    NSString *ipAddress = identity.ipaddress.length ? identity.ipaddress : @"";
+    NSString *hostName = identity.hostname.length ? identity.hostname : @"";
+    NSString *userAgent = identity.useragent.length ? identity.useragent : @"";
 
     return @{
              @"userId": userId,
              @"name": name,
-             @"avatar": avatar
+             @"avatar": avatar,
+             @"role": role,
+             @"email": email,
+             @"phone": phone,
+             @"location": location,
+             @"browser": browser,
+             @"platform": platform,
+             @"device": device,
+             @"ipAddress": ipAddress,
+             @"hostName": hostName,
+             @"userAgent": userAgent
              };
 }
 
