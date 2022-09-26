@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
-import {requireNativeComponent, ViewPropTypes, Platform} from "react-native";
-
+import {requireNativeComponent, Platform} from "react-native";
+import { ViewPropTypes } from "deprecated-react-native-prop-types";
 var iface = {
   name: "StringeeVideoView",
   propTypes: {
