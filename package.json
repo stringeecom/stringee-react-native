@@ -19,6 +19,7 @@
   "author": "Stringee <info@stringee.com>",
   "license": "MIT",
   "dependencies": {
+    "@react-native/normalize-color": "^2.0.0",
     "deprecated-react-native-prop-types": "^2.3.0",
     "underscore": "^1.8.3"
   },
