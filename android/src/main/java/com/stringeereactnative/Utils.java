@@ -1,13 +1,19 @@
 package com.stringeereactnative;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.stringee.common.StringeeAudioManager;
+import com.stringee.common.StringeeAudioManager.AudioManagerEvents;
 import com.stringee.messaging.ChatProfile;
 import com.stringee.messaging.ChatRequest;
 import com.stringee.messaging.Conversation;
@@ -164,6 +170,16 @@ public class Utils {
         userMap.putString("userId", user.getUserId());
         userMap.putString("name", user.getName());
         userMap.putString("avatar", user.getAvatarUrl());
+        userMap.putString("role", user.getRole().getValue());
+        userMap.putString("email", user.getEmail());
+        userMap.putString("phone", user.getPhone());
+        userMap.putString("location", user.getLocation());
+        userMap.putString("browser", user.getBrowser());
+        userMap.putString("platform", user.getPlatform());
+        userMap.putString("device", user.getDevice());
+        userMap.putString("ipAddress", user.getIpAddress());
+        userMap.putString("hostName", user.getHostName());
+        userMap.putString("userAgent", user.getUserAgent());
         return userMap;
     }
 
@@ -209,15 +225,64 @@ public class Utils {
         return queueMap;
     }
 
-    public static boolean isTextEmpty(@Nullable String text) {
+    public static boolean isStringEmpty(@Nullable CharSequence text) {
         if (text != null) {
-            if (text.equalsIgnoreCase("null")) {
+            if (text.toString().equalsIgnoreCase("null")) {
                 return true;
             } else {
-                return text.trim().length() <= 0;
+                return text.toString().trim().length() <= 0;
             }
         } else {
             return true;
         }
+    }
+
+    public static boolean isListEmpty(@Nullable ReadableArray list) {
+        if (list != null) {
+            return list.size() == 0;
+        } else {
+            return true;
+        }
+    }
+
+    public static void runOnUiThread(Runnable runnable) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(runnable);
+    }
+
+    public static void startAudioManager(Context context, AudioManagerEvents events) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                StringeeAudioManager audioManager = StringeeAudioManager.create(context);
+                audioManager.start(events);
+                StringeeManager.getInstance().setAudioManager(audioManager);
+            }
+        });
+    }
+
+    public static void stopAudioManager() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                StringeeAudioManager audioManager = StringeeManager.getInstance().getAudioManager();
+                if (audioManager != null) {
+                    audioManager.stop();
+                    StringeeManager.getInstance().setAudioManager(null);
+                }
+            }
+        });
+    }
+
+    public static void setSpeakerPhone(boolean on) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                StringeeAudioManager audioManager = StringeeManager.getInstance().getAudioManager();
+                if (audioManager != null) {
+                    audioManager.setSpeakerphoneOn(on);
+                }
+            }
+        });
     }
 }
