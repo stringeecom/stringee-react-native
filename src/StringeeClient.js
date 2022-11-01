@@ -1027,6 +1027,7 @@ export default class extends Component {
     name: string,
     email: string,
     avatar: string,
+    phone: string,
     callback: RNStringeeEventCallback,
   ) {
     RNStringeeClient.updateUserInfo(
@@ -1034,7 +1035,7 @@ export default class extends Component {
       name,
       email,
       avatar,
-      '',
+      phone,
       callback,
     );
   }
