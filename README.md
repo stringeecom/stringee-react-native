@@ -83,7 +83,29 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     // for camera access
     <uses-permission android:name="android.permission.CAMERA" />
+    // for bluetooth 
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     ```
+
+##### Dependencies
+1. Open up `android/app/build.gradle`
+2. Add the following lines:
+    ```
+    dependencies {
+    ...
+    implementation 'com.android.volley:volley:*.*.*'
+    ...
+    }
+    ```
+
+### Version 1.5.0
+##### Bug fixes:
+- Declare ViewPropTypes from react native version 0.69.0.
+##### Features:
+- Allow to get user info and update user info.
+- Upgrade android sdk version
+- Upgrade ios sdk version
 
 ### Version 1.4.31
 ##### Features:
