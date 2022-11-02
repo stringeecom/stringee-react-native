@@ -99,13 +99,19 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     }
     ```
 
+### Version 1.5.1
+##### Bug fixes:
+- Convert wrong user data from native.
+##### Features:
+- Upgrade ios sdk version.
+
 ### Version 1.5.0
 ##### Bug fixes:
 - Declare ViewPropTypes from react native version 0.69.0.
 ##### Features:
 - Allow to get user info and update user info.
-- Upgrade android sdk version
-- Upgrade ios sdk version
+- Upgrade android sdk version.
+- Upgrade ios sdk version.
 
 ### Version 1.4.31
 ##### Features:
