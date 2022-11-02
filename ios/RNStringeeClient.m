@@ -1466,17 +1466,17 @@ RCT_EXPORT_METHOD(updateUserInfo2:(NSString *)uuid param:(NSString *)param callb
         return;
     }
     NSDictionary *dicParam = (NSDictionary *)idParam;
-    NSString *name = [dicParam[@"name"] stringValue];
-    NSString *email = [dicParam[@"email"] stringValue];
-    NSString *avatar = [dicParam[@"avatar"] stringValue];
-    NSString *phone = [dicParam[@"phone"] stringValue];
-    NSString *location = [dicParam[@"location"] stringValue];
-    NSString *browser = [dicParam[@"browser"] stringValue];
-    NSString *platform = [dicParam[@"platform"] stringValue];
-    NSString *device = [dicParam[@"device"] stringValue];
-    NSString *ipAddress = [dicParam[@"ipAddress"] stringValue];
-    NSString *hostName = [dicParam[@"hostName"] stringValue];
-    NSString *userAgent = [dicParam[@"userAgent"] stringValue];
+    NSString *name = dicParam[@"name"];
+    NSString *email = dicParam[@"email"];
+    NSString *avatar = dicParam[@"avatar"];
+    NSString *phone = dicParam[@"phone"];
+    NSString *location = dicParam[@"location"];
+    NSString *browser = dicParam[@"browser"];
+    NSString *platform = dicParam[@"platform"];
+    NSString *device = dicParam[@"device"];
+    NSString *ipAddress = dicParam[@"ipAddress"];
+    NSString *hostName = dicParam[@"hostName"];
+    NSString *userAgent = dicParam[@"userAgent"];
     
     StringeeIdentity *newUserInfo = [StringeeIdentity new];
     newUserInfo.displayName = name;
