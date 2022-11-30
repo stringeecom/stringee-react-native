@@ -1237,25 +1237,15 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
         mClient.getConversationFromServer(convId, new CallbackListener<Conversation>() {
             @Override
             public void onSuccess(Conversation conversation) {
-                conversation.getLastMessages(mClient, 1, true, true, false, new CallbackListener<List<Message>>() {
+                conversation.markAllAsRead(mClient, new StatusListener() {
                     @Override
-                    public void onSuccess(List<Message> messages) {
-                        if (messages != null && messages.size() > 0) {
-                            Message message = messages.get(0);
-                            if (message != null) {
-                                message.markAsRead(mClient, new StatusListener() {
-                                    @Override
-                                    public void onSuccess() {
-                                        callback.invoke(true, 0, "Success");
-                                    }
+                    public void onSuccess() {
+                        callback.invoke(true, 0, "Success");
+                    }
 
-                                    @Override
-                                    public void onError(StringeeError error) {
-                                        callback.invoke(false, error.getCode(), error.getMessage());
-                                    }
-                                });
-                            }
-                        }
+                    @Override
+                    public void onError(StringeeError error) {
+                        callback.invoke(false, error.getCode(), error.getMessage());
                     }
                 });
             }
