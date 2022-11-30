@@ -106,6 +106,10 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     }
     ```
 
+### Version 1.5.2
+##### Features:
+- Upgrade webrtc android version.
+
 ### Version 1.5.1
 ##### Bug fixes:
 - Convert wrong user data from native.
