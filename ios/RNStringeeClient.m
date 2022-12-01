@@ -951,15 +951,19 @@ RCT_EXPORT_METHOD(sendMessage:(NSString *)uuid message:(NSDictionary *)message c
                 return;
         }
 
-        NSError *error;
+        //NSError *error;
         [strongWrapper.messages setObject:msgToSend forKey:msgToSend.localIdentifier];
 
-        [conversation sendMessageWithoutPretreatment:msgToSend error:&error];
-        if (error) {
-            callback(@[@(NO), @(1), @"Fail."]);
-        } else {
-            callback(@[@(YES), @(0), @"Success."]);
-        }
+        // [conversation sendMessageWithoutPretreatment:msgToSend error:&error];
+        // if (error) {
+        //     callback(@[@(NO), @(1), @"Fail."]);
+        // } else {
+        //     callback(@[@(YES), @(0), @"Success."]);
+        // }
+
+        [conversation sendMessageWithoutPretreatment2:msgToSend withCompletionHandler:^(BOOL status, int code, NSString *message) {
+            callback(@[@(status), @(code), message]);
+        }];
     }];
 }
 
