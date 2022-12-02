@@ -1003,7 +1003,8 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     default:
                         break;
                 }
-                conversation.sendMessage(mClient, message, new StatusListener() {
+                Message finalMessage = message;
+                conversation.sendMessage(mClient, finalMessage, new StatusListener() {
                     @Override
                     public void onSuccess() {
                         callback.invoke(true, 0, "Success");
@@ -1012,6 +1013,25 @@ public class RNStringeeClientModule extends ReactContextBaseJavaModule {
                     @Override
                     public void onError(StringeeError error) {
                         callback.invoke(false, error.getCode(), error.getMessage());
+                        ArrayList<String> jsEvents = eventsMap.get(instanceId);
+                        WritableMap data = Arguments.createMap();
+                        WritableMap object = Arguments.createMap();
+                        WritableMap params = Arguments.createMap();
+
+                        params.putString("uuid", instanceId);
+
+                        if (jsEvents != null && contains(jsEvents, "onChangeEvent")) {
+                            data.putInt("objectType", StringeeObject.Type.MESSAGE.getValue());
+                            data.putInt("changeType", StringeeChange.Type.DELETE.getValue());
+                            WritableArray objects = Arguments.createArray();
+
+                            object = Utils.getMessageMap(finalMessage);
+                            objects.pushMap(object);
+                            data.putArray("objects", objects);
+
+                            params.putMap("data", data);
+                            sendEvent(getReactApplicationContext(), "onChangeEvent", params);
+                        }
                     }
                 });
             }
