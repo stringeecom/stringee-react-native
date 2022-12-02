@@ -106,6 +106,10 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     }
     ```
 
+### Version 1.5.3
+##### Features:
+- Add event delete message when send message error.
+
 ### Version 1.5.2
 ##### Features:
 - Upgrade webrtc android version.
