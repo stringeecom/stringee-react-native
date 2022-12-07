@@ -106,6 +106,10 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     }
     ```
 
+### Version 1.5.4
+##### Bug fixed:
+- Ios get last message always empty.
+
 ### Version 1.5.3
 ##### Features:
 - Add event delete message when send message error.
