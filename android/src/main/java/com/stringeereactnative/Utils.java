@@ -210,9 +210,11 @@ public class Utils {
 
         List<Queue> queues = chatProfile.getQueues();
         WritableArray queuesMap = Arguments.createArray();
-        for (int j = 0; j < queues.size(); j++) {
-            WritableMap queueMap = getQueueMap(queues.get(j));
-            queuesMap.pushMap(queueMap);
+        if (!isListEmpty(queues)){
+            for (int j = 0; j < queues.size(); j++) {
+                WritableMap queueMap = getQueueMap(queues.get(j));
+                queuesMap.pushMap(queueMap);
+            }
         }
         conversationMap.putArray("queues", queuesMap);
         return conversationMap;
@@ -240,6 +242,14 @@ public class Utils {
     public static boolean isListEmpty(@Nullable ReadableArray list) {
         if (list != null) {
             return list.size() == 0;
+        } else {
+            return true;
+        }
+    }
+
+    public static boolean isListEmpty(@Nullable List list) {
+        if (list != null) {
+            return list.isEmpty();
         } else {
             return true;
         }
