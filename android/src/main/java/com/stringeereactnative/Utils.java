@@ -295,4 +295,9 @@ public class Utils {
             }
         });
     }
+
+    public static int dpiToPx(Context context, float dpValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
+    }
 }
