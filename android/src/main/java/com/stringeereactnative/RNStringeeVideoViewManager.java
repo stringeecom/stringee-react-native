@@ -1,38 +1,87 @@
 package com.stringeereactnative;
 
-import android.util.Log;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
+import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.annotations.ReactProp;
 
-public class RNStringeeVideoViewManager extends ViewGroupManager<RNStringeeVideoLayout> {
+import java.util.Map;
 
+public class RNStringeeVideoViewManager extends ViewGroupManager<RNStringeeVideoView> {
+    public final int COMMAND_CREATE = 1;
+    ReactApplicationContext reactContext;
+
+    public RNStringeeVideoViewManager(ReactApplicationContext reactContext) {
+        this.reactContext = reactContext;
+    }
+
+    @NonNull
     @Override
     public String getName() {
-        return this.getClass().getSimpleName();
+        return "RNStringeeVideoView";
+    }
+
+    @NonNull
+    @Override
+    protected RNStringeeVideoView createViewInstance(@NonNull ThemedReactContext reactContext) {
+        return new RNStringeeVideoView(reactContext);
+    }
+
+    @Nullable
+    @Override
+    public Map<String, Integer> getCommandsMap() {
+        return MapBuilder.of("create", COMMAND_CREATE);
     }
 
     @Override
-    protected RNStringeeVideoLayout createViewInstance(ThemedReactContext reactContext) {
-        return new RNStringeeVideoLayout(reactContext);
+    public void receiveCommand(
+            @NonNull RNStringeeVideoView root,
+            String commandId,
+            @Nullable ReadableArray args
+    ) {
+        super.receiveCommand(root, commandId, args);
+        int commandIdInt = Integer.parseInt(commandId);
+
+        if (commandIdInt == COMMAND_CREATE) {
+            if (args != null) {
+                root.createView();
+            }
+        }
+    }
+
+    @ReactProp(name = ViewProps.WIDTH)
+    public void setWidth(RNStringeeVideoView view, int width) {
+        view.setWidth(width);
+    }
+
+    @ReactProp(name = ViewProps.HEIGHT)
+    public void setHeight(RNStringeeVideoView view, int height) {
+        view.setHeight(height);
     }
 
     @ReactProp(name = "callId")
-    public void setCallId(RNStringeeVideoLayout layout, String callId) {
-        layout.setCallId(callId);
-        layout.updateView();
+    public void setCallId(RNStringeeVideoView view, String callId) {
+        view.setCallId(callId);
     }
 
     @ReactProp(name = "local", defaultBoolean = false)
-    public void setLocal(RNStringeeVideoLayout layout, boolean isLocal) {
-        layout.setLocal(isLocal);
-        layout.updateView();
+    public void setLocal(RNStringeeVideoView view, boolean isLocal) {
+        view.setLocal(isLocal);
     }
 
     @ReactProp(name = "overlay", defaultBoolean = false)
-    public void setOverlay(RNStringeeVideoLayout layout, boolean isOverlay) {
-        layout.setOverlay(isOverlay);
-        layout.updateView();
+    public void setOverlay(RNStringeeVideoView view, boolean isOverlay) {
+        view.setOverlay(isOverlay);
+    }
+
+    @ReactProp(name = "scalingType")
+    public void setScalingType(RNStringeeVideoView view, String scalingType) {
+        view.setScalingType(scalingType);
     }
 }
