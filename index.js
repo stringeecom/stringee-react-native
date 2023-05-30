@@ -9,6 +9,7 @@ import User from './src/chat/User';
 import ChatRequest from './src/chat/ChatRequest';
 import UserInfoParam from './src/helpers/UserInfoParam';
 import LiveChatTicketParam from './src/helpers/LiveChatTicketParam';
+import {StringeeVideoScalingType} from './src/helpers/StringeeHelper';
 
 export {
   StringeeClient,
@@ -22,4 +23,5 @@ export {
   ChatRequest,
   UserInfoParam,
   LiveChatTicketParam,
+  StringeeVideoScalingType,
 };
