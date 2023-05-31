@@ -59,6 +59,11 @@ const callEvents = {
   },
 };
 
+const StringeeVideoScalingType = {
+  fit: 'fit',
+  fill: 'fill',
+};
+
 const MediaType = {
   AUDIO: 'AUDIO',
   VIDEO: 'VIDEO',
@@ -70,4 +75,4 @@ export type RNStringeeEventCallback = (
   message: string,
 ) => void;
 
-export {clientEvents, callEvents, MediaType};
+export {clientEvents, callEvents, MediaType, StringeeVideoScalingType};

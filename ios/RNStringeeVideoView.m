@@ -27,10 +27,15 @@
 - (void)layoutSubviews {
     [super layoutSubviews];
 
+    StringeeVideoContentMode mode = StringeeVideoContentModeScaleAspectFill;
+    if ([_scalingType isEqualToString:@"fit"]) {
+        mode = StringeeVideoContentModeScaleAspectFit;
+    }
+    
     if (!hasDisplayed) {
         if (_callId.length) {
-            [[RNStringeeInstanceManager instance].rnCall addRenderToView:self callId:_callId isLocal:_local];
-            [[RNStringeeInstanceManager instance].rnCall2 addRenderToView:self callId:_callId isLocal:_local];
+            [[RNStringeeInstanceManager instance].rnCall addRenderToView:self callId:_callId isLocal:_local contentMode:mode];
+            [[RNStringeeInstanceManager instance].rnCall2 addRenderToView:self callId:_callId isLocal:_local contentMode:mode];
             hasDisplayed = YES;
         }
     }
