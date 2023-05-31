@@ -106,6 +106,10 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     }
     ```
 
+### Version 1.5.7
+##### Features:
+- Allow setting ScaleType for StringeeVideoView.
+
 ### Version 1.5.6
 ##### Features:
 - Bug fixed: Crash on checking exist call progress.
