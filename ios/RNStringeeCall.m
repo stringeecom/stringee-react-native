@@ -460,16 +460,17 @@ RCT_EXPORT_METHOD(enableVideo:(NSString *)callId enableVideo:(BOOL)enableVideo c
 
 }
 
-- (void)addRenderToView:(UIView *)view callId:(NSString *)callId isLocal:(BOOL)isLocal {
+- (void)addRenderToView:(UIView *)view callId:(NSString *)callId isLocal:(BOOL)isLocal contentMode:(StringeeVideoContentMode)contentMode {
     if (callId.length) {
         StringeeCall *call = [[RNStringeeInstanceManager instance].calls objectForKey:callId];
         if (call) {
             if (isLocal) {
                 call.localVideoView.frame = CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height);
+                call.localVideoView.contentMode = contentMode;
                 [view addSubview:call.localVideoView];
             } else {
                 call.remoteVideoView.frame = CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height);
-                call.remoteVideoView.delegate = view;
+                call.remoteVideoView.contentMode = contentMode;
                 [view addSubview:call.remoteVideoView];
             }
         }

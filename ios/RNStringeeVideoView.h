@@ -9,5 +9,5 @@
 @property(strong, nonatomic) NSString *callId;
 @property(strong, nonatomic) NSString *streamId; // removed
 @property(assign, nonatomic) CGSize videoSize;
-
+@property(strong, nonatomic) NSString *scalingType;
 @end

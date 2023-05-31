@@ -449,26 +449,26 @@ RCT_EXPORT_METHOD(sendDTMF:(NSString *)callId dtmf:(NSString *)dtmf callback:(RC
     }
 }
 
-- (void)addRenderToView:(UIView *)view callId:(NSString *)callId isLocal:(BOOL)isLocal {
+- (void)addRenderToView:(UIView *)view callId:(NSString *)callId isLocal:(BOOL)isLocal contentMode:(StringeeVideoContentMode)contentMode {
     if (callId.length) {
         StringeeCall2 *call = [[RNStringeeInstanceManager instance].call2s objectForKey:callId];
         if (call) {
             if (isLocal) {
+                call.localVideoView.contentMode = contentMode;
                 call.localVideoView.frame = CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height);
                 [view addSubview:call.localVideoView];
             } else {
                 StringeeVideoTrack *track = [[RNStringeeInstanceManager instance].call2VideoTracks objectForKey:callId];
                 if (track != nil) {
-                    StringeeVideoView *videoView = [track attachWithVideoContentMode:StringeeVideoContentModeScaleAspectFill];
+                    StringeeVideoView *videoView = [track attachWithVideoContentMode:contentMode];
                     if (videoView != nil) {
                         videoView.frame = CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height);
                         [view addSubview:videoView];
                     }
-                    
                     [[RNStringeeInstanceManager instance].call2VideoTracks removeObjectForKey:callId];
                 } else {
                     call.remoteVideoView.frame = CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height);
-//                    call.remoteVideoView.delegate = view;
+                    call.remoteVideoView.contentMode = contentMode;
                     [view addSubview:call.remoteVideoView];
                 }
             }
