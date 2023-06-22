@@ -1,24 +1,54 @@
 import {Component} from 'react';
 import PropTypes from 'prop-types';
-import {NativeModules, NativeEventEmitter, Platform} from 'react-native';
+import {NativeModules, NativeEventEmitter, Platform, View} from 'react-native';
 import {callEvents, MediaType} from './helpers/StringeeHelper';
 import {each} from 'underscore';
 import type {RNStringeeEventCallback} from './helpers/StringeeHelper';
+import {StringeeCall} from './StringeeCall';
 
 const RNStringeeCall2 = NativeModules.RNStringeeCall2;
 
-export default class extends Component {
-  static propTypes = {
-    eventHandlers: PropTypes.object,
-    clientId: PropTypes.string,
-  };
+interface StringeeCall2Props {
+  clientId: string;
+  callId: string;
+  customData: string;
+  from: string;
+  fromAlias: string;
+  to: string;
+  toAlias: string;
+  isPhoneToApp: boolean;
+  isVideoCall: boolean;
+}
 
-  constructor(props) {
+class StringeeCall2 extends Component {
+  clientId: string;
+  callId: string;
+  customData: string;
+  from: string;
+  fromAlias: string;
+  to: string;
+  toAlias: string;
+  isVideoCall: boolean;
+
+  constructor(props: StringeeCall2Props) {
     super(props);
-    this._events = [];
-    this._subscriptions = [];
-    this._eventEmitter = new NativeEventEmitter(RNStringeeCall2);
+    if (this.props === undefined) {
+      this.props = {};
+    }
+    this.clientId = this.props.clientId;
+    this.callId = this.props.callId;
+    this.customData = this.props.customData;
+    this.from = this.props.from;
+    this.fromAlias = this.props.fromAlias;
+    this.to = this.props.to;
+    this.toAlias = this.props.toAlias;
+    this.isVideoCall = this.props.isVideoCall;
+    this.events = [];
+    this.subscriptions = [];
+    this.eventEmitter = new NativeEventEmitter(RNStringeeCall2);
 
+    this.registerEvents = this.registerEvents.bind(this);
+    this.unregisterEvents = this.unregisterEvents.bind(this);
     this.makeCall = this.makeCall.bind(this);
     this.initAnswer = this.initAnswer.bind(this);
     this.answer = this.answer.bind(this);
@@ -37,37 +67,34 @@ export default class extends Component {
   }
 
   componentDidMount() {
-    this.sanitizeCallEvents(this.props.eventHandlers);
+    this.registerEvents(this.props.eventHandlers);
   }
 
   componentWillUnmount() {
-    this._unregisterEvents();
+    this.unregisterEvents();
   }
 
   render() {
     return null;
   }
 
-  _unregisterEvents() {
-    this._subscriptions.forEach(e => e.remove());
-    this._subscriptions = [];
-
-    this._events.forEach(e => RNStringeeCall2.removeNativeEvent(e));
-    this._events = [];
-  }
-
-  sanitizeCallEvents(events) {
-    if (typeof events !== 'object') {
+  registerEvents(eventHandlers) {
+    if (
+      eventHandlers === undefined ||
+      typeof eventHandlers !== 'object' ||
+      (this.events.length !== 0 && this.subscriptions.length !== 0)
+    ) {
       return;
     }
+
     const platform = Platform.OS;
 
-    each(events, (handler, type) => {
+    each(eventHandlers, (handler, type) => {
       const eventName = callEvents[platform][type];
       if (eventName !== undefined) {
         if (type === 'onTrackMediaStateChange') {
-          this._subscriptions.push(
-            this._eventEmitter.addListener(
+          this.subscriptions.push(
+            this.eventEmitter.addListener(
               eventName,
               ({from, mediaType, enable}) => {
                 if (handler !== undefined) {
@@ -82,52 +109,76 @@ export default class extends Component {
             ),
           );
         } else {
-          this._subscriptions.push(
-            this._eventEmitter.addListener(eventName, data => {
+          this.subscriptions.push(
+            this.eventEmitter.addListener(eventName, data => {
               if (handler !== undefined) {
                 handler(data);
               }
             }),
           );
         }
-        this._events.push(eventName);
+        this.events.push(eventName);
         RNStringeeCall2.setNativeEvent(eventName);
       } else {
-        console.log(`${type} is not a supported event`);
+        console.warn(`${type} is not a supported event`);
       }
     });
   }
 
+  unregisterEvents() {
+    if (this.events.length === 0 && this.subscriptions.length === 0) {
+      return;
+    }
+
+    this.subscriptions.forEach(e => e.remove());
+    this.subscriptions = [];
+
+    this.events.forEach(e => RNStringeeCall2.removeNativeEvent(e));
+    this.events = [];
+  }
+
   makeCall(parameters: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall2.makeCall(this.props.clientId, parameters, callback);
+    const params = JSON.parse(parameters);
+    this.from = params.from;
+    this.to = params.to;
+    this.isVideoCall = params.isVideoCall;
+    this.customData = params.customData;
+    RNStringeeCall2.makeCall(
+      this.clientId,
+      parameters,
+      (status, code, message, callId, customData) => {
+        this.callId = callId;
+        return callback(status, code, message, callId, customData);
+      },
+    );
   }
 
   initAnswer(callId: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall2.initAnswer(this.props.clientId, callId, callback);
+    RNStringeeCall2.initAnswer(this.clientId, this.callId, callback);
   }
 
   answer(callId: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall2.answer(callId, callback);
+    RNStringeeCall2.answer(this.callId, callback);
   }
 
   hangup(callId: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall2.hangup(callId, callback);
+    RNStringeeCall2.hangup(this.callId, callback);
   }
 
   reject(callId: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall2.reject(callId, callback);
+    RNStringeeCall2.reject(this.callId, callback);
   }
 
   sendDTMF(callId: string, dtmf: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall2.sendDTMF(callId, dtmf, callback);
+    RNStringeeCall2.sendDTMF(this.callId, dtmf, callback);
   }
 
   getCallStats(callId: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall2.getCallStats(this.props.clientId, callId, callback);
+    RNStringeeCall2.getCallStats(this.clientId, this.callId, callback);
   }
 
   switchCamera(callId: string, callback: RNStringeeEventCallback) {
-    RNStringeeCall2.switchCamera(callId, callback);
+    RNStringeeCall2.switchCamera(this.callId, callback);
   }
 
   enableVideo(
@@ -135,11 +186,11 @@ export default class extends Component {
     enabled: boolean,
     callback: RNStringeeEventCallback,
   ) {
-    RNStringeeCall2.enableVideo(callId, enabled, callback);
+    RNStringeeCall2.enableVideo(this.callId, enabled, callback);
   }
 
   mute(callId: string, mute: boolean, callback: RNStringeeEventCallback) {
-    RNStringeeCall2.mute(callId, mute, callback);
+    RNStringeeCall2.mute(this.callId, mute, callback);
   }
 
   setSpeakerphoneOn(
@@ -147,15 +198,15 @@ export default class extends Component {
     on: boolean,
     callback: RNStringeeEventCallback,
   ) {
-    RNStringeeCall2.setSpeakerphoneOn(callId, on, callback);
+    RNStringeeCall2.setSpeakerphoneOn(this.callId, on, callback);
   }
 
   resumeVideo(callId: string, callback: RNStringeeEventCallback) {
     const platform = Platform.OS;
     if (platform === 'ios') {
-      console.log('this function only for android');
+      console.warn('this function only for android');
     } else {
-      RNStringeeCall2.resumeVideo(callId, callback);
+      RNStringeeCall2.resumeVideo(this.callId, callback);
     }
   }
 
@@ -164,7 +215,7 @@ export default class extends Component {
     callInfo: string,
     callback: RNStringeeEventCallback,
   ) {
-    RNStringeeCall2.sendCallInfo(callId, callInfo, callback);
+    RNStringeeCall2.sendCallInfo(this.callId, callInfo, callback);
   }
 
   setAutoSendTrackMediaStateChangeEvent(
@@ -173,9 +224,17 @@ export default class extends Component {
     callback: RNStringeeEventCallback,
   ) {
     RNStringeeCall2.setAutoSendTrackMediaStateChangeEvent(
-      callId,
+      this.callId,
       autoSendTrackMediaStateChangeEvent,
       callback,
     );
   }
 }
+
+StringeeCall2.propTypes = {
+  clientId: PropTypes.string,
+  eventHandlers: PropTypes.object,
+  ...View.propTypes,
+};
+
+export {StringeeCall2};

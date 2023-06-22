@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import {Component} from 'react';
-import {NativeEventEmitter, NativeModules, Platform} from 'react-native';
+import {NativeEventEmitter, NativeModules, Platform, View} from 'react-native';
 import {each} from 'underscore';
 import {clientEvents} from './helpers/StringeeHelper';
 import type {RNStringeeEventCallback} from './helpers/StringeeHelper';
@@ -9,6 +9,9 @@ import {
   Conversation,
   LiveChatTicketParam,
   Message,
+  StringeeCall,
+  StringeeCall2,
+  StringeeServerAddress,
   User,
   UserInfoParam,
 } from '../index';
@@ -17,19 +20,31 @@ const RNStringeeClient = NativeModules.RNStringeeClient;
 
 const iOS = Platform.OS === 'ios';
 
-export default class extends Component {
-  static propTypes = {
-    eventHandlers: PropTypes.object,
-    baseUrl: PropTypes.string,
-    serverAddresses: PropTypes.array,
-    stringeeXBaseUrl: PropTypes.string,
-  };
+interface StringeeClientProps {
+  baseUrl: string;
+  stringeeXBaseUrl: string;
+  serverAddresses: Array<StringeeServerAddress>;
+}
 
-  constructor(props) {
+class StringeeClient extends Component {
+  userId: string;
+  uuid: string;
+  baseUrl: string;
+  stringeeXBaseUrl: string;
+  serverAddresses: Array<StringeeServerAddress>;
+  isConnected: boolean;
+
+  constructor(props: StringeeClientProps) {
     super(props);
-    this._events = [];
-    this._subscriptions = [];
-    this._eventEmitter = new NativeEventEmitter(RNStringeeClient);
+    if (this.props === undefined) {
+      this.props = {};
+    }
+    this.baseUrl = this.props.baseUrl;
+    this.stringeeXBaseUrl = this.props.stringeeXBaseUrl;
+    this.serverAddresses = this.props.serverAddresses;
+    this.events = [];
+    this.subscriptions = [];
+    this.eventEmitter = new NativeEventEmitter(RNStringeeClient);
 
     // Sinh uuid va tao wrapper object trong native
     this.uuid =
@@ -37,13 +52,16 @@ export default class extends Component {
       Math.random().toString(36).substring(2, 15) +
       Math.random().toString(36).substring(2, 15) +
       Math.random().toString(36).substring(2, 15);
+
     RNStringeeClient.createClientWrapper(
       this.uuid,
-      this.props.baseUrl,
-      this.props.serverAddresses,
-      this.props.stringeeXBaseUrl,
+      this.baseUrl,
+      this.serverAddresses,
+      this.stringeeXBaseUrl,
     );
 
+    this.registerEvents = this.registerEvents.bind(this);
+    this.unregisterEvents = this.unregisterEvents.bind(this);
     this.getId = this.getId.bind(this);
     this.connect = this.connect.bind(this);
     this.disconnect = this.disconnect.bind(this);
@@ -111,7 +129,7 @@ export default class extends Component {
   }
 
   componentDidMount() {
-    this.sanitizeClientEvents(this.props.eventHandlers);
+    this.registerEvents(this.props.eventHandlers);
   }
 
   componentWillUnmount() {
@@ -119,98 +137,145 @@ export default class extends Component {
     if (!iOS) {
       return;
     }
-    this._unregisterEvents();
+    this.unregisterEvents();
   }
 
   render() {
     return null;
   }
 
-  _unregisterEvents() {
-    this._subscriptions.forEach(e => e.remove());
-    this._subscriptions = [];
-
-    this._events.forEach(e => RNStringeeClient.removeNativeEvent(this.uuid, e));
-    this._events = [];
-  }
-
-  sanitizeClientEvents(events) {
-    if (typeof events !== 'object') {
+  registerEvents(eventHandlers) {
+    if (
+      eventHandlers === undefined ||
+      typeof eventHandlers !== 'object' ||
+      (this.events.length !== 0 && this.subscriptions.length !== 0)
+    ) {
       return;
     }
     const platform = Platform.OS;
 
-    each(events, (handler, type) => {
+    each(eventHandlers, (handler, type) => {
       const eventName = clientEvents[platform][type];
       if (eventName !== undefined) {
-        // Voi phan chat can format du lieu
-        if (type === 'onObjectChange') {
-          this._subscriptions.push(
-            this._eventEmitter.addListener(eventName, ({uuid, data}) => {
-              // Event cua thang khac
+        if (type === 'onIncomingCall' || type === 'onIncomingCall2') {
+          this.subscriptions.push(
+            this.eventEmitter.addListener(eventName, ({uuid, data}) => {
               if (this.uuid !== uuid) {
                 return;
               }
-
-              var objectType = data.objectType;
-              var objects = data.objects;
-              var changeType = data.changeType;
-
-              var objectChanges = [];
-              if (objectType === 0) {
-                objects.map(object => {
-                  objectChanges.push(new Conversation(object));
-                });
-              } else if (objectType === 1) {
-                objects.map(object => {
-                  objectChanges.push(new Message(object));
-                });
-              }
-              if (handler !== undefined) {
-                handler({objectType, objectChanges, changeType});
-              }
-            }),
-          );
-        } else if (
-          type === 'onReceiveChatRequest' ||
-          type === 'onReceiveTransferChatRequest' ||
-          type === 'onTimeoutAnswerChat'
-        ) {
-          this._subscriptions.push(
-            this._eventEmitter.addListener(eventName, ({uuid, data}) => {
-              if (this.uuid !== uuid) {
-                return;
-              }
-
-              var requestData = data.request;
-              var request = new ChatRequest(requestData);
-
-              if (handler !== undefined) {
-                handler({request});
-              }
-            }),
-          );
-        } else {
-          this._subscriptions.push(
-            this._eventEmitter.addListener(eventName, ({uuid, data}) => {
-              if (this.uuid === uuid) {
+              if (type === 'onIncomingCall') {
+                const stringeeCall = new StringeeCall(data);
                 if (handler !== undefined) {
-                  handler(data);
+                  handler({stringeeCall});
+                }
+              } else {
+                const stringeeCall2 = new StringeeCall2(data);
+                if (handler !== undefined) {
+                  handler({stringeeCall2});
                 }
               }
             }),
           );
-        }
+          if (type === 'onIncomingCall') {
+            this.events.push(eventName);
+            this.events.push('onIncomingCallObject');
+            RNStringeeClient.setNativeEvent(this.uuid, eventName);
+            RNStringeeClient.setNativeEvent(this.uuid, 'onIncomingCallObject');
+          } else {
+            this.events.push(eventName);
+            this.events.push('onIncomingCall2Object');
+            RNStringeeClient.setNativeEvent(this.uuid, eventName);
+            RNStringeeClient.setNativeEvent(this.uuid, 'onIncomingCall2Object');
+          }
+        } else {
+          // Voi phan chat can format du lieu
+          if (type === 'onObjectChange') {
+            this.subscriptions.push(
+              this.eventEmitter.addListener(eventName, ({uuid, data}) => {
+                // Event cua thang khac
+                if (this.uuid !== uuid) {
+                  return;
+                }
 
-        this._events.push(eventName);
-        RNStringeeClient.setNativeEvent(this.uuid, eventName);
+                const objectType = data.objectType;
+                const objects = data.objects;
+                const changeType = data.changeType;
+
+                let objectChanges = [];
+                if (objectType === 0) {
+                  objects.map(object => {
+                    objectChanges.push(new Conversation(object));
+                  });
+                } else if (objectType === 1) {
+                  objects.map(object => {
+                    objectChanges.push(new Message(object));
+                  });
+                }
+                if (handler !== undefined) {
+                  handler({objectType, objectChanges, changeType});
+                }
+              }),
+            );
+          } else if (
+            type === 'onReceiveChatRequest' ||
+            type === 'onReceiveTransferChatRequest' ||
+            type === 'onTimeoutAnswerChat'
+          ) {
+            this.subscriptions.push(
+              this.eventEmitter.addListener(eventName, ({uuid, data}) => {
+                if (this.uuid !== uuid) {
+                  return;
+                }
+
+                const requestData = data.request;
+                const request = new ChatRequest(requestData);
+
+                if (handler !== undefined) {
+                  handler({request});
+                }
+              }),
+            );
+          } else {
+            this.subscriptions.push(
+              this.eventEmitter.addListener(eventName, ({uuid, data}) => {
+                if (this.uuid === uuid) {
+                  if (handler !== undefined) {
+                    if (type === 'onConnect') {
+                      this.isConnected = true;
+                      this.userId = data.userId;
+                    } else if (
+                      type === 'onDisConnect' ||
+                      type === 'onFailWithError'
+                    ) {
+                      this.isConnected = false;
+                    }
+                    handler(data);
+                  }
+                }
+              }),
+            );
+          }
+          this.events.push(eventName);
+          RNStringeeClient.setNativeEvent(this.uuid, eventName);
+        }
       } else {
-        console.log(`${type} is not a supported event`);
+        console.warn(`${type} is not a supported event`);
       }
     });
   }
 
-  getId() {
+  unregisterEvents() {
+    if (this.events.length === 0 && this.subscriptions.length === 0) {
+      return;
+    }
+    this.subscriptions.forEach(e => e.remove());
+    this.subscriptions = [];
+
+    this.events.forEach(e => RNStringeeClient.removeNativeEvent(this.uuid, e));
+    this.events = [];
+  }
+
+  getId(): string {
     return this.uuid;
   }
 
@@ -289,7 +354,7 @@ export default class extends Component {
       userIds,
       options,
       (status, code, message, conversation) => {
-        var returnConversation;
+        let returnConversation;
         if (status) {
           returnConversation = new Conversation(conversation);
         }
@@ -303,7 +368,7 @@ export default class extends Component {
       this.uuid,
       convId,
       (status, code, message, conversation) => {
-        var returnConversation;
+        let returnConversation;
         if (status) {
           returnConversation = new Conversation(conversation);
         }
@@ -325,7 +390,7 @@ export default class extends Component {
         count,
         userId,
         (status, code, message, conversations) => {
-          var returnConversations = [];
+          let returnConversations = [];
           if (status) {
             if (isAscending) {
               conversations.reverse().map(conversation => {
@@ -346,7 +411,7 @@ export default class extends Component {
         this.uuid,
         userId,
         (status, code, message, conversations) => {
-          var returnConversations = [];
+          let returnConversations = [];
           if (status) {
             if (isAscending) {
               conversations.reverse().map(conversation => {
@@ -373,7 +438,7 @@ export default class extends Component {
       this.uuid,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
+        let returnConversations = [];
         if (status) {
           if (isAscending) {
             // Tăng dần -> Cần đảo mảng
@@ -400,7 +465,7 @@ export default class extends Component {
       this.uuid,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
+        let returnConversations = [];
         if (status) {
           if (isAscending) {
             // Tăng dần -> Cần đảo mảng
@@ -429,7 +494,7 @@ export default class extends Component {
       datetime,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
+        let returnConversations = [];
         if (status) {
           if (isAscending) {
             conversations.reverse().map(conversation => {
@@ -457,7 +522,7 @@ export default class extends Component {
       datetime,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
+        let returnConversations = [];
         if (status) {
           if (isAscending) {
             conversations.reverse().map(conversation => {
@@ -485,7 +550,7 @@ export default class extends Component {
       datetime,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
+        let returnConversations = [];
         if (status) {
           if (isAscending) {
             conversations.reverse().map(conversation => {
@@ -513,7 +578,7 @@ export default class extends Component {
       datetime,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
+        let returnConversations = [];
         if (status) {
           if (isAscending) {
             conversations.reverse().map(conversation => {
@@ -539,7 +604,7 @@ export default class extends Component {
       this.uuid,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
+        let returnConversations = [];
         if (status) {
           if (isAscending) {
             // Tăng dần -> Cần đảo mảng
@@ -568,7 +633,7 @@ export default class extends Component {
       datetime,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
+        let returnConversations = [];
         if (status) {
           if (isAscending) {
             conversations.reverse().map(conversation => {
@@ -596,7 +661,7 @@ export default class extends Component {
       datetime,
       count,
       (status, code, message, conversations) => {
-        var returnConversations = [];
+        let returnConversations = [];
         if (status) {
           if (isAscending) {
             conversations.reverse().map(conversation => {
@@ -623,7 +688,7 @@ export default class extends Component {
       convId,
       userIds,
       (status, code, message, users) => {
-        var returnUsers = [];
+        let returnUsers = [];
         if (status) {
           users.map(user => {
             returnUsers.push(new User(user));
@@ -644,7 +709,7 @@ export default class extends Component {
       convId,
       userIds,
       (status, code, message, users) => {
-        var returnUsers = [];
+        let returnUsers = [];
         if (status) {
           users.map(user => {
             returnUsers.push(new User(user));
@@ -672,7 +737,7 @@ export default class extends Component {
       this.uuid,
       userId,
       (status, code, message, conversation) => {
-        var returnConversation;
+        let returnConversation;
         if (status) {
           returnConversation = new Conversation(conversation);
         }
@@ -748,7 +813,7 @@ export default class extends Component {
       convId,
       count,
       (status, code, message, messages) => {
-        var returnMessages = [];
+        let returnMessages = [];
         if (status) {
           if (isAscending) {
             messages.map(msg => {
@@ -780,7 +845,7 @@ export default class extends Component {
       loadDeletedMessage,
       loadDeletedMessageContent,
       (status, code, message, messages) => {
-        var returnMessages = [];
+        let returnMessages = [];
         if (status) {
           if (isAscending) {
             messages.map(msg => {
@@ -812,7 +877,7 @@ export default class extends Component {
       loadDeletedMessage,
       loadDeletedMessageContent,
       (status, code, message, messages) => {
-        var returnMessages = [];
+        let returnMessages = [];
         if (status) {
           if (isAscending) {
             messages.map(msg => {
@@ -846,7 +911,7 @@ export default class extends Component {
       loadDeletedMessage,
       loadDeletedMessageContent,
       (status, code, message, messages) => {
-        var returnMessages = [];
+        let returnMessages = [];
         if (status) {
           if (isAscending) {
             messages.map(msg => {
@@ -880,7 +945,7 @@ export default class extends Component {
       loadDeletedMessage,
       loadDeletedMessageContent,
       (status, code, message, messages) => {
-        var returnMessages = [];
+        let returnMessages = [];
         if (status) {
           if (isAscending) {
             messages.map(msg => {
@@ -914,7 +979,7 @@ export default class extends Component {
       loadDeletedMessage,
       loadDeletedMessageContent,
       (status, code, message, messages) => {
-        var returnMessages = [];
+        let returnMessages = [];
         if (status) {
           if (isAscending) {
             messages.map(msg => {
@@ -948,7 +1013,7 @@ export default class extends Component {
       loadDeletedMessage,
       loadDeletedMessageContent,
       (status, code, message, messages) => {
-        var returnMessages = [];
+        let returnMessages = [];
         if (status) {
           if (isAscending) {
             messages.map(msg => {
@@ -989,7 +1054,7 @@ export default class extends Component {
       this.uuid,
       userIds,
       (status, code, message, users) => {
-        var returnUsers = [];
+        let returnUsers = [];
         if (status) {
           users.map(user => {
             returnUsers.push(new User(user));
@@ -1133,3 +1198,13 @@ export default class extends Component {
     RNStringeeClient.endChat(this.uuid, convId, callback);
   }
 }
+
+StringeeClient.propTypes = {
+  eventHandlers: PropTypes.object,
+  baseUrl: PropTypes.string,
+  serverAddresses: PropTypes.array,
+  stringeeXBaseUrl: PropTypes.string,
+  ...View.propTypes,
+};
+
+export {StringeeClient};
