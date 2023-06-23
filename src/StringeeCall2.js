@@ -92,31 +92,29 @@ class StringeeCall2 extends Component {
     each(eventHandlers, (handler, type) => {
       const eventName = callEvents[platform][type];
       if (eventName !== undefined) {
-        if (type === 'onTrackMediaStateChange') {
-          this.subscriptions.push(
-            this.eventEmitter.addListener(
-              eventName,
-              ({from, mediaType, enable}) => {
-                if (handler !== undefined) {
-                  if (mediaType === 1) {
-                    mediaType = MediaType.AUDIO;
-                  } else if (mediaType === 2) {
-                    mediaType = MediaType.VIDEO;
-                  }
-                  handler({from, mediaType, enable});
-                }
-              },
-            ),
-          );
-        } else {
-          this.subscriptions.push(
-            this.eventEmitter.addListener(eventName, data => {
-              if (handler !== undefined) {
-                handler(data);
+        this.subscriptions.push(
+          this.eventEmitter.addListener(eventName, data => {
+            console.log('');
+            if (type === 'onTrackMediaStateChange') {
+              if (data.mediaType === 1) {
+                data.mediaType = MediaType.AUDIO;
+              } else if (data.mediaType === 2) {
+                data.mediaType = MediaType.VIDEO;
               }
-            }),
-          );
-        }
+              if (eventHandlers[type]) {
+                eventHandlers[type]({
+                  from: data.from,
+                  mediaType: data.mediaType,
+                  enable: data.enable,
+                });
+              }
+            } else {
+              if (eventHandlers[type]) {
+                eventHandlers[type](data);
+              }
+            }
+          }),
+        );
         this.events.push(eventName);
         RNStringeeCall2.setNativeEvent(eventName);
       } else {

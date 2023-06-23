@@ -93,12 +93,11 @@ class StringeeCall extends Component {
       if (eventName !== undefined) {
         this.subscriptions.push(
           this.eventEmitter.addListener(eventName, data => {
-            if (handler !== undefined) {
-              handler(data);
+            if (eventHandlers[type]) {
+              eventHandlers[type](data);
             }
           }),
         );
-
         this.events.push(eventName);
         RNStringeeCall.setNativeEvent(eventName);
       } else {

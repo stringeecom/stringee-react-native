@@ -157,106 +157,83 @@ class StringeeClient extends Component {
     each(eventHandlers, (handler, type) => {
       const eventName = clientEvents[platform][type];
       if (eventName !== undefined) {
-        if (type === 'onIncomingCall' || type === 'onIncomingCall2') {
-          this.subscriptions.push(
-            this.eventEmitter.addListener(eventName, ({uuid, data}) => {
-              if (this.uuid !== uuid) {
-                return;
-              }
-              if (type === 'onIncomingCall') {
+        this.subscriptions.push(
+          this.eventEmitter.addListener(eventName, ({uuid, data}) => {
+            if (this.uuid !== uuid) {
+              return;
+            }
+            if (type === 'onIncomingCallObject') {
+              if (eventHandlers.onIncomingCallObject) {
+                data.clientId = this.uuid;
                 const stringeeCall = new StringeeCall(data);
-                if (handler !== undefined) {
-                  handler({stringeeCall});
-                }
-              } else {
-                const stringeeCall2 = new StringeeCall2(data);
-                if (handler !== undefined) {
-                  handler({stringeeCall2});
+                if (eventHandlers[type]) {
+                  eventHandlers[type]({stringeeCall: stringeeCall});
                 }
               }
-            }),
-          );
-          if (type === 'onIncomingCall') {
-            this.events.push(eventName);
-            this.events.push('onIncomingCallObject');
-            RNStringeeClient.setNativeEvent(this.uuid, eventName);
-            RNStringeeClient.setNativeEvent(this.uuid, 'onIncomingCallObject');
-          } else {
-            this.events.push(eventName);
-            this.events.push('onIncomingCall2Object');
-            RNStringeeClient.setNativeEvent(this.uuid, eventName);
-            RNStringeeClient.setNativeEvent(this.uuid, 'onIncomingCall2Object');
-          }
-        } else {
-          // Voi phan chat can format du lieu
-          if (type === 'onObjectChange') {
-            this.subscriptions.push(
-              this.eventEmitter.addListener(eventName, ({uuid, data}) => {
-                // Event cua thang khac
-                if (this.uuid !== uuid) {
-                  return;
-                }
+            } else if (type === 'onIncomingCallObject2') {
+              if (eventHandlers.onIncomingCall2Object) {
+                data.clientId = this.uuid;
+                const stringeeCall2 = new StringeeCall2(data);
+                eventHandlers.onIncomingCall2Object({
+                  stringeeCall2: stringeeCall2,
+                });
+              }
+            } else if (type === 'onObjectChange') {
+              const objectType = data.objectType;
+              const objects = data.objects;
+              const changeType = data.changeType;
 
-                const objectType = data.objectType;
-                const objects = data.objects;
-                const changeType = data.changeType;
+              let objectChanges = [];
+              if (objectType === 0) {
+                objects.map(object => {
+                  objectChanges.push(new Conversation(object));
+                });
+              } else if (objectType === 1) {
+                objects.map(object => {
+                  objectChanges.push(new Message(object));
+                });
+              }
+              if (eventHandlers[type]) {
+                eventHandlers[type]({objectType, objectChanges, changeType});
+              }
+            } else if (
+              type === 'onReceiveChatRequest' ||
+              type === 'onReceiveTransferChatRequest' ||
+              type === 'onTimeoutAnswerChat'
+            ) {
+              const requestData = data.request;
+              const request = new ChatRequest(requestData);
 
-                let objectChanges = [];
-                if (objectType === 0) {
-                  objects.map(object => {
-                    objectChanges.push(new Conversation(object));
-                  });
-                } else if (objectType === 1) {
-                  objects.map(object => {
-                    objectChanges.push(new Message(object));
-                  });
-                }
-                if (handler !== undefined) {
-                  handler({objectType, objectChanges, changeType});
-                }
-              }),
-            );
-          } else if (
-            type === 'onReceiveChatRequest' ||
-            type === 'onReceiveTransferChatRequest' ||
-            type === 'onTimeoutAnswerChat'
-          ) {
-            this.subscriptions.push(
-              this.eventEmitter.addListener(eventName, ({uuid, data}) => {
-                if (this.uuid !== uuid) {
-                  return;
-                }
+              if (eventHandlers[type]) {
+                eventHandlers[type]({request});
+              }
+            } else {
+              if (type === 'onConnect') {
+                this.isConnected = true;
+                this.userId = data.userId;
+              } else if (
+                type === 'onDisConnect' ||
+                type === 'onFailWithError'
+              ) {
+                this.isConnected = false;
+              }
 
-                const requestData = data.request;
-                const request = new ChatRequest(requestData);
+              if (eventHandlers[type]) {
+                eventHandlers[type](data);
+              }
+            }
+          }),
+        );
 
-                if (handler !== undefined) {
-                  handler({request});
-                }
-              }),
-            );
-          } else {
-            this.subscriptions.push(
-              this.eventEmitter.addListener(eventName, ({uuid, data}) => {
-                if (this.uuid === uuid) {
-                  if (handler !== undefined) {
-                    if (type === 'onConnect') {
-                      this.isConnected = true;
-                      this.userId = data.userId;
-                    } else if (
-                      type === 'onDisConnect' ||
-                      type === 'onFailWithError'
-                    ) {
-                      this.isConnected = false;
-                    }
-                    handler(data);
-                  }
-                }
-              }),
-            );
-          }
-          this.events.push(eventName);
-          RNStringeeClient.setNativeEvent(this.uuid, eventName);
+        this.events.push(eventName);
+        RNStringeeClient.setNativeEvent(this.uuid, eventName);
+        if (type === 'onIncomingCall') {
+          this.events.push('onIncomingCallObject');
+          RNStringeeClient.setNativeEvent(this.uuid, 'onIncomingCallObject');
+        }
+        if (type === 'onIncomingCall2') {
+          this.events.push('onIncomingCall2Object');
+          RNStringeeClient.setNativeEvent(this.uuid, 'onIncomingCall2Object');
         }
       } else {
         console.warn(`${type} is not a supported event`);
