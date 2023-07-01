@@ -106,6 +106,10 @@ The Stringee Android SDK requires some permissions from your AndroidManifest
     }
     ```
 
+### Version 1.5.8
+##### Features:
+- Bug fixed: Connectivity doesn't establish with DualSIM iPhones.
+
 ### Version 1.5.7
 ##### Features:
 - Allow setting ScaleType for StringeeVideoView.
