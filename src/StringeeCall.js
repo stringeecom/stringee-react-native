@@ -1,22 +1,25 @@
 import {Component} from 'react';
 import {NativeModules, NativeEventEmitter, Platform, View} from 'react-native';
-import {callEvents} from './helpers/StringeeHelper';
+import {callEvents, stringeeCallEvents} from './helpers/StringeeHelper';
 import {each} from 'underscore';
 import type {RNStringeeEventCallback} from './helpers/StringeeHelper';
 import PropTypes from 'prop-types';
+import {
+  CallType,
+  StringeeCallListener,
+  StringeeClient,
+  VideoResolution,
+  AudioDevice,
+  MediaState,
+  SignalingState,
+} from '../index';
 
 const RNStringeeCall = NativeModules.RNStringeeCall;
 
-interface StringeeCallProps {
-  clientId: string;
-  callId: string;
-  customData: string;
+class StringeeCallProps {
+  stringeeClient: StringeeClient;
   from: string;
-  fromAlias: string;
   to: string;
-  toAlias: string;
-  isPhoneToApp: boolean;
-  isVideoCall: boolean;
 }
 
 class StringeeCall extends Component {
@@ -27,23 +30,23 @@ class StringeeCall extends Component {
   fromAlias: string;
   to: string;
   toAlias: string;
-  isPhoneToApp: boolean;
+  callType: CallType;
   isVideoCall: boolean;
+  videoResolution: VideoResolution = VideoResolution.normal;
 
   constructor(props: StringeeCallProps) {
     super(props);
     if (this.props === undefined) {
       this.props = {};
     }
-    this.clientId = this.props.clientId;
-    this.callId = this.props.callId;
-    this.customData = this.props.customData;
+    if (this.props.stringeeClient) {
+      this.clientId = this.props.stringeeClient.uuid;
+    }
+    if (this.props.clientId) {
+      this.clientId = this.props.clientId;
+    }
     this.from = this.props.from;
-    this.fromAlias = this.props.fromAlias;
     this.to = this.props.to;
-    this.toAlias = this.props.toAlias;
-    this.isPhoneToApp = this.props.isPhoneToApp;
-    this.isVideoCall = this.props.isVideoCall;
     this.events = [];
     this.subscriptions = [];
     this.eventEmitter = new NativeEventEmitter(RNStringeeCall);
@@ -66,7 +69,7 @@ class StringeeCall extends Component {
   }
 
   componentDidMount() {
-    this.registerEvents(this.props.eventHandlers);
+    this.sanitizeCallEvents(this.props.eventHandlers);
   }
 
   componentWillUnmount() {
@@ -77,7 +80,138 @@ class StringeeCall extends Component {
     return null;
   }
 
-  registerEvents(eventHandlers) {
+  registerEvents(stringeeCallListener: StringeeCallListener) {
+    if (this.events.length !== 0 && this.subscriptions.length !== 0) {
+      return;
+    }
+    if (stringeeCallListener) {
+      stringeeCallEvents.forEach(event => {
+        if (stringeeCallListener[event]) {
+          this.subscriptions.push(
+            this.eventEmitter.addListener(
+              callEvents[Platform.OS][event],
+              data => {
+                if (data !== undefined) {
+                  if (data.callId !== undefined) {
+                    this.callId = data.callId;
+                  }
+                }
+                switch (event) {
+                  case 'onChangeSignalingState':
+                    let signalingState = data.code;
+                    switch (signalingState) {
+                      case 0:
+                        signalingState = SignalingState.calling;
+                        break;
+                      case 1:
+                        signalingState = SignalingState.ringing;
+                        break;
+                      case 2:
+                        signalingState = SignalingState.answered;
+                        break;
+                      case 3:
+                        signalingState = SignalingState.busy;
+                        break;
+                      case 4:
+                        signalingState = SignalingState.ended;
+                        break;
+                    }
+                    stringeeCallListener.onChangeSignalingState(
+                      this,
+                      signalingState,
+                      data.reason,
+                      data.sipCode,
+                      data.sipReason,
+                    );
+                    break;
+                  case 'onChangeMediaState':
+                    let mediaState = data.code;
+                    switch (mediaState) {
+                      case 0:
+                        mediaState = MediaState.connected;
+                        break;
+                      case 1:
+                        mediaState = MediaState.disconnected;
+                        break;
+                    }
+                    stringeeCallListener.onChangeMediaState(
+                      this,
+                      mediaState,
+                      data.description,
+                    );
+                    break;
+                  case 'onReceiveLocalStream':
+                    stringeeCallListener.onReceiveLocalStream(this);
+                    break;
+                  case 'onReceiveRemoteStream':
+                    stringeeCallListener.onReceiveRemoteStream(this);
+                    break;
+                  case 'onReceiveDtmfDigit':
+                    stringeeCallListener.onReceiveDtmfDigit(this, data.dtmf);
+                    break;
+                  case 'onReceiveCallInfo':
+                    stringeeCallListener.onReceiveCallInfo(this, data.data);
+                    break;
+                  case 'onHandleOnAnotherDevice':
+                    stringeeCallListener.onHandleOnAnotherDevice(
+                      data.from,
+                      data.data,
+                      data.description,
+                    );
+                    break;
+                  case 'onAudioDeviceChange':
+                    let selectedAudioDevice = data.selectedAudioDevice;
+                    switch (selectedAudioDevice) {
+                      case 'NONE':
+                        selectedAudioDevice = AudioDevice.none;
+                        break;
+                      case 'SPEAKER_PHONE':
+                        selectedAudioDevice = AudioDevice.speakerPhone;
+                        break;
+                      case 'WIRED_HEADSET':
+                        selectedAudioDevice = AudioDevice.wiredHeadset;
+                        break;
+                      case 'EARPIECE':
+                        selectedAudioDevice = AudioDevice.earpiece;
+                        break;
+                      case 'BLUETOOTH':
+                        selectedAudioDevice = AudioDevice.bluetooth;
+                        break;
+                    }
+                    let availableAudioDevices = [];
+                    data.availableAudioDevices.forEach(audioDevice => {
+                      switch (audioDevice) {
+                        case 'SPEAKER_PHONE':
+                          availableAudioDevices.push(AudioDevice.speakerPhone);
+                          break;
+                        case 'WIRED_HEADSET':
+                          availableAudioDevices.push(AudioDevice.wiredHeadset);
+                          break;
+                        case 'EARPIECE':
+                          availableAudioDevices.push(AudioDevice.earpiece);
+                          break;
+                        case 'BLUETOOTH':
+                          availableAudioDevices.push(AudioDevice.bluetooth);
+                          break;
+                      }
+                    });
+                    stringeeCallListener.onAudioDeviceChange(
+                      selectedAudioDevice,
+                      availableAudioDevices,
+                    );
+                    break;
+                }
+              },
+            ),
+          );
+          this.events.push(callEvents[Platform.OS][event]);
+          RNStringeeCall.setNativeEvent(callEvents[Platform.OS][event]);
+        }
+      });
+    }
+  }
+
+  sanitizeCallEvents(eventHandlers) {
     if (
       eventHandlers === undefined ||
       typeof eventHandlers !== 'object' ||
@@ -119,38 +253,76 @@ class StringeeCall extends Component {
   }
 
   makeCall(parameters: string, callback: RNStringeeEventCallback) {
-    const params = JSON.parse(parameters);
-    this.from = params.from;
-    this.to = params.to;
-    this.isVideoCall = params.isVideoCall;
-    this.customData = params.customData;
+    if (parameters) {
+      const params = JSON.parse(parameters);
+      if (!this.from) {
+        this.from = params.from;
+      }
+      if (!this.to) {
+        this.to = params.to;
+      }
+      if (params.isVideoCall) {
+        this.isVideoCall = params.isVideoCall;
+      }
+      if (params.customData) {
+        this.customData = params.customData;
+      }
+      if (params.videoResolution) {
+        this.videoResolution = params.videoResolution;
+      }
+    }
+    const makeCallParam = {
+      from: this.from,
+      to: this.to,
+      isVideoCall: this.isVideoCall,
+      customData: this.customData,
+      videoResolution: this.videoResolution,
+    };
     RNStringeeCall.makeCall(
       this.clientId,
-      parameters,
+      JSON.stringify(makeCallParam),
       (status, code, message, callId, customData) => {
         this.callId = callId;
+        if (!callback) {
+          callback = () => {};
+        }
         return callback(status, code, message, callId, customData);
       },
     );
   }
 
   initAnswer(callId: string, callback: RNStringeeEventCallback) {
+    if (!callback) {
+      callback = () => {};
+    }
     RNStringeeCall.initAnswer(this.clientId, this.callId, callback);
   }
 
   answer(callId: string, callback: RNStringeeEventCallback) {
+    if (!callback) {
+      callback = () => {};
+    }
     RNStringeeCall.answer(this.callId, callback);
   }
 
   hangup(callId: string, callback: RNStringeeEventCallback) {
+    if (!callback) {
+      callback = () => {};
+    }
     RNStringeeCall.hangup(this.callId, callback);
   }
 
   reject(callId: string, callback: RNStringeeEventCallback) {
+    if (!callback) {
+      callback = () => {};
+    }
     RNStringeeCall.reject(this.callId, callback);
   }
 
   sendDTMF(callId: string, dtmf: string, callback: RNStringeeEventCallback) {
+    if (!callback) {
+      callback = () => {};
+    }
     RNStringeeCall.sendDTMF(this.callId, dtmf, callback);
   }
 
@@ -159,14 +331,23 @@ class StringeeCall extends Component {
     callInfo: string,
     callback: RNStringeeEventCallback,
   ) {
+    if (!callback) {
+      callback = () => {};
+    }
     RNStringeeCall.sendCallInfo(this.callId, callInfo, callback);
   }
 
   getCallStats(callId: string, callback: RNStringeeEventCallback) {
+    if (!callback) {
+      callback = () => {};
+    }
     RNStringeeCall.getCallStats(this.clientId, this.callId, callback);
   }
 
   switchCamera(callId: string, callback: RNStringeeEventCallback) {
+    if (!callback) {
+      callback = () => {};
+    }
     RNStringeeCall.switchCamera(this.callId, callback);
   }
 
@@ -175,10 +356,16 @@ class StringeeCall extends Component {
     enabled: boolean,
     callback: RNStringeeEventCallback,
   ) {
+    if (!callback) {
+      callback = () => {};
+    }
     RNStringeeCall.enableVideo(this.callId, enabled, callback);
   }
 
   mute(callId: string, mute: boolean, callback: RNStringeeEventCallback) {
+    if (!callback) {
+      callback = () => {};
+    }
     RNStringeeCall.mute(this.callId, mute, callback);
   }
 
@@ -187,6 +374,9 @@ class StringeeCall extends Component {
     on: boolean,
     callback: RNStringeeEventCallback,
   ) {
+    if (!callback) {
+      callback = () => {};
+    }
     RNStringeeCall.setSpeakerphoneOn(this.callId, on, callback);
   }
 
@@ -195,6 +385,9 @@ class StringeeCall extends Component {
     if (platform === 'ios') {
       console.warn('this function only for android');
     } else {
+      if (!callback) {
+        callback = () => {};
+      }
       RNStringeeCall.resumeVideo(this.callId, callback);
     }
   }

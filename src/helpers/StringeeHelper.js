@@ -39,6 +39,24 @@ const clientEvents = {
   },
 };
 
+const stringeeClientEvents = [
+  'onConnect',
+  'onDisConnect',
+  'onFailWithError',
+  'onRequestAccessToken',
+  'onIncomingCall',
+  'onIncomingCall2',
+  'onCustomMessage',
+  'onObjectChange',
+  'onReceiveChatRequest',
+  'onReceiveTransferChatRequest',
+  'onTimeoutAnswerChat',
+  'onTimeoutInQueue',
+  'onConversationEnded',
+  'onUserBeginTyping',
+  'onUserEndTyping',
+];
+
 const callEvents = {
   ios: {
     onChangeSignalingState: 'didChangeSignalingState',
@@ -63,14 +81,81 @@ const callEvents = {
   },
 };
 
+const stringeeCallEvents = [
+  'onChangeSignalingState',
+  'onChangeMediaState',
+  'onReceiveLocalStream',
+  'onReceiveRemoteStream',
+  'onReceiveDtmfDigit',
+  'onReceiveCallInfo',
+  'onHandleOnAnotherDevice',
+  'onAudioDeviceChange',
+];
+
+const stringeeCall2Events = [
+  'onChangeSignalingState',
+  'onChangeMediaState',
+  'onReceiveLocalStream',
+  'onReceiveRemoteStream',
+  'onReceiveDtmfDigit',
+  'onReceiveCallInfo',
+  'onHandleOnAnotherDevice',
+  'onTrackMediaStateChange',
+  'onAudioDeviceChange',
+];
+
 const StringeeVideoScalingType = {
   fit: 'fit',
   fill: 'fill',
 };
 
 const MediaType = {
-  AUDIO: 'AUDIO',
-  VIDEO: 'VIDEO',
+  audio: 'audio',
+  video: 'video',
+};
+
+const ObjectType = {
+  conversation: 'conversation',
+  message: 'message',
+};
+
+const ChangeType = {
+  insert: 'insert',
+  update: 'update',
+  delete: 'delete',
+};
+
+const SignalingState = {
+  calling: 'calling',
+  ringing: 'ringing',
+  answered: 'answered',
+  busy: 'busy',
+  ended: 'ended',
+};
+
+const MediaState = {
+  connected: 'connected',
+  disconnected: 'disconnected',
+};
+
+const AudioDevice = {
+  speakerPhone: 'speakerPhone',
+  wiredHeadset: 'wiredHeadset',
+  earpiece: 'earpiece',
+  bluetooth: 'bluetooth',
+  none: 'none',
+};
+
+const VideoResolution = {
+  normal: 'NORMAL',
+  hd: 'HD',
+};
+
+const CallType = {
+  appToAppOutgoing: 'appToAppOutgoing',
+  appToAppIncoming: 'appToAppIncoming',
+  appToPhone: 'appToPhone',
+  phoneToApp: 'phoneToApp',
 };
 
 export type RNStringeeEventCallback = (
@@ -79,4 +164,19 @@ export type RNStringeeEventCallback = (
   message: string,
 ) => void;
 
-export {clientEvents, callEvents, MediaType, StringeeVideoScalingType};
+export {
+  clientEvents,
+  callEvents,
+  MediaType,
+  StringeeVideoScalingType,
+  ObjectType,
+  ChangeType,
+  stringeeClientEvents,
+  stringeeCallEvents,
+  stringeeCall2Events,
+  SignalingState,
+  MediaState,
+  AudioDevice,
+  VideoResolution,
+  CallType,
+};

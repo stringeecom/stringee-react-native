@@ -9,7 +9,20 @@ import User from './src/chat/User';
 import ChatRequest from './src/chat/ChatRequest';
 import UserInfoParam from './src/helpers/UserInfoParam';
 import LiveChatTicketParam from './src/helpers/LiveChatTicketParam';
-import {StringeeVideoScalingType} from './src/helpers/StringeeHelper';
+import {
+  StringeeVideoScalingType,
+  ChangeType,
+  ObjectType,
+  SignalingState,
+  MediaState,
+  AudioDevice,
+  MediaType,
+  VideoResolution,
+  CallType,
+} from './src/helpers/StringeeHelper';
+import {StringeeClientListener} from './src/helpers/StringeeClientListener';
+import {StringeeCallListener} from './src/helpers/StringeeCallListener';
+import {StringeeCall2Listener} from './src/helpers/StringeeCall2Listener';
 
 export {
   StringeeClient,
@@ -24,4 +37,15 @@ export {
   UserInfoParam,
   LiveChatTicketParam,
   StringeeVideoScalingType,
+  ChangeType,
+  ObjectType,
+  StringeeClientListener,
+  StringeeCallListener,
+  StringeeCall2Listener,
+  SignalingState,
+  MediaState,
+  AudioDevice,
+  MediaType,
+  VideoResolution,
+  CallType,
 };

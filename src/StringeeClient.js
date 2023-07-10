@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import {Component} from 'react';
 import {NativeEventEmitter, NativeModules, Platform, View} from 'react-native';
 import {each} from 'underscore';
-import {clientEvents} from './helpers/StringeeHelper';
+import {clientEvents, stringeeClientEvents} from './helpers/StringeeHelper';
 import type {RNStringeeEventCallback} from './helpers/StringeeHelper';
 import {
   ChatRequest,
@@ -14,13 +14,17 @@ import {
   StringeeServerAddress,
   User,
   UserInfoParam,
+  StringeeClientListener,
+  ObjectType,
+  ChangeType,
+  CallType,
 } from '../index';
 
 const RNStringeeClient = NativeModules.RNStringeeClient;
 
 const iOS = Platform.OS === 'ios';
 
-interface StringeeClientProps {
+class StringeeClientProps {
   baseUrl: string;
   stringeeXBaseUrl: string;
   serverAddresses: Array<StringeeServerAddress>;
@@ -129,7 +133,7 @@ class StringeeClient extends Component {
   }
 
   componentDidMount() {
-    this.registerEvents(this.props.eventHandlers);
+    this.sanitizeClientEvents(this.props.eventHandlers);
   }
 
   componentWillUnmount() {
@@ -144,7 +148,164 @@ class StringeeClient extends Component {
     return null;
   }
 
-  registerEvents(eventHandlers) {
+  registerEvents(stringeeClientListener: StringeeClientListener) {
+    if (this.events.length !== 0 && this.subscriptions.length !== 0) {
+      return;
+    }
+    if (stringeeClientListener) {
+      stringeeClientEvents.forEach(event => {
+        if (stringeeClientListener[event]) {
+          this.eventEmitter.addListener(
+            clientEvents[Platform.OS][event],
+            ({uuid, data}) => {
+              if (this.uuid !== uuid) {
+                return;
+              }
+              switch (event) {
+                case 'onConnect':
+                  this.isConnected = true;
+                  this.userId = data.userId;
+                  stringeeClientListener.onConnect(this.userId);
+                  break;
+                case 'onDisConnect':
+                  this.isConnected = false;
+                  stringeeClientListener.onDisConnect();
+                  break;
+                case 'onFailWithError':
+                  this.isConnected = false;
+                  stringeeClientListener.onFailWithError(
+                    data.code,
+                    data.message,
+                  );
+                  break;
+                case 'onRequestAccessToken':
+                  stringeeClientListener.onRequestAccessToken();
+                  break;
+                case 'onIncomingCall':
+                  let stringeeCall = new StringeeCall({
+                    stringeeClient: this,
+                    from: data.from,
+                    to: data.to,
+                  });
+                  stringeeCall.callId = data.callId;
+                  stringeeCall.customData = data.customDataFromYourServer;
+                  stringeeCall.fromAlias = data.fromAlias;
+                  stringeeCall.toAlias = data.toAlias;
+                  switch (data.callType) {
+                    case 1:
+                    default:
+                      stringeeCall.callType = CallType.appToAppIncoming;
+                      break;
+                    case 2:
+                      stringeeCall.callType = CallType.appToPhone;
+                      break;
+                    case 3:
+                      stringeeCall.callType = CallType.phoneToApp;
+                      break;
+                  }
+                  stringeeCall.isVideoCall = data.isVideoCall;
+                  stringeeClientListener.onIncomingCall(stringeeCall);
+                  break;
+                case 'onIncomingCall2':
+                  let stringeeCall2 = new StringeeCall2({
+                    stringeeClient: this,
+                    from: data.from,
+                    to: data.to,
+                  });
+                  stringeeCall2.callId = data.callId;
+                  stringeeCall2.customData = data.customDataFromYourServer;
+                  stringeeCall2.fromAlias = data.fromAlias;
+                  stringeeCall2.toAlias = data.toAlias;
+                  stringeeCall2.callType = CallType.appToAppIncoming;
+                  stringeeCall2.isVideoCall = data.isVideoCall;
+                  data.clientId = this.uuid;
+                  stringeeClientListener.onIncomingCall2(stringeeCall2);
+                  break;
+                case 'onCustomMessage':
+                  stringeeClientListener.onCustomMessage(data.from, data.data);
+                  break;
+                case 'onObjectChange':
+                  const objectType =
+                    data.objectType === 0
+                      ? ObjectType.conversation
+                      : ObjectType.message;
+                  const objects = data.objects;
+                  let changeType = ChangeType.insert;
+                  if (data.changeType === 1) {
+                    changeType = ChangeType.update;
+                  } else if (data.changeType === 2) {
+                    changeType = ChangeType.delete;
+                  }
+
+                  let objectChanges = [];
+                  objects.map(object => {
+                    objectChanges.push(
+                      objectType === ObjectType.conversation
+                        ? new Conversation(object)
+                        : new Message(object),
+                    );
+                  });
+                  stringeeClientListener.onObjectChange(
+                    objectType,
+                    objectChanges,
+                    changeType,
+                  );
+                  break;
+                case 'onReceiveChatRequest':
+                  stringeeClientListener.onReceiveChatRequest(
+                    new ChatRequest(data.request),
+                  );
+                  break;
+                case 'onReceiveTransferChatRequest':
+                  stringeeClientListener.onReceiveTransferChatRequest(
+                    new ChatRequest(data.request),
+                  );
+                  break;
+                case 'onTimeoutAnswerChat':
+                  stringeeClientListener.onTimeoutAnswerChat(
+                    new ChatRequest(data.request),
+                  );
+                  break;
+                case 'onTimeoutInQueue':
+                  stringeeClientListener.onTimeoutInQueue(
+                    data.convId,
+                    data.customerId,
+                    data.customerName,
+                  );
+                  break;
+                case 'onConversationEnded':
+                  stringeeClientListener.onConversationEnded(
+                    data.convId,
+                    data.endedby,
+                  );
+                  break;
+                case 'onUserBeginTyping':
+                  stringeeClientListener.onUserBeginTyping(
+                    data.convId,
+                    data.userId,
+                    data.displayName,
+                  );
+                  break;
+                case 'onUserEndTyping':
+                  stringeeClientListener.onUserEndTyping(
+                    data.convId,
+                    data.userId,
+                    data.displayName,
+                  );
+                  break;
+              }
+            },
+          );
+          RNStringeeClient.setNativeEvent(
+            this.uuid,
+            clientEvents[Platform.OS][event],
+          );
+        }
+      });
+    }
+  }
+
+  sanitizeClientEvents(eventHandlers) {
     if (
       eventHandlers === undefined ||
       typeof eventHandlers !== 'object' ||
@@ -157,31 +318,18 @@ class StringeeClient extends Component {
     each(eventHandlers, (handler, type) => {
       const eventName = clientEvents[platform][type];
       if (eventName !== undefined) {
-        this.subscriptions.push(
-          this.eventEmitter.addListener(eventName, ({uuid, data}) => {
-            if (this.uuid !== uuid) {
-              return;
-            }
-            if (type === 'onIncomingCallObject') {
-              if (eventHandlers.onIncomingCallObject) {
-                data.clientId = this.uuid;
-                const stringeeCall = new StringeeCall(data);
-                if (eventHandlers[type]) {
-                  eventHandlers[type]({stringeeCall: stringeeCall});
-                }
+        // Voi phan chat can format du lieu
+        if (type === 'onObjectChange') {
+          this.subscriptions.push(
+            this.eventEmitter.addListener(eventName, ({uuid, data}) => {
+              // Event cua thang khac
+              if (this.uuid !== uuid) {
+                return;
               }
-            } else if (type === 'onIncomingCallObject2') {
-              if (eventHandlers.onIncomingCall2Object) {
-                data.clientId = this.uuid;
-                const stringeeCall2 = new StringeeCall2(data);
-                eventHandlers.onIncomingCall2Object({
-                  stringeeCall2: stringeeCall2,
-                });
-              }
-            } else if (type === 'onObjectChange') {
-              const objectType = data.objectType;
-              const objects = data.objects;
-              const changeType = data.changeType;
+
+              let objectType = data.objectType;
+              let objects = data.objects;
+              let changeType = data.changeType;
 
               let objectChanges = [];
               if (objectType === 0) {
@@ -193,50 +341,55 @@ class StringeeClient extends Component {
                   objectChanges.push(new Message(object));
                 });
               }
-              if (eventHandlers[type]) {
-                eventHandlers[type]({objectType, objectChanges, changeType});
+              if (handler !== undefined) {
+                handler({objectType, objectChanges, changeType});
               }
-            } else if (
-              type === 'onReceiveChatRequest' ||
-              type === 'onReceiveTransferChatRequest' ||
-              type === 'onTimeoutAnswerChat'
-            ) {
-              const requestData = data.request;
-              const request = new ChatRequest(requestData);
-
-              if (eventHandlers[type]) {
-                eventHandlers[type]({request});
-              }
-            } else {
-              if (type === 'onConnect') {
-                this.isConnected = true;
-                this.userId = data.userId;
-              } else if (
-                type === 'onDisConnect' ||
-                type === 'onFailWithError'
-              ) {
-                this.isConnected = false;
+            }),
+          );
+        } else if (
+          type === 'onReceiveChatRequest' ||
+          type === 'onReceiveTransferChatRequest' ||
+          type === 'onTimeoutAnswerChat'
+        ) {
+          this.subscriptions.push(
+            this.eventEmitter.addListener(eventName, ({uuid, data}) => {
+              if (this.uuid !== uuid) {
+                return;
               }
 
-              if (eventHandlers[type]) {
-                eventHandlers[type](data);
+              let requestData = data.request;
+              let request = new ChatRequest(requestData);
+
+              if (handler !== undefined) {
+                handler({request});
               }
-            }
-          }),
-        );
+            }),
+          );
+        } else {
+          this.subscriptions.push(
+            this.eventEmitter.addListener(eventName, ({uuid, data}) => {
+              if (this.uuid === uuid) {
+                if (eventName === 'onConnect') {
+                  this.isConnected = true;
+                  this.userId = data.userId;
+                } else if (
+                  eventName === 'onDisConnect' ||
+                  eventName === 'onFailWithError'
+                ) {
+                  this.isConnected = false;
+                }
+                if (handler !== undefined) {
+                  handler(data);
+                }
+              }
+            }),
+          );
+        }
 
         this.events.push(eventName);
         RNStringeeClient.setNativeEvent(this.uuid, eventName);
-        if (type === 'onIncomingCall') {
-          this.events.push('onIncomingCallObject');
-          RNStringeeClient.setNativeEvent(this.uuid, 'onIncomingCallObject');
-        }
-        if (type === 'onIncomingCall2') {
-          this.events.push('onIncomingCall2Object');
-          RNStringeeClient.setNativeEvent(this.uuid, 'onIncomingCall2Object');
-        }
       } else {
-        console.warn(`${type} is not a supported event`);
+        console.log(`${type} is not a supported event`);
       }
     });
   }
