@@ -158,6 +158,66 @@ const CallType = {
   phoneToApp: 'phoneToApp',
 };
 
+export function getSignalingState(code: number): SignalingState {
+  switch (code) {
+    case 0:
+      return SignalingState.calling;
+    case 1:
+      return SignalingState.ringing;
+    case 2:
+      return SignalingState.answered;
+    case 3:
+      return SignalingState.busy;
+    case 4:
+    default:
+      return SignalingState.ended;
+  }
+}
+
+export function getMediaState(code: number): MediaState {
+  switch (code) {
+    case 0:
+      return MediaState.connected;
+    case 1:
+    default:
+      return MediaState.disconnected;
+  }
+}
+
+export function getAudioDevice(audioDevice: string): AudioDevice {
+  switch (audioDevice) {
+    case 'SPEAKER_PHONE':
+      return AudioDevice.speakerPhone;
+    case 'WIRED_HEADSET':
+      return AudioDevice.wiredHeadset;
+    case 'EARPIECE':
+      return AudioDevice.earpiece;
+    case 'BLUETOOTH':
+      return AudioDevice.bluetooth;
+    case 'NONE':
+    default:
+      return AudioDevice.none;
+  }
+}
+
+export function getListAudioDevice(audioDevices: Array): Array<AudioDevice> {
+  let availableAudioDevices = [];
+  audioDevices.forEach(audioDevice => {
+    availableAudioDevices.push(getAudioDevice(audioDevice));
+  });
+  return availableAudioDevices;
+}
+
+export function getMediaType(code: number): MediaType {
+  switch (code) {
+    case 2:
+      return MediaType.video;
+    case 1:
+    default:
+      return MediaType.audio;
+  }
+}
+
 export type RNStringeeEventCallback = (
   status: boolean,
   code: number,

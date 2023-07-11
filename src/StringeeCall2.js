@@ -3,17 +3,21 @@ import PropTypes from 'prop-types';
 import {NativeModules, NativeEventEmitter, Platform, View} from 'react-native';
 import {each} from 'underscore';
 import type {RNStringeeEventCallback} from './helpers/StringeeHelper';
-import {StringeeClient} from './StringeeClient';
 import {
+  StringeeClient,
   StringeeCall2Listener,
-  AudioDevice,
   CallType,
-  MediaState,
-  MediaType,
-  SignalingState,
   VideoResolution,
 } from '../index';
-import {callEvents, stringeeCall2Events} from './helpers/StringeeHelper';
+import {
+  callEvents,
+  getAudioDevice,
+  getListAudioDevice,
+  getMediaState,
+  getMediaType,
+  getSignalingState,
+  stringeeCall2Events,
+} from './helpers/StringeeHelper';
 
 const RNStringeeCall2 = NativeModules.RNStringeeCall2;
 
@@ -101,45 +105,18 @@ class StringeeCall2 extends Component {
                 }
                 switch (event) {
                   case 'onChangeSignalingState':
-                    let signalingState = data.code;
-                    switch (signalingState) {
-                      case 0:
-                        signalingState = SignalingState.calling;
-                        break;
-                      case 1:
-                        signalingState = SignalingState.ringing;
-                        break;
-                      case 2:
-                        signalingState = SignalingState.answered;
-                        break;
-                      case 3:
-                        signalingState = SignalingState.busy;
-                        break;
-                      case 4:
-                        signalingState = SignalingState.ended;
-                        break;
-                    }
                     stringeeCall2Listener.onChangeSignalingState(
                       this,
-                      signalingState,
+                      getSignalingState(data.code),
                       data.reason,
                       data.sipCode,
                       data.sipReason,
                     );
                     break;
                   case 'onChangeMediaState':
-                    let mediaState = data.code;
-                    switch (mediaState) {
-                      case 0:
-                        mediaState = MediaState.connected;
-                        break;
-                      case 1:
-                        mediaState = MediaState.disconnected;
-                        break;
-                    }
                     stringeeCall2Listener.onChangeMediaState(
                       this,
-                      mediaState,
+                      getMediaState(data.code),
                       data.description,
                     );
                     break;
@@ -157,62 +134,21 @@ class StringeeCall2 extends Component {
                     break;
                   case 'onHandleOnAnotherDevice':
                     stringeeCall2Listener.onHandleOnAnotherDevice(
-                      data.from,
-                      data.data,
+                      this,
+                      getSignalingState(data.code),
                       data.description,
                     );
                     break;
                   case 'onAudioDeviceChange':
-                    let selectedAudioDevice = data.selectedAudioDevice;
-                    switch (selectedAudioDevice) {
-                      case 'NONE':
-                        selectedAudioDevice = AudioDevice.none;
-                        break;
-                      case 'SPEAKER_PHONE':
-                        selectedAudioDevice = AudioDevice.speakerPhone;
-                        break;
-                      case 'WIRED_HEADSET':
-                        selectedAudioDevice = AudioDevice.wiredHeadset;
-                        break;
-                      case 'EARPIECE':
-                        selectedAudioDevice = AudioDevice.earpiece;
-                        break;
-                      case 'BLUETOOTH':
-                        selectedAudioDevice = AudioDevice.bluetooth;
-                        break;
-                    }
-                    let availableAudioDevices = [];
-                    data.availableAudioDevices.forEach(audioDevice => {
-                      switch (audioDevice) {
-                        case 'SPEAKER_PHONE':
-                          availableAudioDevices.push(AudioDevice.speakerPhone);
-                          break;
-                        case 'WIRED_HEADSET':
-                          availableAudioDevices.push(AudioDevice.wiredHeadset);
-                          break;
-                        case 'EARPIECE':
-                          availableAudioDevices.push(AudioDevice.earpiece);
-                          break;
-                        case 'BLUETOOTH':
-                          availableAudioDevices.push(AudioDevice.bluetooth);
-                          break;
-                      }
-                    });
                     stringeeCall2Listener.onAudioDeviceChange(
-                      selectedAudioDevice,
-                      availableAudioDevices,
+                      getAudioDevice(data.selectedAudioDevice),
+                      getListAudioDevice(data.availableAudioDevices),
                     );
                     break;
                   case 'onTrackMediaStateChange':
-                    let mediaType = data.mediaType;
-                    if (mediaType === 1) {
-                      mediaType = MediaType.audio;
-                    } else if (data.mediaType === 2) {
-                      mediaType = MediaType.video;
-                    }
                     stringeeCall2Listener.onTrackMediaStateChange(
                       data.from,
-                      mediaType,
+                      getMediaType(data.mediaType),
                       data.enable,
                     );
                     break;
@@ -245,15 +181,10 @@ class StringeeCall2 extends Component {
           this.eventEmitter.addListener(eventName, data => {
             console.log('');
             if (type === 'onTrackMediaStateChange') {
-              if (data.mediaType === 1) {
-                data.mediaType = MediaType.audio;
-              } else if (data.mediaType === 2) {
-                data.mediaType = MediaType.video;
-              }
               if (eventHandlers[type]) {
                 eventHandlers[type]({
                   from: data.from,
-                  mediaType: data.mediaType,
+                  mediaType: getMediaType(data.mediaType),
                   enable: data.enable,
                 });
               }

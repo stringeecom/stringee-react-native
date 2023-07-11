@@ -1,18 +1,22 @@
 import {Component} from 'react';
+import PropTypes from 'prop-types';
 import {NativeModules, NativeEventEmitter, Platform, View} from 'react-native';
-import {callEvents, stringeeCallEvents} from './helpers/StringeeHelper';
 import {each} from 'underscore';
 import type {RNStringeeEventCallback} from './helpers/StringeeHelper';
-import PropTypes from 'prop-types';
 import {
-  CallType,
-  StringeeCallListener,
   StringeeClient,
+  StringeeCallListener,
+  CallType,
   VideoResolution,
-  AudioDevice,
-  MediaState,
-  SignalingState,
 } from '../index';
+import {
+  callEvents,
+  getAudioDevice,
+  getListAudioDevice,
+  getMediaState,
+  getSignalingState,
+  stringeeCallEvents,
+} from './helpers/StringeeHelper';
 
 const RNStringeeCall = NativeModules.RNStringeeCall;
 
@@ -98,45 +102,18 @@ class StringeeCall extends Component {
                 }
                 switch (event) {
                   case 'onChangeSignalingState':
-                    let signalingState = data.code;
-                    switch (signalingState) {
-                      case 0:
-                        signalingState = SignalingState.calling;
-                        break;
-                      case 1:
-                        signalingState = SignalingState.ringing;
-                        break;
-                      case 2:
-                        signalingState = SignalingState.answered;
-                        break;
-                      case 3:
-                        signalingState = SignalingState.busy;
-                        break;
-                      case 4:
-                        signalingState = SignalingState.ended;
-                        break;
-                    }
                     stringeeCallListener.onChangeSignalingState(
                       this,
-                      signalingState,
+                      getSignalingState(data.code),
                       data.reason,
                       data.sipCode,
                       data.sipReason,
                     );
                     break;
                   case 'onChangeMediaState':
-                    let mediaState = data.code;
-                    switch (mediaState) {
-                      case 0:
-                        mediaState = MediaState.connected;
-                        break;
-                      case 1:
-                        mediaState = MediaState.disconnected;
-                        break;
-                    }
                     stringeeCallListener.onChangeMediaState(
                       this,
-                      mediaState,
+                      getMediaState(data.code),
                       data.description,
                     );
                     break;
@@ -154,50 +131,15 @@ class StringeeCall extends Component {
                     break;
                   case 'onHandleOnAnotherDevice':
                     stringeeCallListener.onHandleOnAnotherDevice(
-                      data.from,
-                      data.data,
+                      this,
+                      getSignalingState(data.code),
                       data.description,
                     );
                     break;
                   case 'onAudioDeviceChange':
-                    let selectedAudioDevice = data.selectedAudioDevice;
-                    switch (selectedAudioDevice) {
-                      case 'NONE':
-                        selectedAudioDevice = AudioDevice.none;
-                        break;
-                      case 'SPEAKER_PHONE':
-                        selectedAudioDevice = AudioDevice.speakerPhone;
-                        break;
-                      case 'WIRED_HEADSET':
-                        selectedAudioDevice = AudioDevice.wiredHeadset;
-                        break;
-                      case 'EARPIECE':
-                        selectedAudioDevice = AudioDevice.earpiece;
-                        break;
-                      case 'BLUETOOTH':
-                        selectedAudioDevice = AudioDevice.bluetooth;
-                        break;
-                    }
-                    let availableAudioDevices = [];
-                    data.availableAudioDevices.forEach(audioDevice => {
-                      switch (audioDevice) {
-                        case 'SPEAKER_PHONE':
-                          availableAudioDevices.push(AudioDevice.speakerPhone);
-                          break;
-                        case 'WIRED_HEADSET':
-                          availableAudioDevices.push(AudioDevice.wiredHeadset);
-                          break;
-                        case 'EARPIECE':
-                          availableAudioDevices.push(AudioDevice.earpiece);
-                          break;
-                        case 'BLUETOOTH':
-                          availableAudioDevices.push(AudioDevice.bluetooth);
-                          break;
-                      }
-                    });
                     stringeeCallListener.onAudioDeviceChange(
-                      selectedAudioDevice,
-                      availableAudioDevices,
+                      getAudioDevice(data.selectedAudioDevice),
+                      getListAudioDevice(data.availableAudioDevices),
                     );
                     break;
                 }
